@@ -5,41 +5,41 @@
 
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.2 0.05 20);
+  --foreground: oklch(0.2 0.05 260);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.05 20);
+  --card-foreground: oklch(0.2 0.05 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.05 20);
-  --primary: oklch(0.35 0.15 20);
+  --popover-foreground: oklch(0.2 0.05 260);
+  --primary: oklch(0.45 0.2 260);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.97 0.01 20);
-  --secondary-foreground: oklch(0.35 0.15 20);
-  --muted: oklch(0.97 0.01 20);
-  --muted-foreground: oklch(0.5 0.03 20);
-  --accent: oklch(0.95 0.02 20);
-  --accent-foreground: oklch(0.35 0.15 20);
+  --secondary: oklch(0.97 0.01 260);
+  --secondary-foreground: oklch(0.45 0.2 260);
+  --muted: oklch(0.97 0.01 260);
+  --muted-foreground: oklch(0.5 0.03 260);
+  --accent: oklch(0.95 0.02 260);
+  --accent-foreground: oklch(0.45 0.2 260);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.9 0.02 20);
-  --input: oklch(0.9 0.02 20);
-  --ring: oklch(0.45 0.12 20);
-  --chart-1: oklch(0.35 0.15 20);
-  --chart-2: oklch(0.5 0.12 20);
-  --chart-3: oklch(0.65 0.1 20);
-  --chart-4: oklch(0.75 0.08 20);
-  --chart-5: oklch(0.85 0.05 20);
+  --border: oklch(0.9 0.02 260);
+  --input: oklch(0.9 0.02 260);
+  --ring: oklch(0.55 0.15 260);
+  --chart-1: oklch(0.45 0.2 260);
+  --chart-2: oklch(0.5 0.12 260);
+  --chart-3: oklch(0.65 0.1 260);
+  --chart-4: oklch(0.75 0.08 260);
+  --chart-5: oklch(0.85 0.05 260);
   --radius: 0.625rem;
-  --sidebar: oklch(0.98 0.005 20);
-  --sidebar-foreground: oklch(0.2 0.05 20);
-  --sidebar-primary: oklch(0.35 0.15 20);
+  --sidebar: oklch(0.98 0.005 260);
+  --sidebar-foreground: oklch(0.2 0.05 260);
+  --sidebar-primary: oklch(0.45 0.2 260);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.95 0.02 20);
-  --sidebar-accent-foreground: oklch(0.35 0.15 20);
-  --sidebar-border: oklch(0.9 0.02 20);
-  --sidebar-ring: oklch(0.45 0.12 20);
+  --sidebar-accent: oklch(0.95 0.02 260);
+  --sidebar-accent-foreground: oklch(0.45 0.2 260);
+  --sidebar-border: oklch(0.9 0.02 260);
+  --sidebar-ring: oklch(0.55 0.15 260);
 }
 
-/* Dark mode removed - using maroon and white light theme */
+/* Dark mode removed - using blue and white light theme */
 
 @theme inline {
   --font-sans: 'Geist', 'Geist Fallback';
