@@ -1,0 +1,24 @@
+# Chrome profile - contains session cookies and login data
+DataCollectionv2/DataCollection/profile/
+DataCollection/profile/
+
+# Scraped data - may contain sensitive student/course information
+DataCollectionv2/DataCollection/*.csv
+DataCollection/*.csv
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.env
+.env
+.env.*
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
