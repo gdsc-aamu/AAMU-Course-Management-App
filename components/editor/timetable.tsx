@@ -1,8 +1,8 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, Fragment } from "react"
 import { Droppable } from "@hello-pangea/dnd"
-import { AlertTriangle, X } from "lucide-react"
+import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -90,10 +90,9 @@ export function Timetable({ courses, onRemoveCourse }: TimetableProps) {
       <div className="flex items-center justify-between border-b p-3">
         <h3 className="font-semibold">Weekly Timetable</h3>
         {conflicts.size > 0 && (
-          <div className="flex items-center gap-1.5 text-sm text-amber-500">
-            <AlertTriangle className="h-4 w-4" />
-            <span>{conflicts.size} conflict{conflicts.size > 1 ? "s" : ""}</span>
-          </div>
+          <span className="text-sm text-amber-500">
+            {conflicts.size} conflict{conflicts.size > 1 ? "s" : ""}
+          </span>
         )}
       </div>
       
@@ -110,10 +109,9 @@ export function Timetable({ courses, onRemoveCourse }: TimetableProps) {
             
             {/* Time slots */}
             {TIME_SLOTS.map((time, rowIndex) => (
-              <>
+              <Fragment key={time}>
                 {/* Time label */}
                 <div
-                  key={`time-${time}`}
                   className="bg-background p-2 text-xs text-muted-foreground text-right pr-3"
                 >
                   {formatTimeLabel(time)}
@@ -171,9 +169,7 @@ export function Timetable({ courses, onRemoveCourse }: TimetableProps) {
                                       </Button>
                                     </div>
                                     {pos.hasConflict && (
-                                      <div className="absolute bottom-1 right-1">
-                                        <AlertTriangle className="h-3 w-3 text-amber-300" />
-                                      </div>
+                                      <div className="absolute bottom-1 right-1 text-amber-300 text-xs font-bold leading-none">!</div>
                                     )}
                                   </div>
                                 </TooltipTrigger>
@@ -192,7 +188,7 @@ export function Timetable({ courses, onRemoveCourse }: TimetableProps) {
                     )}
                   </Droppable>
                 ))}
-              </>
+              </Fragment>
             ))}
           </div>
         </div>
