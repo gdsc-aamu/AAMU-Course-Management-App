@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { Settings, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -24,17 +23,14 @@ export function Header() {
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
-            <Link href="/settings">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Link>
+            <Link href="/settings">Settings</Link>
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                  <User className="h-4 w-4" />
+              <Button variant="ghost" size="sm" className="rounded-full px-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                  JD
                 </div>
                 <span className="sr-only">User menu</span>
               </Button>
