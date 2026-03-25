@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { DragDropContext, type DropResult } from "@hello-pangea/dnd"
-import { ArrowLeft, Save, Share2, Check, PanelLeftClose, PanelLeft } from "lucide-react"
+import { ArrowLeft, PanelLeftClose, PanelLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -34,7 +34,7 @@ const SEMESTERS = [
   "Spring 2027",
 ]
 
-export default function PlanEditorPage({ params }: { params: Promise<{ id: string }> }) {
+export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ id: string }> }>) {
   const resolvedParams = use(params)
   const router = useRouter()
   const { plans, createPlan, updatePlan, getPlan, addCourseToPlan, removeCourseFromPlan } = usePlans()
@@ -99,7 +99,7 @@ export default function PlanEditorPage({ params }: { params: Promise<{ id: strin
   const handleDragEnd = (result: DropResult) => {
     if (!plan) return
     
-    const { source, destination, draggableId } = result
+    const { destination, draggableId } = result
     
     // Dropped outside a droppable
     if (!destination) return
@@ -204,22 +204,10 @@ export default function PlanEditorPage({ params }: { params: Promise<{ id: strin
               size="sm"
               onClick={handleSave}
               disabled={isSaving}
-              className="gap-2"
             >
-              {showSaved ? (
-                <>
-                  <Check className="h-4 w-4 text-green-500" />
-                  Saved
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  {isSaving ? "Saving..." : "Save"}
-                </>
-              )}
+              {showSaved ? "Saved" : isSaving ? "Saving..." : "Save"}
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Share2 className="h-4 w-4" />
+            <Button variant="outline" size="sm">
               Share
             </Button>
           </div>

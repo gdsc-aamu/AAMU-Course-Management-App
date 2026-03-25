@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Star, MoreHorizontal, Calendar } from "lucide-react"
+import { Star, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -33,12 +33,9 @@ export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: PlanCard
             <h3 className="font-semibold truncate text-foreground group-hover:text-primary transition-colors">
               {plan.name}
             </h3>
-            <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>{plan.semester}</span>
-            </div>
+            <p className="mt-1 text-sm text-muted-foreground">{plan.semester}</p>
           </div>
-          
+
           <div className="flex items-center gap-1 relative z-20">
             <Button
               variant="ghost"
@@ -58,7 +55,7 @@ export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: PlanCard
               />
               <span className="sr-only">{plan.starred ? "Unstar" : "Star"}</span>
             </Button>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -79,7 +76,7 @@ export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: PlanCard
                   Make a copy
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="text-destructive"
                   onClick={() => onDelete?.(plan.id)}
                 >
@@ -89,7 +86,7 @@ export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: PlanCard
             </DropdownMenu>
           </div>
         </div>
-        
+
         <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
           <span>{plan.courses.length} courses</span>
           <span className="text-border">•</span>

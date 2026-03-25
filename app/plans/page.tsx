@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
-import { Plus, LayoutGrid, List, ArrowUpDown } from "lucide-react"
+import { LayoutGrid, List } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { PlanFilters } from "@/components/plans/plan-filters"
 import { PlanListItem } from "@/components/plans/plan-list-item"
@@ -19,6 +19,12 @@ import { cn } from "@/lib/utils"
 type SortOption = "recent" | "title" | "created"
 type ViewMode = "grid" | "list"
 
+const SORT_LABELS: Record<SortOption, string> = {
+  recent: "Most Recent",
+  title: "Title",
+  created: "Date Created",
+}
+
 export default function PlansPage() {
   const { plans, isLoading, toggleStarred, deletePlan, duplicatePlan, getPlan } = usePlans()
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
@@ -28,7 +34,6 @@ export default function PlansPage() {
   const filteredAndSortedPlans = useMemo(() => {
     let filtered = [...plans]
 
-    // Apply filters
     if (activeFilters.includes("starred")) {
       filtered = filtered.filter((p) => p.starred)
     }
@@ -39,7 +44,6 @@ export default function PlansPage() {
       filtered = filtered.filter((p) => p.semester.includes("2026"))
     }
 
-    // Apply sort
     switch (sortBy) {
       case "recent":
         filtered.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
@@ -58,33 +62,38 @@ export default function PlansPage() {
   const handleDownload = (id: string) => {
     const plan = getPlan(id)
     if (!plan) return
-    
+
     const data = JSON.stringify(plan, null, 2)
     const blob = new Blob([data], { type: "application/json" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `${plan.name.toLowerCase().replace(/\s+/g, "-")}.json`
+    a.download = `${plan.name.toLowerCase().replaceAll(" ", "-")}.json`
     document.body.appendChild(a)
     a.click()
-    document.body.removeChild(a)
+    a.remove()
     URL.revokeObjectURL(url)
   }
+
+  const skeletonKeys = new Array(6).fill(null).map((_, i) => i)
+
+  const emptyMessage =
+    activeFilters.length > 0
+      ? "Try adjusting your filters"
+      : "Create your first course plan to get started"
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       <main className="flex-1 px-4 py-6 md:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Filters sidebar */}
             <PlanFilters
               activeFilters={activeFilters}
               onFilterChange={setActiveFilters}
             />
-            
-            {/* Main content */}
+
             <div className="flex-1 space-y-4">
               {/* Toolbar */}
               <div className="flex flex-wrap items-center justify-between gap-4">
@@ -115,14 +124,11 @@ export default function PlansPage() {
                       <span className="sr-only">List view</span>
                     </Button>
                   </div>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="gap-2">
-                        <ArrowUpDown className="h-4 w-4" />
-                        {sortBy === "recent" && "Most Recent"}
-                        {sortBy === "title" && "Title"}
-                        {sortBy === "created" && "Date Created"}
+                      <Button variant="outline" size="sm">
+                        {SORT_LABELS[sortBy]}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
@@ -138,25 +144,22 @@ export default function PlansPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                
+
                 <Button asChild>
-                  <Link href="/plans/new">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create new
-                  </Link>
+                  <Link href="/plans/new">Create new</Link>
                 </Button>
               </div>
-              
+
               {/* Plans grid/list */}
               {isLoading ? (
                 <div className={cn(
-                  viewMode === "grid" 
+                  viewMode === "grid"
                     ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
                     : "space-y-2"
                 )}>
-                  {[...Array(6)].map((_, i) => (
-                    <div 
-                      key={i} 
+                  {skeletonKeys.map((key) => (
+                    <div
+                      key={key}
                       className={cn(
                         "rounded-lg border bg-muted/50 animate-pulse",
                         viewMode === "grid" ? "h-40" : "h-16"
@@ -166,25 +169,15 @@ export default function PlansPage() {
                 </div>
               ) : filteredAndSortedPlans.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                    <Plus className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold">No plans found</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {activeFilters.length > 0
-                      ? "Try adjusting your filters"
-                      : "Create your first course plan to get started"}
-                  </p>
+                  <h3 className="text-lg font-semibold">No plans found</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{emptyMessage}</p>
                   <Button asChild className="mt-4">
-                    <Link href="/plans/new">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create plan
-                    </Link>
+                    <Link href="/plans/new">Create plan</Link>
                   </Button>
                 </div>
               ) : (
                 <div className={cn(
-                  viewMode === "grid" 
+                  viewMode === "grid"
                     ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
                     : "space-y-2"
                 )}>
