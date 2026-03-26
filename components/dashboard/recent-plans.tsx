@@ -27,7 +27,7 @@ export function RecentPlans({
         <h2 className="text-lg font-semibold">Recent Plans</h2>
         {totalCount > 3 && (
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/plans">See all {totalCount}</Link>
+            <Link href="/plans">View all</Link>
           </Button>
         )}
       </div>
