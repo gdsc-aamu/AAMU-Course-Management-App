@@ -1,6 +1,6 @@
 "use client"
 
-import { Header } from "@/components/layout/header"
+import { Sidebar } from "@/components/layout/sidebar"
 import { FeaturedPlans } from "@/components/dashboard/featured-plans"
 import { RecentPlans } from "@/components/dashboard/recent-plans"
 import { usePlans } from "@/hooks/use-plans"
@@ -14,8 +14,8 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <div className="flex min-h-screen">
+      <Sidebar />
       
       <main className="flex-1 px-4 py-6 md:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl space-y-8">
