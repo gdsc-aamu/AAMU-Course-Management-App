@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import type { Plan } from "@/lib/types"
+import { mockCourses } from "@/lib/data"
 import { cn } from "@/lib/utils"
 
 interface PlanCardProps {
@@ -21,7 +22,11 @@ interface PlanCardProps {
   onDuplicate?: (id: string) => void
 }
 
-export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: PlanCardProps) {
+export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: Readonly<PlanCardProps>) {
+  const totalCredits = mockCourses
+    .filter((c) => plan.courses.includes(c.id))
+    .reduce((sum, c) => sum + c.credits, 0)
+
   return (
     <Card className="group relative overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
       <Link href={`/plans/${plan.id}`} className="absolute inset-0 z-10">
@@ -87,10 +92,14 @@ export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: PlanCard
           </div>
         </div>
 
-        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{plan.courses.length} courses</span>
-          <span className="text-border">•</span>
-          <span>Updated {new Date(plan.updatedAt).toLocaleDateString()}</span>
+        <div className="mt-3 space-y-3">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span>{plan.courses.length} courses</span>
+            <span>{totalCredits} credits</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Last updated {new Date(plan.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </p>
         </div>
       </CardContent>
     </Card>
