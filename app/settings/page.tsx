@@ -1,10 +1,26 @@
 "use client"
 
+import { useState, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sidebar } from "@/components/layout/sidebar"
-import { Search, Upload, CheckCircle2, AlertCircle } from "lucide-react"
+import { Upload, CheckCircle2, AlertCircle, FileText } from "lucide-react"
 
 export default function SettingsPage() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      console.log("File selected:", file.name)
+    }
+  }
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click()
+  }
+
   return (
     <div className="flex min-h-screen bg-[#fafafa]">
       <Sidebar />
@@ -76,16 +92,54 @@ export default function SettingsPage() {
               <CardContent className="p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4">Degree Works Integration</h2>
                 <div className="border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 p-10 flex flex-col items-center justify-center text-center">
-                  <div className="h-14 w-14 rounded-full bg-[#78103A]/10 flex items-center justify-center mb-4">
-                    <Upload className="h-6 w-6 text-[#78103A]" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900">Upload Your Degree Audit</h3>
-                  <p className="mt-2 max-w-sm text-sm text-gray-500">
-                    Upload your PDF from Degree Works to automatically sync your completed courses and remaining requirements.
-                  </p>
-                  <button className="mt-6 rounded-md bg-[#78103A] px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#600d2e] transition-colors cursor-pointer">
-                    Select PDF File
-                  </button>
+                  
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+
+                  {selectedFile ? (
+                    <div className="flex flex-col items-center">
+                      <div className="h-14 w-14 rounded-full bg-emerald-50 flex items-center justify-center mb-4">
+                        <FileText className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">Ready to Upload</h3>
+                      <p className="mt-2 max-w-sm text-sm font-medium text-emerald-600">
+                        {selectedFile.name}
+                      </p>
+                      <div className="mt-6 flex gap-3">
+                        <button 
+                          onClick={handleUploadClick}
+                          className="rounded-md bg-white border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Change File
+                        </button>
+                        <button className="rounded-md bg-[#78103A] px-6 py-2 text-sm font-semibold text-white shadow hover:bg-[#600d2e] transition-colors cursor-pointer">
+                          Sync Audit
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="h-14 w-14 rounded-full bg-[#78103A]/10 flex items-center justify-center mb-4">
+                        <Upload className="h-6 w-6 text-[#78103A]" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">Upload Your Degree Audit</h3>
+                      <p className="mt-2 max-w-sm text-sm text-gray-500">
+                        Upload your PDF from Degree Works to automatically sync your completed courses and remaining requirements.
+                      </p>
+                      <button 
+                        onClick={handleUploadClick}
+                        className="mt-6 rounded-md bg-[#78103A] px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#600d2e] transition-colors cursor-pointer"
+                      >
+                        Select PDF File
+                      </button>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -142,19 +196,6 @@ export default function SettingsPage() {
             </Card>
 
             {/* Sign Out Card */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-red-100 bg-red-50/50 p-6">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                <div>
-                  <h3 className="text-base font-bold text-red-900">Sign Out of All Devices</h3>
-                  <p className="text-sm text-red-700 mt-0.5">Protect your academic records by signing out when finished.</p>
-                </div>
-              </div>
-              <button className="whitespace-nowrap rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-700 shadow-sm hover:bg-red-50 transition-colors cursor-pointer">
-                Secure Logout
-              </button>
-            </div>
-
           </div>
         </div>
       </main>
