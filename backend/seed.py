@@ -13,7 +13,10 @@ Required environment variables:
 import json
 import os
 import sys
+from dotenv import load_dotenv
 from supabase import create_client, Client
+
+load_dotenv()
 
 
 # ── Semester label → ordered integer ─────────────────────────────────────────
@@ -33,6 +36,35 @@ CAPSTONE_COURSES = {"CS 403"}
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+def parse_credit_hours(value) -> int:
+    """
+    Coerce credit_hours to int. Handles range strings like '2-4' or '3-4'
+    by taking the minimum value.
+    """
+    if isinstance(value, int):
+        return value
+    s = str(value).strip()
+    if "-" in s:
+        return int(s.split("-")[0])
+    return int(s)
+
+
+def get_required_courses(conc: dict) -> list:
+    """
+    Return the required courses list for a concentration regardless of the key
+    name used. Some programs (e.g. Teacher Ed) split required courses across
+    required_courses_teaching_field and required_courses_professional_study
+    instead of the standard required_courses key.
+    """
+    if "required_courses" in conc:
+        return conc["required_courses"]
+    combined = []
+    for key, val in conc.items():
+        if key.startswith("required_courses") and isinstance(val, list):
+            combined.extend(val)
+    return combined
+
+
 def collect_all_courses(data: dict) -> dict:
     """
     Build a course_id -> record dict from baseline curriculum and
@@ -47,7 +79,7 @@ def collect_all_courses(data: dict) -> dict:
             courses[course_id] = {
                 "course_id":    course_id,
                 "title":        title,
-                "credit_hours": credit_hours,
+                "credit_hours": parse_credit_hours(credit_hours),
                 "is_capstone":  is_capstone,
             }
 
@@ -67,8 +99,10 @@ def collect_all_courses(data: dict) -> dict:
                 add(cid, cid, 3)   # placeholder title/hours — update from scraped data
 
     # Concentrations and minors — required courses
+    # Some programs use alternate key names (e.g. Teacher Ed uses
+    # required_courses_teaching_field / required_courses_professional_study)
     for conc in data["concentrations_and_minors"]:
-        for rc in conc["required_courses"]:
+        for rc in get_required_courses(conc):
             add(rc["course_id"], rc["course_title"], rc["credit_hours"])
 
     return courses
@@ -80,103 +114,132 @@ def seed(client: Client, data: dict):
 
     meta = data["program_metadata"]
 
-    # ── 1. Program ────────────────────────────────────────────────────────────
-    print("Inserting program...")
-    result = client.table("programs").insert({
-        "code":               meta["degree_abbreviation"],   # "BSCS"
-        "name":               meta["program_name"],          # "Computer Science"
+    # ── 1. Program (upsert on code) ───────────────────────────────────────────
+    # Code is composed as "DEPT-DEGREE" (e.g. "BENV-BS", "BSCS") to ensure
+    # uniqueness across programs that share the same degree abbreviation (e.g. "BS").
+    program_code = f"{meta['department_code']}-{meta['degree_abbreviation']}"
+    print("Upserting program...")
+    result = client.table("programs").upsert({
+        "code":               program_code,
+        "name":               meta["program_name"],
         "catalog_year":       2021,
-        "total_credit_hours": meta["total_credit_hours"],    # 125
-    }).execute()
+        "total_credit_hours": parse_credit_hours(meta["total_credit_hours"]),
+    }, on_conflict="code").execute()
     program_id = result.data[0]["id"]
-    print(f"  program_id: {program_id}")
+    print(f"  program_id: {program_id} (code: {program_code})")
 
-    # ── 2. Courses ────────────────────────────────────────────────────────────
-    print("\nInserting courses...")
+    # ── 2. Courses (upsert on course_id) ─────────────────────────────────────
+    print("\nUpserting courses...")
     all_courses = collect_all_courses(data)
-    result = client.table("courses").insert(list(all_courses.values())).execute()
-    # Map course_id string (e.g. "CS 102") → uuid for FK resolution
-    course_map: dict[str, str] = {r["course_id"]: r["id"] for r in result.data}
-    print(f"  {len(course_map)} courses inserted")
+    result = client.table("courses").upsert(
+        list(all_courses.values()), on_conflict="course_id"
+    ).execute()
+    # Re-fetch to get UUIDs for both new and pre-existing courses
+    all_ids = client.table("courses").select("id, course_id").in_(
+        "course_id", list(all_courses.keys())
+    ).execute()
+    course_map: dict[str, str] = {r["course_id"]: r["id"] for r in all_ids.data}
+    print(f"  {len(course_map)} courses upserted")
 
-    # ── 3. Curriculum slots ───────────────────────────────────────────────────
+    # ── 3. Curriculum slots (skip if already seeded for this program) ─────────
     print("\nInserting curriculum slots...")
+    existing_slots = client.table("curriculum_slots").select("id").eq(
+        "program_id", program_id
+    ).limit(1).execute()
+
     slot_id_by_index: dict[int, str] = {}
-    sem_counters: dict[int, int] = {}
 
-    for i, slot in enumerate(data["baseline_curriculum"]):
-        sem_num = SEMESTER_MAP[slot["semester_suggested"]]
-        sem_counters[sem_num] = sem_counters.get(sem_num, 0) + 1
+    if existing_slots.data:
+        print("  Slots already exist for this program — skipping.")
+        # Re-fetch existing slot IDs in order so elective eligible courses can
+        # reference them if this script is re-run after a partial failure.
+        all_slots = client.table("curriculum_slots").select("id").eq(
+            "program_id", program_id
+        ).order("semester_number").order("slot_order").execute()
+        for i, row in enumerate(all_slots.data):
+            slot_id_by_index[i] = row["id"]
+    else:
+        sem_counters: dict[int, int] = {}
+        for i, slot in enumerate(data["baseline_curriculum"]):
+            sem_num = SEMESTER_MAP[slot["semester_suggested"]]
+            sem_counters[sem_num] = sem_counters.get(sem_num, 0) + 1
 
-        result = client.table("curriculum_slots").insert({
-            "program_id":       program_id,
-            "slot_label":       slot["course_title"],
-            "semester_number":  sem_num,
-            "slot_order":       sem_counters[sem_num],
-            "credit_hours":     slot["credit_hours"],
-            "is_elective_slot": slot["is_elective_slot"],
-            "course_id":        course_map.get(slot["course_id"]) if slot["course_id"] else None,
-            "min_grade":        slot.get("min_grade"),
-        }).execute()
+            result = client.table("curriculum_slots").insert({
+                "program_id":       program_id,
+                "slot_label":       slot["course_title"],
+                "semester_number":  sem_num,
+                "slot_order":       sem_counters[sem_num],
+                "credit_hours":     parse_credit_hours(slot["credit_hours"]),
+                "is_elective_slot": slot["is_elective_slot"],
+                "course_id":        course_map.get(slot["course_id"]) if slot["course_id"] else None,
+                "min_grade":        slot.get("min_grade"),
+            }).execute()
+            slot_id_by_index[i] = result.data[0]["id"]
 
-        slot_id_by_index[i] = result.data[0]["id"]
+        print(f"  {len(slot_id_by_index)} slots inserted")
 
-    print(f"  {len(slot_id_by_index)} slots inserted")
-
-    # ── 4. Elective slot eligible courses ─────────────────────────────────────
-    print("\nInserting elective slot eligible courses...")
+    # ── 4. Elective slot eligible courses (upsert on slot_id, course_id) ──────
+    print("\nUpserting elective slot eligible courses...")
     elective_rows = []
     for i, slot in enumerate(data["baseline_curriculum"]):
         if not slot["is_elective_slot"]:
             continue
         eligible = slot.get("eligible_courses")
         if not isinstance(eligible, list):
-            continue  # skip open-ended descriptions like "Any CS course at 300-400 level"
+            continue
         for cid in eligible:
-            if cid in course_map:
+            if cid in course_map and i in slot_id_by_index:
                 elective_rows.append({
                     "slot_id":   slot_id_by_index[i],
                     "course_id": course_map[cid],
                 })
 
     if elective_rows:
-        client.table("elective_slot_eligible_courses").insert(elective_rows).execute()
-    print(f"  {len(elective_rows)} elective options inserted")
+        client.table("elective_slot_eligible_courses").upsert(
+            elective_rows, on_conflict="slot_id,course_id"
+        ).execute()
+    print(f"  {len(elective_rows)} elective options upserted")
 
-    # ── 5. Concentrations / minors ────────────────────────────────────────────
-    print("\nInserting concentrations and minors...")
+    # ── 5. Concentrations (upsert on code) ────────────────────────────────────
+    print("\nUpserting concentrations and minors...")
     for conc in data["concentrations_and_minors"]:
-        result = client.table("concentrations").insert({
+        result = client.table("concentrations").upsert({
             "program_id":   program_id,
             "code":         conc["code"],
             "name":         conc["name"],
             "type":         conc["type"],
-            "total_hours":  conc["total_hours"],
+            "total_hours":  parse_credit_hours(conc["total_hours"]),
             "min_grade":    conc.get("min_grade"),
-        }).execute()
+        }, on_conflict="code").execute()
         conc_id = result.data[0]["id"]
 
-        # ── 6. Concentration slots ────────────────────────────────────────────
-        conc_slots = []
+        # ── 6. Concentration slots (skip if already seeded) ───────────────────
+        existing_conc_slots = client.table("concentration_slots").select("id").eq(
+            "concentration_id", conc_id
+        ).limit(1).execute()
 
-        for rc in conc["required_courses"]:
+        if existing_conc_slots.data:
+            print(f"  {conc['name']}: slots already exist — skipping.")
+            continue
+
+        conc_slots = []
+        for rc in get_required_courses(conc):
             conc_slots.append({
                 "concentration_id": conc_id,
                 "slot_label":       rc["course_title"],
                 "is_elective_slot": False,
                 "level_restriction":None,
-                "credit_hours":     rc["credit_hours"],
+                "credit_hours":     parse_credit_hours(rc["credit_hours"]),
                 "course_id":        course_map.get(rc["course_id"]),
                 "min_grade":        conc.get("min_grade"),
             })
-
-        for ep in conc["elective_pool"]:
+        for ep in conc.get("elective_pool", []):
             conc_slots.append({
                 "concentration_id": conc_id,
                 "slot_label":       ep["slot_name"],
                 "is_elective_slot": True,
                 "level_restriction":ep.get("level_restriction"),
-                "credit_hours":     ep["credit_hours"],
+                "credit_hours":     parse_credit_hours(ep["credit_hours"]),
                 "course_id":        None,
                 "min_grade":        conc.get("min_grade"),
             })
