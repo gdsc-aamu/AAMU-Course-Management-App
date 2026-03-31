@@ -55,7 +55,7 @@ export async function searchBulletin(query, studentProfile, options = {}) {
     filter_chunk_type: isHardFilter ? inferredType : null,
     boost_critical:    true,
     full_text_weight:  1,
-    semantic_weight:   1,
+    semantic_weight:   2,
   })
 
   if (error) throw new Error(error.message)
