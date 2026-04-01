@@ -1,0 +1,6 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pdfplumber==0.11.4
+python-multipart==0.0.12
+# 2.8.x pulls pydantic-core without cp314 wheels on PyPI; use 2.12+ for Python 3.14.
+pydantic==2.12.5
