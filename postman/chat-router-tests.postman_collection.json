@@ -1,0 +1,148 @@
+{
+  "info": {
+    "name": "AAMU Chat Router Tests",
+    "_postman_id": "f31b59e8-54ca-4ccd-89a7-86e5d1d65a0f",
+    "description": "Test requests for /api/chat/query routing: DB_ONLY, RAG_ONLY, HYBRID",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "studentId",
+      "value": "stu-123"
+    },
+    {
+      "key": "programCode",
+      "value": "BSCS-BS"
+    },
+    {
+      "key": "bulletinYear",
+      "value": "2025-2026"
+    }
+  ],
+  "item": [
+    {
+      "name": "DB_ONLY - Prerequisites",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"What are the prerequisites for CS 214?\",\n  \"session\": {\n    \"programCode\": \"{{programCode}}\",\n    \"bulletinYear\": \"{{bulletinYear}}\"\n  },\n  \"studentId\": \"{{studentId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/query",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "chat",
+            "query"
+          ]
+        },
+        "description": "Expect route DB_ONLY and prerequisite group output if course exists."
+      },
+      "response": []
+    },
+    {
+      "name": "DB_ONLY - Program Summary",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"How many credits are required for my program?\",\n  \"session\": {\n    \"programCode\": \"{{programCode}}\",\n    \"bulletinYear\": \"{{bulletinYear}}\"\n  },\n  \"studentId\": \"{{studentId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/query",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "chat",
+            "query"
+          ]
+        },
+        "description": "Expect route DB_ONLY and overview payload for the supplied programCode."
+      },
+      "response": []
+    },
+    {
+      "name": "RAG_ONLY - Policy",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"What is the academic dismissal policy?\",\n  \"session\": {\n    \"bulletinYear\": \"{{bulletinYear}}\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/query",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "chat",
+            "query"
+          ]
+        },
+        "description": "Expect route RAG_ONLY with sources from bulletin chunks."
+      },
+      "response": []
+    },
+    {
+      "name": "HYBRID - Personalized Policy",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"Given my GPA is 1.95, am I at risk of dismissal in my program?\",\n  \"session\": {\n    \"programCode\": \"{{programCode}}\",\n    \"bulletinYear\": \"{{bulletinYear}}\"\n  },\n  \"studentId\": \"{{studentId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/query",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "chat",
+            "query"
+          ]
+        },
+        "description": "Expect route HYBRID with both curriculum and bulletin sources."
+      },
+      "response": []
+    }
+  ]
+}
