@@ -1,4 +1,4 @@
-import type { ChatQueryRequest, ChatRoute, MatchedRule, RoutingDecision } from "@/lib/chat-routing/types"
+import type { ChatQueryRequest, ChatRoute, MatchedRule, RoutingDecision } from "@/shared/contracts"
 
 interface BucketScore {
   score: number

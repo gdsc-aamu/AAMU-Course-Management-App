@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { mockCourses } from "@/lib/data"
 import type { Message, Course } from "@/lib/types"
+import type { ChatQueryRequest, RoutedResponse } from "@/shared/contracts"
 import { cn } from "@/lib/utils"
 
 interface AISuggestionsProps {
@@ -35,92 +36,57 @@ const QUICK_ACTIONS = [
   "Check my requirements",
 ]
 
-// Mock AI response generator
-function generateAIResponse(userMessage: string, currentCourses: string[]): { content: string; courses?: Course[] } {
+function buildFallbackResponse(userMessage: string, currentCourses: string[]): string {
   const lowerMessage = userMessage.toLowerCase()
-  const enrolledCourses = mockCourses.filter(c => currentCourses.includes(c.id))
-  const availableCourses = mockCourses.filter(c => !currentCourses.includes(c.id))
+  const enrolledCourses = mockCourses.filter((c) => currentCourses.includes(c.id))
+  const availableCourses = mockCourses.filter((c) => !currentCourses.includes(c.id))
 
   const currentCredits = enrolledCourses.reduce((sum, c) => sum + c.credits, 0)
   const remainingCredits = GRADUATION_REQUIREMENTS.totalCredits - currentCredits
 
   if (lowerMessage.includes("graduate") || lowerMessage.includes("graduation") || lowerMessage.includes("on time")) {
-    const hasEnglish = enrolledCourses.some(c => c.code === "ENGL 101")
-    const hasMath = enrolledCourses.some(c => c.code === "MTH 808")
-    const missingRequired = []
+    const hasEnglish = enrolledCourses.some((c) => c.code === "ENGL 101")
+    const hasMath = enrolledCourses.some((c) => c.code === "MTH 808")
+    const missingRequired: string[] = []
     if (!hasEnglish) missingRequired.push("ENGL 101")
     if (!hasMath) missingRequired.push("MTH 808")
 
     if (missingRequired.length > 0) {
-      return {
-        content: `Based on your current plan, you're missing some required courses: ${missingRequired.join(", ")}. You currently have ${currentCredits} credits enrolled. To graduate, you need ${GRADUATION_REQUIREMENTS.totalCredits} credits total (${remainingCredits} remaining). I recommend adding the missing required courses to stay on track for graduation.`,
-      }
+      return `Based on your current plan, you're missing some required courses: ${missingRequired.join(", ")}. You currently have ${currentCredits} credits enrolled. To graduate, you need ${GRADUATION_REQUIREMENTS.totalCredits} credits total (${remainingCredits} remaining).`
     }
 
-    return {
-      content: `Great news! You have all required core courses. You currently have ${currentCredits} credits enrolled, with ${remainingCredits} credits remaining to reach ${GRADUATION_REQUIREMENTS.totalCredits}. At this pace, you're on track to graduate. Consider adding electives that align with your interests or career goals.`,
-    }
+    return `You currently have ${currentCredits} credits enrolled, with ${remainingCredits} credits remaining to reach ${GRADUATION_REQUIREMENTS.totalCredits}.`
   }
 
   if (lowerMessage.includes("what course") || lowerMessage.includes("can i take") || lowerMessage.includes("recommend") || lowerMessage.includes("suggest")) {
     const recommendations = availableCourses.slice(0, 3)
-    return {
-      content: `Based on your current schedule, here are some courses you can take:\n\n${recommendations.map(c => `**${c.code}** - ${c.name} (${c.credits} credits)\n${c.description}`).join("\n\n")}\n\nThese courses don't conflict with your current schedule and help fulfill graduation requirements.`,
-      courses: recommendations,
-    }
+    return `Here are available courses from your local plan data:\n\n${recommendations
+      .map((c) => `${c.code} - ${c.name} (${c.credits} credits)`)
+      .join("\n")}`
   }
 
-  if (lowerMessage.includes("requirement") || lowerMessage.includes("check") || lowerMessage.includes("need")) {
-    const categories = Object.entries(GRADUATION_REQUIREMENTS.categories).map(([cat, req]) => {
-      const enrolled = enrolledCourses.filter(c => req.courses.includes(c.code))
-      const earnedCredits = enrolled.reduce((sum, c) => sum + c.credits, 0)
-      const status = earnedCredits >= req.required ? "Complete" : `${earnedCredits}/${req.required} credits`
-      return `${cat.charAt(0).toUpperCase() + cat.slice(1)}: ${status}`
-    })
+  return "I couldn't reach the server response, but I can still help with local schedule guidance. Try asking about graduation progress or course recommendations."
+}
 
-    return {
-      content: `Here's your graduation requirements status:\n\n${categories.join("\n")}\n\nTotal: ${currentCredits}/${GRADUATION_REQUIREMENTS.totalCredits} credits`,
-    }
+function formatServerAnswer(response: RoutedResponse): string {
+  const handlerResult = response.handlerResult as {
+    answer?: string
+    sources?: Array<{ citation?: string; title?: string }>
   }
 
-  const courseCodeMatch = userMessage.match(/([A-Z]{2,4})\s*(\d{3})/i)
-  if (courseCodeMatch) {
-    const searchCode = `${courseCodeMatch[1].toUpperCase()} ${courseCodeMatch[2]}`
-    const course = mockCourses.find(c => c.code.toUpperCase() === searchCode)
+  const answer = handlerResult.answer ?? "I could not generate an answer."
+  const sources = handlerResult.sources ?? []
 
-    if (course) {
-      const isRequired = GRADUATION_REQUIREMENTS.requiredCourses.includes(course.code)
-      const alreadyEnrolled = currentCourses.includes(course.id)
-
-      if (alreadyEnrolled) {
-        return {
-          content: `You're already enrolled in ${course.code} (${course.name}). ${isRequired ? "This is a required course for graduation - good choice!" : "This course counts toward your elective credits."}`,
-        }
-      }
-
-      const hasConflict = enrolledCourses.some(enrolled =>
-        enrolled.times.some(t1 =>
-          course.times.some(t2 =>
-            t1.day === t2.day && t1.startTime === t2.startTime
-          )
-        )
-      )
-
-      if (hasConflict) {
-        return {
-          content: `Adding ${course.code} (${course.name}) would create a time conflict with your current schedule. ${isRequired ? "However, this is a required course for graduation, so you may need to adjust your other courses." : "Consider taking this course in a different semester."}`,
-        }
-      }
-
-      return {
-        content: `${course.code} (${course.name}) - ${course.credits} credits\n\n${course.description}\n\n${isRequired ? "This is a **required course** for graduation. Adding it will help you stay on track!" : "This course fulfills elective requirements."} It fits well in your current schedule with no time conflicts.`,
-      }
-    }
+  if (sources.length === 0) {
+    return answer
   }
 
-  return {
-    content: "I can help you with course planning. Try asking:\n\n- \"What courses can I take?\"\n- \"Will I graduate on time?\"\n- \"Tell me about CS 201\"\n- \"Check my requirements\"\n\nI'll analyze your schedule and provide personalized recommendations.",
-  }
+  const citations = sources
+    .slice(0, 3)
+    .map((s) => `- ${s.title ?? "Source"}${s.citation ? ` (${s.citation})` : ""}`)
+    .join("\n")
+
+  return `${answer}\n\nSources:\n${citations}`
 }
 
 const initialMessages: Message[] = [
@@ -136,6 +102,7 @@ export function AISuggestions({ currentCourses = [] }: AISuggestionsProps) {
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const messageCounterRef = useRef(1)
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -143,9 +110,15 @@ export function AISuggestions({ currentCourses = [] }: AISuggestionsProps) {
     }
   }, [messages])
 
-  const sendMessage = (content: string) => {
+  const nextMessageId = (prefix: "user" | "assistant") => {
+    const id = `msg-${prefix}-${messageCounterRef.current}`
+    messageCounterRef.current += 1
+    return id
+  }
+
+  const sendMessage = async (content: string) => {
     const userMessage: Message = {
-      id: `msg-user-${Date.now()}`,
+      id: nextMessageId("user"),
       role: "user",
       content,
     }
@@ -154,16 +127,42 @@ export function AISuggestions({ currentCourses = [] }: AISuggestionsProps) {
     setInput("")
     setIsTyping(true)
 
-    setTimeout(() => {
-      const response = generateAIResponse(content, currentCourses)
+    try {
+      const payload: ChatQueryRequest = {
+        question: content,
+        session: {
+          programCode: "BSCS-BS",
+          bulletinYear: "2025-2026",
+        },
+      }
+
+      const apiResponse = await fetch("/api/chat/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+
+      if (!apiResponse.ok) {
+        throw new Error(`Chat query failed with status ${apiResponse.status}`)
+      }
+
+      const routed = (await apiResponse.json()) as RoutedResponse
       const assistantMessage: Message = {
-        id: `msg-assistant-${Date.now()}`,
+        id: nextMessageId("assistant"),
         role: "assistant",
-        content: response.content,
+        content: formatServerAnswer(routed),
       }
       setMessages((prev) => [...prev, assistantMessage])
+    } catch {
+      const assistantMessage: Message = {
+        id: nextMessageId("assistant"),
+        role: "assistant",
+        content: buildFallbackResponse(content, currentCourses),
+      }
+      setMessages((prev) => [...prev, assistantMessage])
+    } finally {
       setIsTyping(false)
-    }, 800)
+    }
   }
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {

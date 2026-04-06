@@ -9,6 +9,47 @@
 
 import { createClient } from "@supabase/supabase-js"
 
+export interface ProgramRow {
+  id: string
+  code: string
+  name: string
+  total_credit_hours: number
+}
+
+export interface CourseRow {
+  id: string
+  course_id: string
+  title: string
+}
+
+export interface CourseRelationRow {
+  course_id: string
+  title: string
+  credit_hours: number
+  is_capstone: boolean
+}
+
+export interface CurriculumSlotRow {
+  semester_number: number
+  slot_label: string
+  slot_order: number
+  credit_hours: number
+  is_elective_slot: boolean
+  min_grade: string | null
+  courses: CourseRelationRow | CourseRelationRow[] | null
+}
+
+export interface PrerequisiteRelationRow {
+  course_id: string
+  title: string
+}
+
+export interface CoursePrerequisiteRow {
+  prereq_group: number
+  min_grade: string | null
+  prerequisite: PrerequisiteRelationRow | PrerequisiteRelationRow[] | null
+}
+
 function getSupabaseClient() {
   const url = process.env.SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_KEY
@@ -19,7 +60,7 @@ function getSupabaseClient() {
 /**
  * Fetch program by code
  */
-export async function getProgram(code: string): Promise<any> {
+export async function getProgram(code: string): Promise<ProgramRow | null> {
   const supabase = getSupabaseClient()
   const { data: program, error } = await supabase
     .from("programs")
@@ -34,7 +75,7 @@ export async function getProgram(code: string): Promise<any> {
 /**
  * Fetch curriculum slots for a program with course details
  */
-export async function getCurriculumSlots(programId: string): Promise<any[]> {
+export async function getCurriculumSlots(programId: string): Promise<CurriculumSlotRow[]> {
   const supabase = getSupabaseClient()
   const { data: slots, error } = await supabase
     .from("curriculum_slots")
@@ -63,7 +104,7 @@ export async function getCurriculumSlots(programId: string): Promise<any[]> {
 /**
  * Fetch course by code with title
  */
-export async function getCourseByCode(courseCode: string): Promise<any> {
+export async function getCourseByCode(courseCode: string): Promise<CourseRow | null> {
   const supabase = getSupabaseClient()
   const normalizedCode = courseCode.trim().toUpperCase()
   const { data: course, error } = await supabase
@@ -79,7 +120,7 @@ export async function getCourseByCode(courseCode: string): Promise<any> {
 /**
  * Fetch prerequisites for a course by course ID
  */
-export async function getCoursePrerequisites(courseId: string): Promise<any[]> {
+export async function getCoursePrerequisites(courseId: string): Promise<CoursePrerequisiteRow[]> {
   const supabase = getSupabaseClient()
   const { data: prereqs, error } = await supabase
     .from("course_prerequisites")

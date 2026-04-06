@@ -2,17 +2,33 @@
  * Curriculum Service
  * 
  * Responsibility: Provide curriculum data (programs, courses, prerequisites)
+ * Handles formatting and business logic; delegates data access to data-access layer
  * 
  * Current location of implementation: /lib/db/curriculum.ts
- * Status: To be migrated from lib/ to here
  */
 
 import type {
   CurriculumContext,
   ProgramOverview,
   PrerequisiteResult,
-  SearchOptions,
-} from "@/shared/contracts";
+} from "@/shared/contracts"
+import {
+  getProgram,
+  getCurriculumSlots,
+  getCourseByCode,
+  getCoursePrerequisites,
+} from "@/backend/data-access/curriculum"
+
+const SEMESTER_LABELS: Record<number, string> = {
+  1: "Freshman Fall",
+  2: "Freshman Spring",
+  3: "Sophomore Fall",
+  4: "Sophomore Spring",
+  5: "Junior Fall",
+  6: "Junior Spring",
+  7: "Senior Fall",
+  8: "Senior Spring",
+}
 
 /**
  * Fetch full curriculum context for a program
@@ -21,8 +37,58 @@ import type {
 export async function fetchCurriculumContext(
   programCode: string
 ): Promise<CurriculumContext | null> {
-  // TODO: Migrate implementation from /lib/db/curriculum.ts
-  throw new Error("Not yet migrated");
+  const program = await getProgram(programCode)
+  if (!program) return null
+
+  const slots = await getCurriculumSlots(program.id)
+  if (slots.length === 0) return null
+
+  // Group by semester and format as readable text
+  const bySemester: Record<number, string[]> = {}
+
+  for (const slot of slots) {
+    const sem = slot.semester_number
+    if (!bySemester[sem]) bySemester[sem] = []
+
+    const courseRelation = slot.courses as
+      | { course_id: string; title: string; credit_hours: number; is_capstone: boolean }
+      | Array<{ course_id: string; title: string; credit_hours: number; is_capstone: boolean }>
+      | null
+    const course = Array.isArray(courseRelation) ? courseRelation[0] : courseRelation
+
+    if (slot.is_elective_slot) {
+      bySemester[sem].push(
+        `  - [Elective] ${slot.slot_label} (${slot.credit_hours} cr)`
+      )
+    } else if (course) {
+      const capstone = course.is_capstone ? " [CAPSTONE]" : ""
+      const minGrade = slot.min_grade ? ` — min grade: ${slot.min_grade}` : ""
+      bySemester[sem].push(
+        `  - ${course.course_id}: ${course.title} (${course.credit_hours} cr)${capstone}${minGrade}`
+      )
+    }
+  }
+
+  const semesterBlocks = Object.entries(bySemester)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([sem, lines]) => {
+      const label = SEMESTER_LABELS[Number(sem)] ?? `Semester ${sem}`
+      return `${label}:\n${lines.join("\n")}`
+    })
+    .join("\n\n")
+
+  const formattedText = `Program: ${program.name} (${program.code})
+Total Credit Hours Required: ${program.total_credit_hours}
+
+4-Year Curriculum Plan:
+${semesterBlocks}`
+
+  return {
+    programCode: program.code,
+    programName: program.name,
+    totalCreditHours: program.total_credit_hours,
+    formattedText,
+  }
 }
 
 /**
@@ -31,8 +97,28 @@ export async function fetchCurriculumContext(
 export async function fetchProgramOverview(
   programCode: string
 ): Promise<ProgramOverview | null> {
-  // TODO: Migrate implementation from /lib/db/curriculum.ts
-  throw new Error("Not yet migrated");
+  const program = await getProgram(programCode)
+  if (!program) return null
+
+  const slots = await getCurriculumSlots(program.id)
+  if (slots.length === 0) return null
+
+  const semesters = new Set<number>()
+  let electiveSlots = 0
+
+  for (const slot of slots) {
+    semesters.add(slot.semester_number as number)
+    if (slot.is_elective_slot) electiveSlots += 1
+  }
+
+  return {
+    programCode: program.code as string,
+    programName: program.name as string,
+    totalCreditHours: program.total_credit_hours as number,
+    semesterCount: semesters.size,
+    totalSlots: slots.length,
+    electiveSlots,
+  }
 }
 
 /**
@@ -41,6 +127,46 @@ export async function fetchProgramOverview(
 export async function fetchCoursePrerequisitesByCode(
   courseCode: string
 ): Promise<PrerequisiteResult | null> {
-  // TODO: Migrate implementation from /lib/db/curriculum.ts
-  throw new Error("Not yet migrated");
+  const course = await getCourseByCode(courseCode)
+  if (!course) return null
+
+  const prereqs = await getCoursePrerequisites(course.id)
+  if (prereqs.length === 0) {
+    return {
+      courseId: course.course_id as string,
+      title: course.title as string,
+      groups: [],
+    }
+  }
+
+  const grouped = new Map<number, PrerequisiteResult["groups"][number]>()
+
+  for (const row of prereqs as Array<{
+    prereq_group: number
+    min_grade: string | null
+    prerequisite: { course_id: string; title: string } | { course_id: string; title: string }[] | null
+  }>) {
+    const groupId = row.prereq_group
+    if (!grouped.has(groupId)) {
+      grouped.set(groupId, { prereqGroup: groupId, options: [] })
+    }
+
+    const prereq = Array.isArray(row.prerequisite)
+      ? row.prerequisite[0]
+      : row.prerequisite
+
+    if (!prereq) continue
+
+    grouped.get(groupId)!.options.push({
+      courseId: prereq.course_id,
+      title: prereq.title,
+      minGrade: row.min_grade,
+    })
+  }
+
+  return {
+    courseId: course.course_id as string,
+    title: course.title as string,
+    groups: Array.from(grouped.values()).sort((a, b) => a.prereqGroup - b.prereqGroup),
+  }
 }
