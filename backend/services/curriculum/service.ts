@@ -170,3 +170,47 @@ export async function fetchCoursePrerequisitesByCode(
     groups: Array.from(grouped.values()).sort((a, b) => a.prereqGroup - b.prereqGroup),
   }
 }
+
+/**
+ * Format prerequisite data for LLM processing
+ * Converts structured prerequisite data to natural text for generateDbResponse
+ */
+export function formatPrerequisiteForLLM(prereq: PrerequisiteResult): string {
+  if (prereq.groups.length === 0) {
+    return `Course: ${prereq.courseId} - ${prereq.title}
+Prerequisites: No prerequisites required for this course.`
+  }
+
+  const groupTexts = prereq.groups.map((group) => {
+    const options = group.options
+      .map((opt) => {
+        const gradeRequirement = opt.minGrade ? ` (minimum grade: ${opt.minGrade})` : ""
+        return `${opt.courseId} - ${opt.title}${gradeRequirement}`
+      })
+      .join(" OR ")
+
+    return `Group ${group.prereqGroup}: ${options}`
+  })
+
+  return `Course: ${prereq.courseId} - ${prereq.title}
+Prerequisites:
+${groupTexts.map((g) => `• ${g}`).join("\n")}`
+}
+
+/**
+ * Format program/curriculum data for LLM processing
+ * Converts curriculum data to natural text for generateDbResponse
+ */
+export function formatCurriculumForLLM(
+  overview: ProgramOverview,
+  curriculum: CurriculumContext
+): string {
+  return `Program: ${overview.programName} (${overview.programCode})
+Total Credit Hours Required: ${overview.totalCreditHours}
+Number of Semesters: ${overview.semesterCount}
+Total Courses/Slots: ${overview.totalSlots}
+Elective Slots: ${overview.electiveSlots}
+
+Detailed Curriculum:
+${curriculum.formattedText}`
+}

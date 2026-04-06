@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { mockCourses } from "@/lib/data"
-import type { Message, Course } from "@/lib/types"
+import type { Message } from "@/lib/types"
 import type { ChatQueryRequest, RoutedResponse } from "@/shared/contracts"
 import { cn } from "@/lib/utils"
 

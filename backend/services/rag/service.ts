@@ -176,3 +176,42 @@ ${bulletinSection}`,
 
   return response.choices[0].message.content ?? ""
 }
+
+/**
+ * Generate a response based on structured database/curriculum data
+ * Converts database results to natural language using the LLM
+ */
+export async function generateDbResponse(
+  query: string,
+  dataContext: string
+): Promise<string> {
+  if (!dataContext || dataContext.trim().length === 0) {
+    return "I couldn't find the information you were asking about in the structured curriculum database. Please try a different question or contact your academic advisor."
+  }
+
+  const openai = getOpenAIClient()
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    temperature: 0.3,
+    messages: [
+      {
+        role: "system",
+        content: `You are a helpful academic advisor assistant for Alabama A&M University (AAMU).
+Answer student questions based strictly on the provided curriculum and program data.
+Be concise, friendly, and accurate.
+If the data doesn't fully answer the question, say so clearly.`,
+      },
+      {
+        role: "user",
+        content: `Answer the following student question using only the curriculum data below.
+
+Question: ${query}
+
+Curriculum Data:
+${dataContext}`,
+      },
+    ],
+  })
+
+  return response.choices[0].message.content ?? ""
+}

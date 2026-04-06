@@ -9,11 +9,13 @@
 
 import type { ChatQueryRequest, RoutedResponse } from "@/shared/contracts"
 import { decideRoute } from "@/lib/chat-routing/router"
-import { searchBulletin, generateRagResponse, generateHybridResponse } from "@/backend/services/rag/service"
+import { searchBulletin, generateRagResponse, generateHybridResponse, generateDbResponse } from "@/backend/services/rag/service"
 import {
   fetchCurriculumContext,
   fetchProgramOverview,
   fetchCoursePrerequisitesByCode,
+  formatPrerequisiteForLLM,
+  formatCurriculumForLLM,
 } from "@/backend/services/curriculum/service"
 
 /**
@@ -31,44 +33,36 @@ async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, u
     const prereq = await fetchCoursePrerequisitesByCode(normalizedCourseCode)
 
     if (!prereq) {
+      const answer = await generateDbResponse(
+        question,
+        `Course Code: ${normalizedCourseCode}\nStatus: Not found in the course catalog`
+      )
       return {
         mode: "DB_ONLY",
-        answer: `I couldn't find ${normalizedCourseCode} in the structured course catalog.`,
+        answer,
         data: null,
       }
     }
 
-    if (prereq.groups.length === 0) {
-      return {
-        mode: "DB_ONLY",
-        answer: `${prereq.courseId} (${prereq.title}) has no prerequisites in the catalog data.`,
-        data: prereq,
-      }
-    }
-
-    const prereqText = prereq.groups
-      .map((group) => {
-        const options = group.options.map((opt) => {
-          const grade = opt.minGrade ? ` (min ${opt.minGrade})` : ""
-          return `${opt.courseId}${grade}`
-        })
-
-        return `Group ${group.prereqGroup}: ${options.join(" OR ")}`
-      })
-      .join("; ")
+    // Format prerequisite data for the LLM
+    const prereqContext = formatPrerequisiteForLLM(prereq)
+    const answer = await generateDbResponse(question, prereqContext)
 
     return {
       mode: "DB_ONLY",
-      answer: `Prerequisites for ${prereq.courseId} (${prereq.title}): ${prereqText}`,
+      answer,
       data: prereq,
     }
   }
 
   if (!programCode) {
+    const answer = await generateDbResponse(
+      question,
+      "Available data: Structured program curriculum data requires a program code (e.g., BSCS-BS)"
+    )
     return {
       mode: "DB_ONLY",
-      answer:
-        "I can answer structured program questions, but I need session.programCode (for example: BSCS-BS) to query the curriculum tables.",
+      answer,
       data: null,
     }
   }
@@ -79,9 +73,13 @@ async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, u
   ])
 
   if (!overview || !curriculum) {
+    const answer = await generateDbResponse(
+      question,
+      `Program Code: ${programCode}\nStatus: Curriculum data not found`
+    )
     return {
       mode: "DB_ONLY",
-      answer: `I couldn't find structured curriculum data for program code ${programCode}.`,
+      answer,
       data: { programCode },
     }
   }
@@ -91,9 +89,12 @@ async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, u
   )
 
   if (asksSummary) {
+    const curriculumContext = formatCurriculumForLLM(overview, curriculum)
+    const answer = await generateDbResponse(question, curriculumContext)
+
     return {
       mode: "DB_ONLY",
-      answer: `${overview.programName} (${overview.programCode}) requires ${overview.totalCreditHours} credits across ${overview.semesterCount} semesters. The curriculum currently has ${overview.totalSlots} slots, including ${overview.electiveSlots} elective slots.`,
+      answer,
       data: {
         overview,
         curriculumText: curriculum.formattedText,
@@ -101,9 +102,19 @@ async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, u
     }
   }
 
+  const curriculumContext = formatCurriculumForLLM(overview, curriculum)
+  const answer = await generateDbResponse(
+    question,
+    `${curriculumContext}\n\nYou can ask about:
+- Specific courses and their prerequisites
+- Program credit requirements
+- Semester course layout
+- Elective slots and requirements`
+  )
+
   return {
     mode: "DB_ONLY",
-    answer: `I found structured curriculum data for ${overview.programCode}. Ask about course prerequisites (for example: 'What are the prerequisites for CS 214?') or program credits/semester layout.`,
+    answer,
     data: {
       overview,
     },

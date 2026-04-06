@@ -26,6 +26,10 @@ function addRule(bucket: BucketScore, id: string, weight: number, reason: string
 }
 
 function chooseRoute(db: BucketScore, rag: BucketScore, hybrid: BucketScore): ChatRoute {
+  if (db.score === 0 && rag.score === 0 && hybrid.score === 0) {
+    return "DB_ONLY"
+  }
+
   if (hybrid.score >= db.score && hybrid.score >= rag.score) {
     return "HYBRID"
   }
