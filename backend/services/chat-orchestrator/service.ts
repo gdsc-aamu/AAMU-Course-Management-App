@@ -18,6 +18,20 @@ import {
   formatCurriculumForLLM,
 } from "@/backend/services/curriculum/service"
 
+function asksPrerequisiteQuestion(question: string): boolean {
+  return /(prereq|pre-?req|pre requisite|pre-requisite|prerequisite|prerequisites|need before|required before|eligib(le|ility) for)/i.test(
+    question
+  )
+}
+
+function extractCourseCodeFromQuestion(question: string): string | null {
+  // Match patterns like "CS 214", "MTH101", "BIO-201", "CHEM 102"
+  const codeMatch = question.match(/\b([A-Za-z]{2,5})[\s-]?(\d{3}[A-Za-z]?)\b/)
+  if (!codeMatch) return null
+
+  return `${codeMatch[1].toUpperCase()} ${codeMatch[2].toUpperCase()}`
+}
+
 /**
  * Handle DB_ONLY queries — curriculum and course prerequisites
  */
@@ -25,11 +39,22 @@ async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, u
   const question = payload.question.trim()
   const programCode = payload.session?.programCode
   const normalizedQuestion = question.toLowerCase()
+  const isPrereqQuery = asksPrerequisiteQuestion(question)
 
-  // Match course patterns like "CS 214", "MTH101", "BIO-201".
-  const courseCodeMatch = question.match(/\b([A-Za-z]{2,4})[\s-]?(\d{3})\b/)
-  if (courseCodeMatch) {
-    const normalizedCourseCode = `${courseCodeMatch[1].toUpperCase()} ${courseCodeMatch[2]}`
+  if (isPrereqQuery) {
+    const normalizedCourseCode = extractCourseCodeFromQuestion(question)
+    if (!normalizedCourseCode) {
+      const answer = await generateDbResponse(
+        question,
+        "Request type: Prerequisites\nStatus: No valid course code found in question\nHint: Use a course code format like CS 214 or BIO 311"
+      )
+      return {
+        mode: "DB_ONLY",
+        answer,
+        data: null,
+      }
+    }
+
     const prereq = await fetchCoursePrerequisitesByCode(normalizedCourseCode)
 
     if (!prereq) {

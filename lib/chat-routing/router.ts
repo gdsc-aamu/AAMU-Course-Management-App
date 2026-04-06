@@ -6,7 +6,7 @@ interface BucketScore {
 }
 
 const DB_TERMS = [
-  /\b(transcript|credit|credits|gpa|grade|grades|completed|enrolled|schedule|prereq|prerequisite)\b/i,
+  /\b(transcript|credit|credits|gpa|grade|grades|completed|enrolled|schedule|prereq|pre-?reqs?|prerequisite|prerequisites)\b/i,
   /\b(degree progress|remaining credits|what classes do i need)\b/i,
 ]
 
