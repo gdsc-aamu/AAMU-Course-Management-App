@@ -1,10 +1,128 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Search, Upload, CheckCircle2, AlertCircle } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
+
+const supabase = createClient()
+
+interface CompletedCourseRow {
+  code: string
+  title: string
+  creditHours: number
+  completedAt: string
+}
 
 export default function SettingsPage() {
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null)
+  const [courses, setCourses] = useState<CompletedCourseRow[]>([])
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true)
+  const [coursesError, setCoursesError] = useState<string | null>(null)
+
+  async function loadCompletedCourses() {
+    setCoursesError(null)
+    setIsLoadingCourses(true)
+
+    try {
+      const { data, error } = await supabase.auth.getSession()
+      if (error || !data.session?.access_token) {
+        throw new Error("You need to be signed in to view completed courses.")
+      }
+
+      const response = await fetch("/api/degreeworks/completed-courses", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+      })
+
+      const payload = (await response.json()) as {
+        success: boolean
+        error?: string
+        courses?: CompletedCourseRow[]
+      }
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error ?? "Failed to fetch completed courses.")
+      }
+
+      setCourses(payload.courses ?? [])
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unexpected load error"
+      setCoursesError(message)
+    } finally {
+      setIsLoadingCourses(false)
+    }
+  }
+
+  useEffect(() => {
+    void loadCompletedCourses()
+  }, [])
+
+  async function handleFileSelection(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setUploadError(null)
+    setUploadSuccess(null)
+
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+      setUploadError("Please select a PDF file.")
+      event.target.value = ""
+      return
+    }
+
+    setIsUploading(true)
+
+    try {
+      const { data, error } = await supabase.auth.getSession()
+      if (error || !data.session?.access_token) {
+        throw new Error("You need to be signed in before uploading a DegreeWorks PDF.")
+      }
+
+      const form = new FormData()
+      form.append("file", file)
+
+      const response = await fetch("/api/degreeworks/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+        body: form,
+      })
+
+      const payload = (await response.json()) as {
+        success: boolean
+        error?: string
+        mappedCompletedCount?: number
+      }
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error ?? "Failed to upload and parse DegreeWorks PDF.")
+      }
+
+      setUploadSuccess(
+        `Upload successful. Synced ${payload.mappedCompletedCount ?? 0} completed courses.`
+      )
+      await loadCompletedCourses()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unexpected upload error"
+      setUploadError(message)
+    } finally {
+      setIsUploading(false)
+      event.target.value = ""
+    }
+  }
+
+  function handleOpenFilePicker() {
+    fileInputRef.current?.click()
+  }
+
   return (
     <div className="flex min-h-screen bg-[#fafafa]">
       <Sidebar />
@@ -83,9 +201,27 @@ export default function SettingsPage() {
                   <p className="mt-2 max-w-sm text-sm text-gray-500">
                     Upload your PDF from Degree Works to automatically sync your completed courses and remaining requirements.
                   </p>
-                  <button className="mt-6 rounded-md bg-[#78103A] px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#600d2e] transition-colors cursor-pointer">
-                    Select PDF File
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    onChange={handleFileSelection}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleOpenFilePicker}
+                    disabled={isUploading}
+                    className="mt-6 rounded-md bg-[#78103A] px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#600d2e] transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isUploading ? "Uploading..." : "Select PDF File"}
                   </button>
+                  {uploadSuccess ? (
+                    <p className="mt-4 text-sm font-semibold text-emerald-700">{uploadSuccess}</p>
+                  ) : null}
+                  {uploadError ? (
+                    <p className="mt-4 text-sm font-semibold text-red-700">{uploadError}</p>
+                  ) : null}
                 </div>
               </CardContent>
             </Card>
@@ -97,7 +233,7 @@ export default function SettingsPage() {
                   <h2 className="text-lg font-bold text-gray-900">Completed Courses</h2>
                   <div className="flex items-center gap-1.5 text-sm font-bold text-emerald-600">
                     <CheckCircle2 className="h-4 w-4" />
-                    11 Courses Verified
+                    {courses.length} Courses Verified
                   </div>
                 </div>
                 
@@ -108,27 +244,42 @@ export default function SettingsPage() {
                         <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Course Code</th>
                         <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Course Name</th>
                         <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Credits</th>
-                        <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Grade</th>
+                        <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                      {[
-                        { code: "ENG 101", name: "Composition I", credits: "3", grade: "A" },
-                        { code: "MTH 125", name: "Calculus I", credits: "4", grade: "B+" },
-                        { code: "ORI 101", name: "First Year Experience", credits: "1", grade: "A" },
-                        { code: "HIS 201", name: "US History I", credits: "3", grade: "A-" },
-                      ].map((course) => (
-                        <tr key={course.code}>
-                          <td className="py-4 font-bold text-[#78103A] whitespace-nowrap">{course.code}</td>
-                          <td className="py-4 font-medium text-gray-900">{course.name}</td>
-                          <td className="py-4 text-center font-medium text-gray-600">{course.credits}</td>
-                          <td className="py-4 text-center">
-                            <span className="inline-flex items-center justify-center rounded bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
-                              {course.grade}
-                            </span>
+                      {isLoadingCourses ? (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-sm font-medium text-gray-500">
+                            Loading completed courses...
                           </td>
                         </tr>
-                      ))}
+                      ) : coursesError ? (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-sm font-medium text-red-700">
+                            {coursesError}
+                          </td>
+                        </tr>
+                      ) : courses.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-sm font-medium text-gray-500">
+                            No completed courses mapped yet. Upload a DegreeWorks PDF to sync.
+                          </td>
+                        </tr>
+                      ) : (
+                        courses.map((course) => (
+                          <tr key={course.code}>
+                            <td className="py-4 font-bold text-[#78103A] whitespace-nowrap">{course.code}</td>
+                            <td className="py-4 font-medium text-gray-900">{course.title}</td>
+                            <td className="py-4 text-center font-medium text-gray-600">{course.creditHours}</td>
+                            <td className="py-4 text-center">
+                              <span className="inline-flex items-center justify-center rounded bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                                Verified
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

@@ -126,6 +126,19 @@ create table if not exists concentration_slots (
 );
 
 
+-- ------------------------------------------------------------
+-- USER COMPLETED COURSES
+-- Maps an application user to catalog courses they have completed.
+-- ------------------------------------------------------------
+create table if not exists user_completed_courses (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  course_id    uuid not null references courses(id) on delete cascade,
+  completed_at timestamptz not null default now(),
+  unique (user_id, course_id)
+);
+
+
 -- ============================================================
 -- INDEXES
 -- ============================================================
@@ -143,3 +156,9 @@ create index if not exists idx_elective_slot_eligible_slot
 
 create index if not exists idx_concentration_slots_concentration
   on concentration_slots (concentration_id);
+
+create index if not exists idx_user_completed_courses_user
+  on user_completed_courses (user_id);
+
+create index if not exists idx_user_completed_courses_course
+  on user_completed_courses (course_id);
