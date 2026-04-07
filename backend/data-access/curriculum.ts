@@ -16,6 +16,11 @@ export interface ProgramRow {
   total_credit_hours: number
 }
 
+export interface ProgramIdentityRow {
+  code: string
+  name: string
+}
+
 export interface CourseRow {
   id: string
   course_id: string
@@ -62,14 +67,28 @@ function getSupabaseClient() {
  */
 export async function getProgram(code: string): Promise<ProgramRow | null> {
   const supabase = getSupabaseClient()
+  const normalizedCode = code.trim().toUpperCase()
   const { data: program, error } = await supabase
     .from("programs")
     .select("id, code, name, total_credit_hours")
-    .eq("code", code)
+    .eq("code", normalizedCode)
     .single()
 
   if (error || !program) return null
   return program
+}
+
+/**
+ * Fetch all program code/name pairs for intent resolution.
+ */
+export async function listPrograms(): Promise<ProgramIdentityRow[]> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from("programs")
+    .select("code, name")
+
+  if (error || !data) return []
+  return data
 }
 
 /**

@@ -16,6 +16,7 @@ import {
   fetchCoursePrerequisitesByCode,
   formatPrerequisiteForLLM,
   formatCurriculumForLLM,
+  resolveProgramCodeFromQuestion,
 } from "@/backend/services/curriculum/service"
 
 function asksPrerequisiteQuestion(question: string): boolean {
@@ -37,7 +38,7 @@ function extractCourseCodeFromQuestion(question: string): string | null {
  */
 async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, unknown>> {
   const question = payload.question.trim()
-  const programCode = payload.session?.programCode
+  const programCode = await resolveProgramCodeFromQuestion(question, payload.session?.programCode)
   const normalizedQuestion = question.toLowerCase()
   const isPrereqQuery = asksPrerequisiteQuestion(question)
 
@@ -177,7 +178,10 @@ async function handleRagOnly(payload: ChatQueryRequest): Promise<Record<string, 
  */
 async function handleHybrid(payload: ChatQueryRequest): Promise<Record<string, unknown>> {
   const bulletinYear = payload.session?.bulletinYear ?? "2025-2026"
-  const programCode = payload.session?.programCode ?? null
+  const programCode = await resolveProgramCodeFromQuestion(
+    payload.question,
+    payload.session?.programCode ?? null
+  )
 
   // Run bulletin search and curriculum fetch in parallel
   const [chunks, curriculum] = await Promise.all([

@@ -17,6 +17,7 @@ import {
   getCurriculumSlots,
   getCourseByCode,
   getCoursePrerequisites,
+  listPrograms,
 } from "@/backend/data-access/curriculum"
 
 const SEMESTER_LABELS: Record<number, string> = {
@@ -213,4 +214,51 @@ Elective Slots: ${overview.electiveSlots}
 
 Detailed Curriculum:
 ${curriculum.formattedText}`
+}
+
+/**
+ * Resolve program code from natural-language question.
+ * Falls back to session program code when no explicit program mention is found.
+ */
+export async function resolveProgramCodeFromQuestion(
+  question: string,
+  fallbackProgramCode?: string | null
+): Promise<string | null> {
+  const normalizedQuestion = question.toLowerCase()
+  const normalizedFallback = fallbackProgramCode?.trim().toUpperCase() ?? null
+
+  const programs = await listPrograms()
+  if (programs.length === 0) {
+    return normalizedFallback
+  }
+
+  // Prefer explicit code mention (e.g., BSCS-BS).
+  for (const program of programs) {
+    if (normalizedQuestion.includes(program.code.toLowerCase())) {
+      return program.code
+    }
+  }
+
+  // Then match by program name phrase (e.g., "accounting").
+  for (const program of programs) {
+    const name = program.name.toLowerCase()
+    if (normalizedQuestion.includes(name) || name.includes(normalizedQuestion)) {
+      return program.code
+    }
+  }
+
+  // Finally match any significant token from the program name.
+  for (const program of programs) {
+    const tokens = program.name
+      .toLowerCase()
+      .split(/\s+/)
+      .map((token) => token.replace(/[^a-z0-9]/g, ""))
+      .filter((token) => token.length >= 4)
+
+    if (tokens.some((token) => normalizedQuestion.includes(token))) {
+      return program.code
+    }
+  }
+
+  return normalizedFallback
 }
