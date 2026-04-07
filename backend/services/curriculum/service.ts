@@ -31,14 +31,22 @@ const SEMESTER_LABELS: Record<number, string> = {
   8: "Senior Spring",
 }
 
+export function parseCatalogYear(value?: string | null): number | null {
+  if (!value) return null
+  const match = value.match(/(20\d{2})/)
+  if (!match) return null
+  return Number(match[1])
+}
+
 /**
  * Fetch full curriculum context for a program
  * Used by chat service to understand degree requirements
  */
 export async function fetchCurriculumContext(
-  programCode: string
+  programCode: string,
+  catalogYear?: number | null
 ): Promise<CurriculumContext | null> {
-  const program = await getProgram(programCode)
+  const program = await getProgram(programCode, catalogYear)
   if (!program) return null
 
   const slots = await getCurriculumSlots(program.id)
@@ -96,9 +104,10 @@ ${semesterBlocks}`
  * Fetch program metadata and statistics
  */
 export async function fetchProgramOverview(
-  programCode: string
+  programCode: string,
+  catalogYear?: number | null
 ): Promise<ProgramOverview | null> {
-  const program = await getProgram(programCode)
+  const program = await getProgram(programCode, catalogYear)
   if (!program) return null
 
   const slots = await getCurriculumSlots(program.id)

@@ -13,6 +13,7 @@ export interface ProgramRow {
   id: string
   code: string
   name: string
+  catalog_year: number
   total_credit_hours: number
 }
 
@@ -65,17 +66,24 @@ function getSupabaseClient() {
 /**
  * Fetch program by code
  */
-export async function getProgram(code: string): Promise<ProgramRow | null> {
+export async function getProgram(code: string, catalogYear?: number | null): Promise<ProgramRow | null> {
   const supabase = getSupabaseClient()
   const normalizedCode = code.trim().toUpperCase()
-  const { data: program, error } = await supabase
+  let query = supabase
     .from("programs")
-    .select("id, code, name, total_credit_hours")
+    .select("id, code, name, catalog_year, total_credit_hours")
     .eq("code", normalizedCode)
-    .single()
 
-  if (error || !program) return null
-  return program
+  if (typeof catalogYear === "number") {
+    query = query.eq("catalog_year", catalogYear)
+  } else {
+    query = query.order("catalog_year", { ascending: false })
+  }
+
+  const { data, error } = await query.limit(1)
+
+  if (error || !data || data.length === 0) return null
+  return data[0]
 }
 
 /**

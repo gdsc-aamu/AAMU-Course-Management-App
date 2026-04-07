@@ -12,6 +12,7 @@ Required environment variables:
 
 import json
 import os
+import re
 import sys
 from dotenv import load_dotenv
 from supabase import create_client, Client
@@ -38,15 +39,40 @@ CAPSTONE_COURSES = {"CS 403"}
 
 def parse_credit_hours(value) -> int:
     """
-    Coerce credit_hours to int. Handles range strings like '2-4' or '3-4'
-    by taking the minimum value.
+    Coerce credit_hours to int.
+    Handles:
+      - integers/floats
+      - ranges like '2-4' or '3-4' (takes minimum)
+      - descriptive strings like '18 + (3) overlap = 21 effective'
     """
     if isinstance(value, int):
         return value
+    if isinstance(value, float):
+        return int(value)
+
     s = str(value).strip()
+
+    # Simple numeric string (e.g. "3" or "3.0")
+    try:
+        return int(float(s))
+    except ValueError:
+        pass
+
+    # Range format (e.g. "2-4")
     if "-" in s:
         return int(s.split("-")[0])
-    return int(s)
+
+    # Prefer explicit equation result when present (e.g. "= 21 effective")
+    eq_match = re.search(r"=\s*(\d+)", s)
+    if eq_match:
+        return int(eq_match.group(1))
+
+    # Fallback: extract all numbers and use the last one (most specific in notes)
+    nums = re.findall(r"\d+(?:\.\d+)?", s)
+    if nums:
+        return int(float(nums[-1]))
+
+    raise ValueError(f"Unable to parse credit hours from value: {value!r}")
 
 
 def get_required_courses(conc: dict) -> list:
@@ -108,13 +134,45 @@ def collect_all_courses(data: dict) -> dict:
     return courses
 
 
+def resolve_catalog_year(data: dict, source_path: str | None = None) -> int:
+        """
+        Resolve catalog year from metadata when present, otherwise infer from file name
+        patterns like *_2023_2024.json. Falls back to 2021 for legacy inputs.
+        """
+        meta = data.get("program_metadata", {})
+
+        # Prefer explicit metadata fields if present.
+        for key in ("catalog_year", "bulletin_year", "academic_year"):
+            value = meta.get(key)
+            if isinstance(value, int):
+                return value
+            if isinstance(value, str):
+                year_match = re.search(r"(20\d{2})", value)
+                if year_match:
+                    return int(year_match.group(1))
+
+        # Fallback to year encoded in source file name.
+        if source_path:
+            basename = os.path.basename(source_path)
+            range_match = re.search(r"(20\d{2})[_-](20\d{2})", basename)
+            if range_match:
+                return int(range_match.group(1))
+
+            single_match = re.search(r"(20\d{2})", basename)
+            if single_match:
+                return int(single_match.group(1))
+
+        return 2021
+
+
 # ── Seed ──────────────────────────────────────────────────────────────────────
 
-def seed(client: Client, data: dict):
+def seed(client: Client, data: dict, source_path: str | None = None):
 
     meta = data["program_metadata"]
+    catalog_year = resolve_catalog_year(data, source_path)
 
-    # ── 1. Program (upsert on code) ───────────────────────────────────────────
+    # ── 1. Program (upsert on code + catalog_year) ───────────────────────────
     # Code is composed as "DEPT-DEGREE" (e.g. "BENV-BS", "BSCS") to ensure
     # uniqueness across programs that share the same degree abbreviation (e.g. "BS").
     program_code = f"{meta['department_code']}-{meta['degree_abbreviation']}"
@@ -122,11 +180,11 @@ def seed(client: Client, data: dict):
     result = client.table("programs").upsert({
         "code":               program_code,
         "name":               meta["program_name"],
-        "catalog_year":       2021,
+        "catalog_year":       catalog_year,
         "total_credit_hours": parse_credit_hours(meta["total_credit_hours"]),
-    }, on_conflict="code").execute()
+    }, on_conflict="code,catalog_year").execute()
     program_id = result.data[0]["id"]
-    print(f"  program_id: {program_id} (code: {program_code})")
+    print(f"  program_id: {program_id} (code: {program_code}, catalog_year: {catalog_year})")
 
     # ── 2. Courses (upsert on course_id) ─────────────────────────────────────
     print("\nUpserting courses...")
@@ -200,7 +258,7 @@ def seed(client: Client, data: dict):
         ).execute()
     print(f"  {len(elective_rows)} elective options upserted")
 
-    # ── 5. Concentrations (upsert on code) ────────────────────────────────────
+    # ── 5. Concentrations (upsert on program_id + code) ──────────────────────
     print("\nUpserting concentrations and minors...")
     for conc in data["concentrations_and_minors"]:
         result = client.table("concentrations").upsert({
@@ -210,7 +268,7 @@ def seed(client: Client, data: dict):
             "type":         conc["type"],
             "total_hours":  parse_credit_hours(conc["total_hours"]),
             "min_grade":    conc.get("min_grade"),
-        }, on_conflict="code").execute()
+        }, on_conflict="program_id,code").execute()
         conc_id = result.data[0]["id"]
 
         # ── 6. Concentration slots (skip if already seeded) ───────────────────
@@ -272,4 +330,4 @@ if __name__ == "__main__":
         data = json.load(f)
 
     client = create_client(url, key)
-    seed(client, data)
+    seed(client, data, json_path)

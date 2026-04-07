@@ -9,11 +9,12 @@
 -- ------------------------------------------------------------
 create table if not exists programs (
   id                 uuid primary key default gen_random_uuid(),
-  code               text unique not null,       -- e.g. 'BSCS'
+  code               text not null,              -- e.g. 'BSCS'
   name               text not null,              -- e.g. 'Computer Science'
   catalog_year       int  not null,              -- e.g. 2021
   total_credit_hours int  not null,
-  created_at         timestamptz default now()
+  created_at         timestamptz default now(),
+  unique (code, catalog_year)
 );
 
 
@@ -99,12 +100,13 @@ create table if not exists elective_slot_eligible_courses (
 create table if not exists concentrations (
   id          uuid primary key default gen_random_uuid(),
   program_id  uuid not null references programs(id) on delete cascade,
-  code        text unique not null,    -- e.g. 'CMP-CYB'
+  code        text not null,           -- e.g. 'CMP-CYB'
   name        text not null,
   type        text not null check (type in ('concentration', 'minor')),
   total_hours int  not null,
   min_grade   text,
-  created_at  timestamptz default now()
+  created_at  timestamptz default now(),
+  unique (program_id, code)
 );
 
 

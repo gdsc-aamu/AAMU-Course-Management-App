@@ -16,6 +16,7 @@ import {
   fetchCoursePrerequisitesByCode,
   formatPrerequisiteForLLM,
   formatCurriculumForLLM,
+  parseCatalogYear,
   resolveProgramCodeFromQuestion,
 } from "@/backend/services/curriculum/service"
 
@@ -39,6 +40,7 @@ function extractCourseCodeFromQuestion(question: string): string | null {
 async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, unknown>> {
   const question = payload.question.trim()
   const programCode = await resolveProgramCodeFromQuestion(question, payload.session?.programCode)
+  const catalogYear = parseCatalogYear(payload.session?.bulletinYear)
   const normalizedQuestion = question.toLowerCase()
   const isPrereqQuery = asksPrerequisiteQuestion(question)
 
@@ -94,14 +96,14 @@ async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, u
   }
 
   const [overview, curriculum] = await Promise.all([
-    fetchProgramOverview(programCode),
-    fetchCurriculumContext(programCode),
+    fetchProgramOverview(programCode, catalogYear),
+    fetchCurriculumContext(programCode, catalogYear),
   ])
 
   if (!overview || !curriculum) {
     const answer = await generateDbResponse(
       question,
-      `Program Code: ${programCode}\nStatus: Curriculum data not found`
+      `Program Code: ${programCode}\nCatalog Year: ${catalogYear ?? "latest"}\nStatus: Curriculum data not found`
     )
     return {
       mode: "DB_ONLY",
@@ -178,6 +180,7 @@ async function handleRagOnly(payload: ChatQueryRequest): Promise<Record<string, 
  */
 async function handleHybrid(payload: ChatQueryRequest): Promise<Record<string, unknown>> {
   const bulletinYear = payload.session?.bulletinYear ?? "2025-2026"
+  const catalogYear = parseCatalogYear(bulletinYear)
   const programCode = await resolveProgramCodeFromQuestion(
     payload.question,
     payload.session?.programCode ?? null
@@ -186,7 +189,7 @@ async function handleHybrid(payload: ChatQueryRequest): Promise<Record<string, u
   // Run bulletin search and curriculum fetch in parallel
   const [chunks, curriculum] = await Promise.all([
     searchBulletin(payload.question, { bulletinYear }, { matchCount: 5 }),
-    programCode ? fetchCurriculumContext(programCode) : Promise.resolve(null),
+    programCode ? fetchCurriculumContext(programCode, catalogYear) : Promise.resolve(null),
   ])
 
   const answer = await generateHybridResponse(
