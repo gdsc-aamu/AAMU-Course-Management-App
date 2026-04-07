@@ -16,7 +16,7 @@ import {
   fetchCoursePrerequisitesByCode,
   formatPrerequisiteForLLM,
   formatCurriculumForLLM,
-  parseCatalogYear,
+  resolveCatalogYearFromQuestion,
   resolveProgramCodeFromQuestion,
 } from "@/backend/services/curriculum/service"
 
@@ -39,8 +39,12 @@ function extractCourseCodeFromQuestion(question: string): string | null {
  */
 async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, unknown>> {
   const question = payload.question.trim()
-  const programCode = await resolveProgramCodeFromQuestion(question, payload.session?.programCode)
-  const catalogYear = parseCatalogYear(payload.session?.bulletinYear)
+  const catalogYear = resolveCatalogYearFromQuestion(question, payload.session?.bulletinYear)
+  const programCode = await resolveProgramCodeFromQuestion(
+    question,
+    payload.session?.programCode,
+    catalogYear
+  )
   const normalizedQuestion = question.toLowerCase()
   const isPrereqQuery = asksPrerequisiteQuestion(question)
 
@@ -180,10 +184,11 @@ async function handleRagOnly(payload: ChatQueryRequest): Promise<Record<string, 
  */
 async function handleHybrid(payload: ChatQueryRequest): Promise<Record<string, unknown>> {
   const bulletinYear = payload.session?.bulletinYear ?? "2025-2026"
-  const catalogYear = parseCatalogYear(bulletinYear)
+  const catalogYear = resolveCatalogYearFromQuestion(payload.question, bulletinYear)
   const programCode = await resolveProgramCodeFromQuestion(
     payload.question,
-    payload.session?.programCode ?? null
+    payload.session?.programCode ?? null,
+    catalogYear
   )
 
   // Run bulletin search and curriculum fetch in parallel

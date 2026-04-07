@@ -38,6 +38,19 @@ export function parseCatalogYear(value?: string | null): number | null {
   return Number(match[1])
 }
 
+export function resolveCatalogYearFromQuestion(
+  question: string,
+  fallbackBulletinYear?: string | null
+): number | null {
+  // Prefer explicit year mention in the user's question, e.g. "2021" or "2023-2024".
+  const questionMatch = question.match(/\b(20\d{2})(?:\s*[-/]\s*20\d{2})?\b/)
+  if (questionMatch) {
+    return Number(questionMatch[1])
+  }
+
+  return parseCatalogYear(fallbackBulletinYear)
+}
+
 /**
  * Fetch full curriculum context for a program
  * Used by chat service to understand degree requirements
@@ -231,7 +244,8 @@ ${curriculum.formattedText}`
  */
 export async function resolveProgramCodeFromQuestion(
   question: string,
-  fallbackProgramCode?: string | null
+  fallbackProgramCode?: string | null,
+  catalogYear?: number | null
 ): Promise<string | null> {
   const normalizedQuestion = question.toLowerCase()
   const normalizedFallback = fallbackProgramCode?.trim().toUpperCase() ?? null
@@ -241,32 +255,80 @@ export async function resolveProgramCodeFromQuestion(
     return normalizedFallback
   }
 
-  // Prefer explicit code mention (e.g., BSCS-BS).
+  const groupedPrograms = new Map<string, { code: string; name: string; years: Set<number> }>()
   for (const program of programs) {
+    const key = `${program.code}|${program.name}`
+    if (!groupedPrograms.has(key)) {
+      groupedPrograms.set(key, {
+        code: program.code,
+        name: program.name,
+        years: new Set<number>(),
+      })
+    }
+    groupedPrograms.get(key)!.years.add(program.catalog_year)
+  }
+  const uniquePrograms = Array.from(groupedPrograms.values())
+
+  // Prefer explicit code mention (e.g., BSCS-BS).
+  for (const program of uniquePrograms) {
     if (normalizedQuestion.includes(program.code.toLowerCase())) {
       return program.code
     }
   }
 
-  // Then match by program name phrase (e.g., "accounting").
-  for (const program of programs) {
+  type Candidate = { code: string; score: number }
+  const candidates: Candidate[] = []
+
+  // Rank by phrase + token overlap to avoid false positives (e.g., generic "science").
+  for (const program of uniquePrograms) {
     const name = program.name.toLowerCase()
-    if (normalizedQuestion.includes(name) || name.includes(normalizedQuestion)) {
-      return program.code
+    const normalizedName = name.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim()
+    const tokens = normalizedName
+      .split(" ")
+      .map((token) => token.trim())
+      .filter((token) => token.length >= 3)
+
+    if (tokens.length === 0) continue
+
+    let score = 0
+
+    if (normalizedQuestion.includes(normalizedName)) {
+      score += 100
+    }
+
+    const matchedTokens = tokens.filter((token) => normalizedQuestion.includes(token)).length
+    score += matchedTokens * 10
+
+    if (matchedTokens === tokens.length) {
+      score += 30
+    }
+
+    // Reward common two-word phrase matches like "computer science".
+    for (let i = 0; i < tokens.length - 1; i++) {
+      const phrase = `${tokens[i]} ${tokens[i + 1]}`
+      if (normalizedQuestion.includes(phrase)) {
+        score += 20
+      }
+    }
+
+    if (typeof catalogYear === "number") {
+      if (program.years.has(catalogYear)) {
+        score += 25
+      } else if (program.years.has(catalogYear - 1) || program.years.has(catalogYear + 1)) {
+        score += 10
+      } else {
+        score -= 5
+      }
+    }
+
+    if (score > 0) {
+      candidates.push({ code: program.code, score })
     }
   }
 
-  // Finally match any significant token from the program name.
-  for (const program of programs) {
-    const tokens = program.name
-      .toLowerCase()
-      .split(/\s+/)
-      .map((token) => token.replace(/[^a-z0-9]/g, ""))
-      .filter((token) => token.length >= 4)
-
-    if (tokens.some((token) => normalizedQuestion.includes(token))) {
-      return program.code
-    }
+  if (candidates.length > 0) {
+    candidates.sort((a, b) => b.score - a.score)
+    return candidates[0].code
   }
 
   return normalizedFallback

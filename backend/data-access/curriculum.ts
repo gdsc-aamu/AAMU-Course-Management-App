@@ -20,6 +20,7 @@ export interface ProgramRow {
 export interface ProgramIdentityRow {
   code: string
   name: string
+  catalog_year: number
 }
 
 export interface CourseRow {
@@ -69,18 +70,42 @@ function getSupabaseClient() {
 export async function getProgram(code: string, catalogYear?: number | null): Promise<ProgramRow | null> {
   const supabase = getSupabaseClient()
   const normalizedCode = code.trim().toUpperCase()
-  let query = supabase
+  if (typeof catalogYear === "number") {
+    // Exact year first.
+    const { data: exactData, error: exactError } = await supabase
+      .from("programs")
+      .select("id, code, name, catalog_year, total_credit_hours")
+      .eq("code", normalizedCode)
+      .eq("catalog_year", catalogYear)
+      .limit(1)
+
+    if (!exactError && exactData && exactData.length > 0) {
+      return exactData[0]
+    }
+
+    // Fallback for academic-year ambiguity (e.g., 2023-2024 stored as 2024).
+    const nearYears = [catalogYear - 1, catalogYear + 1]
+    const { data: nearData, error: nearError } = await supabase
+      .from("programs")
+      .select("id, code, name, catalog_year, total_credit_hours")
+      .eq("code", normalizedCode)
+      .in("catalog_year", nearYears)
+      .order("catalog_year", { ascending: false })
+      .limit(1)
+
+    if (!nearError && nearData && nearData.length > 0) {
+      return nearData[0]
+    }
+
+    return null
+  }
+
+  const { data, error } = await supabase
     .from("programs")
     .select("id, code, name, catalog_year, total_credit_hours")
     .eq("code", normalizedCode)
-
-  if (typeof catalogYear === "number") {
-    query = query.eq("catalog_year", catalogYear)
-  } else {
-    query = query.order("catalog_year", { ascending: false })
-  }
-
-  const { data, error } = await query.limit(1)
+    .order("catalog_year", { ascending: false })
+    .limit(1)
 
   if (error || !data || data.length === 0) return null
   return data[0]
@@ -93,7 +118,7 @@ export async function listPrograms(): Promise<ProgramIdentityRow[]> {
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from("programs")
-    .select("code, name")
+    .select("code, name, catalog_year")
 
   if (error || !data) return []
   return data
