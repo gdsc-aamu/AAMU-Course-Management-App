@@ -1,7 +1,7 @@
 /**
  * Data Access Layer - PDF Parsing
  *
- * Responsibility: Persist user-to-completed-course mappings from DegreeWorks data.
+ * Responsibility: Persist user-to-course mappings and sync their latest status.
  */
 
 import { createClient } from "@supabase/supabase-js"
@@ -22,10 +22,11 @@ interface CourseCatalogUpsert {
 interface UserCompletedCourseInsert {
   user_id: string
   course_id: string
+  status: "completed" | "in_progress"
 }
 
 interface UserCompletedCourseRow {
-  completed_at: string
+  status: "completed" | "in_progress"
   course: {
     course_id: string
     title: string
@@ -46,7 +47,6 @@ export interface UserCompletedCourseView {
   code: string
   title: string
   creditHours: number
-  completedAt: string
 }
 
 function getSupabaseClient() {
@@ -57,36 +57,48 @@ function getSupabaseClient() {
 }
 
 /**
- * Upsert a user's completed course mappings based on the parsed DegreeWorks data.
- * Any missing completed courses are first upserted into the master courses table.
+ * Upsert a user's course mappings based on parsed DegreeWorks data.
+ * Any missing courses are first upserted into the master courses table.
+ * Status is synced per course and promoted to completed when present in the payload.
  */
 export async function upsertUserCompletedCourses(
   userId: string,
   result: DegreeWorksResult
 ): Promise<CompletedCourseMappingResult> {
   const supabase = getSupabaseClient()
-  const completedCourseMap = new Map<string, { title: string; credits: number }>()
+  const courseMap = new Map<
+    string,
+    { title: string; credits: number; status: "completed" | "in_progress" }
+  >()
 
-  for (const course of result.completedCourses) {
+  for (const course of result.allCourses) {
     const normalizedCode = course.code.trim().toUpperCase()
     if (!normalizedCode) continue
 
-    if (!completedCourseMap.has(normalizedCode)) {
-      completedCourseMap.set(normalizedCode, {
+    const existing = courseMap.get(normalizedCode)
+    if (!existing) {
+      courseMap.set(normalizedCode, {
         title: course.title.trim() || normalizedCode,
         credits: Number.isFinite(course.credits) ? Math.round(course.credits) : 0,
+        status: course.status,
       })
+      continue
+    }
+
+    // If either record indicates completion, keep completed as the authoritative state.
+    if (course.status === "completed" && existing.status !== "completed") {
+      existing.status = "completed"
     }
   }
 
-  const completedCourseCodes = Array.from(completedCourseMap.keys())
+  const courseCodes = Array.from(courseMap.keys())
 
-  if (completedCourseCodes.length === 0) {
+  if (courseCodes.length === 0) {
     return { mappedCount: 0, unmatchedCourseCodes: [] }
   }
 
-  const catalogRows: CourseCatalogUpsert[] = completedCourseCodes.map((code) => {
-    const course = completedCourseMap.get(code)
+  const catalogRows: CourseCatalogUpsert[] = courseCodes.map((code) => {
+    const course = courseMap.get(code)
     return {
       course_id: code,
       title: course?.title ?? code,
@@ -106,7 +118,7 @@ export async function upsertUserCompletedCourses(
   const { data: courseRows, error: courseLookupError } = await supabase
     .from("courses")
     .select("id, course_id")
-    .in("course_id", completedCourseCodes)
+    .in("course_id", courseCodes)
 
   if (courseLookupError) {
     throw new Error(`[data-access:upsertUserCompletedCourses] ${courseLookupError.message}`)
@@ -118,15 +130,21 @@ export async function upsertUserCompletedCourses(
     byCode.set(row.course_id.trim().toUpperCase(), row.id)
   }
 
-  const unmatchedCourseCodes = completedCourseCodes.filter((code) => !byCode.has(code))
+  const unmatchedCourseCodes = courseCodes.filter((code) => !byCode.has(code))
 
-  const rows: UserCompletedCourseInsert[] = completedCourseCodes
-    .map((code) => byCode.get(code))
-    .filter((courseId): courseId is string => Boolean(courseId))
-    .map((courseId) => ({
-      user_id: userId,
-      course_id: courseId,
-    }))
+  const rows: UserCompletedCourseInsert[] = courseCodes
+    .map((code) => {
+      const courseId = byCode.get(code)
+      const course = courseMap.get(code)
+      if (!courseId || !course) return null
+
+      return {
+        user_id: userId,
+        course_id: courseId,
+        status: course.status,
+      }
+    })
+    .filter((row): row is UserCompletedCourseInsert => Boolean(row))
 
   if (rows.length === 0) {
     return { mappedCount: 0, unmatchedCourseCodes }
@@ -153,9 +171,10 @@ export async function getUserCompletedCourses(userId: string): Promise<UserCompl
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from("user_completed_courses")
-    .select("completed_at, course:courses(course_id, title, credit_hours)")
+    .select("status, course:courses(course_id, title, credit_hours)")
     .eq("user_id", userId)
-    .order("completed_at", { ascending: false })
+    .eq("status", "completed")
+    .order("course_id", { ascending: true })
 
   if (error) {
     throw new Error(`[data-access:getUserCompletedCourses] ${error.message}`)
@@ -171,7 +190,6 @@ export async function getUserCompletedCourses(userId: string): Promise<UserCompl
         code: course.course_id,
         title: course.title,
         creditHours: course.credit_hours,
-        completedAt: row.completed_at,
       }
     })
     .filter((row): row is UserCompletedCourseView => Boolean(row))

@@ -128,13 +128,13 @@ create table if not exists concentration_slots (
 
 -- ------------------------------------------------------------
 -- USER COMPLETED COURSES
--- Maps an application user to catalog courses they have completed.
+-- Maps an application user to catalog courses with their latest status.
 -- ------------------------------------------------------------
 create table if not exists user_completed_courses (
   id           uuid primary key default gen_random_uuid(),
   user_id      uuid not null references auth.users(id) on delete cascade,
   course_id    uuid not null references courses(id) on delete cascade,
-  completed_at timestamptz not null default now(),
+  status       text not null check (status in ('completed', 'in_progress')),
   unique (user_id, course_id)
 );
 

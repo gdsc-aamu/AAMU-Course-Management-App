@@ -12,7 +12,6 @@ interface CompletedCourseRow {
   code: string
   title: string
   creditHours: number
-  completedAt: string
 }
 
 export default function SettingsPage() {
