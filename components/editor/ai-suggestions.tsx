@@ -172,7 +172,7 @@ export function AISuggestions({ currentCourses = [] }: AISuggestionsProps) {
   }
 
   return (
-    <div className="flex h-full flex-col rounded-lg border bg-card">
+    <div className="relative z-10 flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-card">
       <div className="flex items-center gap-2 border-b p-3">
         <div className="flex-1">
           <h3 className="font-semibold text-sm">AI Course Assistant</h3>
@@ -196,7 +196,7 @@ export function AISuggestions({ currentCourses = [] }: AISuggestionsProps) {
         ))}
       </div>
 
-      <ScrollArea className="flex-1 p-3" ref={scrollRef}>
+      <ScrollArea className="min-h-0 flex-1 p-3" ref={scrollRef}>
         <div className="space-y-4">
           {messages.map((message) => (
             <div
