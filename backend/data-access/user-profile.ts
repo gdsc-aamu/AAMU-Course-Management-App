@@ -10,6 +10,7 @@ export interface UserAcademicProfileRow {
   user_id: string
   program_code: string | null
   bulletin_year: string | null
+    classification: string | null
   updated_at: string
 }
 
@@ -24,7 +25,7 @@ export async function getUserAcademicProfile(userId: string): Promise<UserAcadem
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from("user_academic_profiles")
-    .select("user_id, program_code, bulletin_year, updated_at")
+      .select("user_id, program_code, bulletin_year, classification, updated_at")
     .eq("user_id", userId)
     .maybeSingle()
 
@@ -39,6 +40,7 @@ export async function upsertUserAcademicProfile(params: {
   userId: string
   programCode?: string | null
   bulletinYear?: string | null
+    classification?: string | null
 }): Promise<UserAcademicProfileRow> {
   const supabase = getSupabaseClient()
 
@@ -46,13 +48,14 @@ export async function upsertUserAcademicProfile(params: {
     user_id: params.userId,
     program_code: params.programCode?.trim().toUpperCase() ?? null,
     bulletin_year: params.bulletinYear?.trim() ?? null,
+      classification: params.classification?.trim() ?? null,
     updated_at: new Date().toISOString(),
   }
 
   const { data, error } = await supabase
     .from("user_academic_profiles")
     .upsert(row, { onConflict: "user_id" })
-    .select("user_id, program_code, bulletin_year, updated_at")
+      .select("user_id, program_code, bulletin_year, classification, updated_at")
     .single()
 
   if (error || !data) {

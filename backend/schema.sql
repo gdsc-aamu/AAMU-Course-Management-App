@@ -149,6 +149,7 @@ create table if not exists user_academic_profiles (
   user_id       uuid primary key references auth.users(id) on delete cascade,
   program_code  text,
   bulletin_year text,
+  classification text,
   updated_at    timestamptz not null default now()
 );
 

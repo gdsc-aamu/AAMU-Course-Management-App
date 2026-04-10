@@ -50,12 +50,14 @@ export async function PUT(request: Request) {
     const payload = (await request.json()) as {
       programCode?: string | null
       bulletinYear?: string | null
+        classification?: string | null
     }
 
     const profile = await saveUserAcademicProfile({
       userId: auth.userId,
       programCode: payload.programCode ?? null,
       bulletinYear: payload.bulletinYear ?? null,
+        classification: payload.classification ?? null,
     })
 
     return NextResponse.json({ success: true, profile })

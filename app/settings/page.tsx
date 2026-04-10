@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sidebar } from "@/components/layout/sidebar"
-import { Search, Upload, CheckCircle2, AlertCircle } from "lucide-react"
+import { Search, Upload, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 const supabase = createClient()
@@ -14,6 +14,19 @@ interface CompletedCourseRow {
   creditHours: number
 }
 
+interface UserProfile {
+  fullName: string | null
+  classification: string | null
+  programCode: string | null
+  bulletinYear: string | null
+}
+
+interface ProgramOption {
+  code: string
+  name: string
+  catalogYear: number
+}
+
 export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -22,6 +35,156 @@ export default function SettingsPage() {
   const [courses, setCourses] = useState<CompletedCourseRow[]>([])
   const [isLoadingCourses, setIsLoadingCourses] = useState(true)
   const [coursesError, setCoursesError] = useState<string | null>(null)
+  
+  // Profile state
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [profileError, setProfileError] = useState<string | null>(null)
+  const [programs, setPrograms] = useState<ProgramOption[]>([])
+  const [isLoadingPrograms, setIsLoadingPrograms] = useState(true)
+  
+  // Edit modal state
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
+  const [editFormData, setEditFormData] = useState({ programCode: "", bulletinYear: "", classification: "" })
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [profileSaveError, setProfileSaveError] = useState<string | null>(null)
+  const [profileSaveSuccess, setProfileSaveSuccess] = useState<string | null>(null)
+
+  async function loadUserProfile() {
+    setProfileError(null)
+    setIsLoadingProfile(true)
+
+    try {
+      const { data, error } = await supabase.auth.getSession()
+      if (error || !data.session?.access_token) {
+        throw new Error("You need to be signed in to view your profile.")
+      }
+
+      // Get user's display name from auth
+      const { data: authData } = await supabase.auth.getUser()
+      const fullName = authData.user?.user_metadata?.full_name || authData.user?.email || "Student"
+
+      const response = await fetch("/api/user/academic-profile", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+      })
+
+      const payload = (await response.json()) as {
+        success: boolean
+        error?: string
+        profile?: UserProfile
+      }
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error ?? "Failed to fetch user profile.")
+      }
+
+      setProfile({
+        fullName,
+        ...(payload.profile ?? { classification: null, programCode: null, bulletinYear: null }),
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unexpected profile load error"
+      setProfileError(message)
+    } finally {
+      setIsLoadingProfile(false)
+    }
+  }
+
+  async function loadAvailablePrograms() {
+    setIsLoadingPrograms(true)
+
+    try {
+      const response = await fetch("/api/curriculum/programs")
+      const payload = (await response.json()) as {
+        success: boolean
+        programs?: ProgramOption[]
+        error?: string
+      }
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error ?? "Failed to fetch programs.")
+      }
+
+      setPrograms(payload.programs ?? [])
+    } catch (error) {
+      console.error("Failed to load programs:", error)
+    } finally {
+      setIsLoadingPrograms(false)
+    }
+  }
+
+  async function handleSaveProfile() {
+    setProfileSaveError(null)
+    setProfileSaveSuccess(null)
+    setIsSavingProfile(true)
+
+    try {
+      const { data, error } = await supabase.auth.getSession()
+      if (error || !data.session?.access_token) {
+        throw new Error("You need to be signed in to update your profile.")
+      }
+
+      const response = await fetch("/api/user/academic-profile", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          programCode: editFormData.programCode || null,
+          bulletinYear: editFormData.bulletinYear || null,
+          classification: editFormData.classification || null,
+          }),
+      })
+
+      const payload = (await response.json()) as {
+        success: boolean
+        error?: string
+        profile?: UserProfile
+      }
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error ?? "Failed to save profile.")
+      }
+
+        if (payload.profile) {
+          setProfile({
+            fullName: profile?.fullName ?? null,
+            classification: payload.profile.classification ?? null,
+            programCode: payload.profile.programCode ?? null,
+            bulletinYear: payload.profile.bulletinYear ?? null,
+          })
+        }
+      setProfileSaveSuccess("Profile updated successfully!")
+      setIsEditingProfile(false)
+      setTimeout(() => setProfileSaveSuccess(null), 3000)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unexpected save error"
+      setProfileSaveError(message)
+    } finally {
+      setIsSavingProfile(false)
+    }
+  }
+
+  function handleEditClick() {
+    setEditFormData({
+      programCode: profile?.programCode || "",
+      bulletinYear: profile?.bulletinYear || "",
+       classification: profile?.classification || "",
+    })
+    setProfileSaveError(null)
+    setProfileSaveSuccess(null)
+    setIsEditingProfile(true)
+  }
+
+  function handleCancelEdit() {
+    setIsEditingProfile(false)
+    setProfileSaveError(null)
+    setProfileSaveSuccess(null)
+  }
 
   async function loadCompletedCourses() {
     setCoursesError(null)
@@ -60,6 +223,8 @@ export default function SettingsPage() {
   }
 
   useEffect(() => {
+    void loadUserProfile()
+    void loadAvailablePrograms()
     void loadCompletedCourses()
   }, [])
 
@@ -122,6 +287,21 @@ export default function SettingsPage() {
     fileInputRef.current?.click()
   }
 
+  const topProfileName = profile?.fullName?.trim() || "Student"
+  const topProfileMajor =
+    programs.find((p) => p.code === profile?.programCode)?.name || profile?.programCode || "Major not set"
+  const topProfileClassification =
+    profile?.classification && profile.classification.trim().length > 0
+      ? profile.classification.trim().toUpperCase()
+      : "UNCLASSIFIED"
+  const topProfileMeta = `${topProfileClassification} • ${topProfileMajor}`
+  const topProfileInitials = topProfileName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "ST"
+
   return (
     <div className="flex min-h-screen bg-[#fafafa]">
       <Sidebar />
@@ -136,13 +316,13 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right hidden md:block">
-                <div className="text-sm font-bold text-foreground">John Bulldog</div>
+                <div className="text-sm font-bold text-foreground">{topProfileName}</div>
                 <div className="text-[10px] font-semibold text-muted-foreground tracking-wider">
-                  JUNIOR • CS MAJOR
+                  {topProfileMeta}
                 </div>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#78103A] text-sm font-bold text-white shadow-sm">
-                JD
+                {topProfileInitials}
               </div>
             </div>
           </div>
@@ -162,31 +342,168 @@ export default function SettingsPage() {
             <Card className="shadow-sm border-gray-100">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-bold text-gray-900">Personal Information</h2>
-                  <button className="text-sm font-bold text-[#78103A] hover:underline cursor-pointer">
+                  <h2 className="text-lg font-bold text-gray-900">Academic Profile</h2>
+                  <button
+                    onClick={handleEditClick}
+                    disabled={isLoadingProfile}
+                    className="text-sm font-bold text-[#78103A] hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Edit Profile
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-                  <div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</div>
-                    <div className="text-base font-medium text-gray-900">Johnathan D. Bulldog</div>
+
+                {isLoadingProfile ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-5 w-5 animate-spin text-[#78103A]" />
+                    <span className="ml-2 text-sm text-gray-500">Loading profile...</span>
                   </div>
-                  <div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Student ID</div>
-                    <div className="text-base font-medium text-gray-900">A00123456</div>
+                ) : profileError ? (
+                  <div className="rounded-md bg-red-50 p-4">
+                    <p className="text-sm font-medium text-red-700">{profileError}</p>
                   </div>
-                  <div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Primary Major</div>
-                    <div className="text-base font-medium text-gray-900">Computer Science</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+                    <div>
+                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</div>
+                        <div className="text-base font-medium text-gray-900">
+                          {profile?.fullName || "Not set"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Classification</div>
+                        <div className="text-base font-medium text-gray-900">
+                          {profile?.classification || "Not set"}
+                        </div>
+                      </div>
+                      <div>
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Primary Major</div>
+                      <div className="text-base font-medium text-gray-900">
+                        {programs.find((p) => p.code === profile?.programCode)?.name || profile?.programCode || "Not set"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Catalog Year</div>
+                      <div className="text-base font-medium text-gray-900">
+                        {profile?.bulletinYear || "Not set"}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Classification</div>
-                    <div className="text-base font-medium text-gray-900">Junior (64+ Credits)</div>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
+
+            {/* Edit Profile Modal */}
+            {isEditingProfile && (
+              <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+                <Card className="w-full max-w-md shadow-lg">
+                  <CardContent className="p-6">
+                    <h2 className="text-lg font-bold text-gray-900 mb-6">Edit Academic Profile</h2>
+
+                    {profileSaveError && (
+                      <div className="mb-4 rounded-md bg-red-50 p-4">
+                        <p className="text-sm font-medium text-red-700">{profileSaveError}</p>
+                      </div>
+                    )}
+
+                    {profileSaveSuccess && (
+                      <div className="mb-4 rounded-md bg-emerald-50 p-4">
+                        <p className="text-sm font-medium text-emerald-700">{profileSaveSuccess}</p>
+                      </div>
+                    )}
+
+                    <div className="space-y-4">
+                      {/* Program Selector */}
+                      <div>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                          Primary Major
+                        </label>
+                        <select
+                          value={editFormData.programCode}
+                          onChange={(e) => setEditFormData({ ...editFormData, programCode: e.target.value })}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
+                        >
+                          <option value="">Select a major...</option>
+                          {isLoadingPrograms ? (
+                            <option disabled>Loading programs...</option>
+                          ) : (
+                            programs.map((prog) => (
+                              <option key={`${prog.code}-${prog.catalogYear}`} value={prog.code}>
+                                {prog.name} ({prog.code})
+                              </option>
+                            ))
+                          )}
+                        </select>
+                      </div>
+
+                      {/* Bulletin Year Selector */}
+                      <div>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                          Catalog Year
+                        </label>
+                        <select
+                          value={editFormData.bulletinYear}
+                          onChange={(e) => setEditFormData({ ...editFormData, bulletinYear: e.target.value })}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
+                        >
+                          <option value="">Select a catalog year...</option>
+                          {programs
+                            .filter((p) => !editFormData.programCode || p.code === editFormData.programCode)
+                            .reduce((acc, p) => {
+                              if (!acc.includes(String(p.catalogYear))) {
+                                acc.push(String(p.catalogYear))
+                              }
+                              return acc
+                            }, [] as string[])
+                            .map((year) => (
+                              <option key={year} value={year}>
+                                {year}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                      
+                        {/* Classification Selector */}
+                        <div>
+                          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                            Classification
+                          </label>
+                          <select
+                            value={editFormData.classification}
+                            onChange={(e) => setEditFormData({ ...editFormData, classification: e.target.value })}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
+                          >
+                            <option value="">Select classification...</option>
+                            <option value="freshman">Freshman</option>
+                            <option value="sophomore">Sophomore</option>
+                            <option value="junior">Junior</option>
+                            <option value="senior">Senior</option>
+                          </select>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex gap-3">
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        disabled={isSavingProfile}
+                        className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveProfile}
+                        disabled={isSavingProfile}
+                        className="flex-1 rounded-md bg-[#78103A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#600d2e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {isSavingProfile && <Loader2 className="h-4 w-4 animate-spin" />}
+                        Save Changes
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* Degree Works Integration Card */}
             <Card className="shadow-sm border-gray-100">
