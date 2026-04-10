@@ -16,14 +16,85 @@ import {
   fetchCoursePrerequisitesByCode,
   formatPrerequisiteForLLM,
   formatCurriculumForLLM,
+  recommendNextCoursesForUser,
   resolveCatalogYearFromQuestion,
   resolveProgramCodeFromQuestion,
 } from "@/backend/services/curriculum/service"
+import {
+  fetchUserCompletedCourses,
+  fetchUserInProgressCourses,
+} from "@/backend/services/pdf-parsing/service"
+import { fetchUserAcademicProfile } from "@/backend/services/user-profile/service"
 
 function asksPrerequisiteQuestion(question: string): boolean {
   return /(prereq|pre-?req|pre requisite|pre-requisite|prerequisite|prerequisites|need before|required before|eligib(le|ility) for)/i.test(
     question
   )
+}
+
+function asksNextCoursesQuestion(question: string): boolean {
+  return /(what\s+should\s+i\s+take\s+next|next\s+courses?|courses?\s+i\s+need\s+next|what\s+courses?\s+can\s+i\s+take\s+next|what\s+courses?\s+can\s+i\s+take\??)/i.test(
+    question
+  )
+}
+
+function asksCompletedCoursesQuestion(question: string): boolean {
+  return /(what\s+courses?\s+have\s+i\s+completed|what\s+have\s+i\s+completed|completed\s+courses?|courses?\s+completed\s+thus\s+far)/i.test(
+    question
+  )
+}
+
+function buildNextCoursesContext(rec: {
+  programCode: string
+  catalogYear: number | null
+  completedCount: number
+  inProgressCount: number
+  eligibleNow: Array<{ courseId: string; title: string; creditHours: number; semesterLabel: string }>
+  blocked: Array<{ courseId: string; title: string; missingPrerequisiteGroups: string[]; semesterLabel: string }>
+  alreadyInProgress: Array<{ courseId: string; title: string; semesterLabel: string }>
+}): string {
+  const eligibleLines = rec.eligibleNow.length
+    ? rec.eligibleNow
+        .slice(0, 8)
+        .map(
+          (course) =>
+            `- ${course.courseId}: ${course.title} (${course.creditHours} cr) [${course.semesterLabel}]`
+        )
+        .join("\n")
+    : "- None"
+
+  const blockedLines = rec.blocked.length
+    ? rec.blocked
+        .slice(0, 6)
+        .map(
+          (course) =>
+            `- ${course.courseId}: ${course.title} [${course.semesterLabel}] — missing: ${course.missingPrerequisiteGroups.join(
+              "; "
+            )}`
+        )
+        .join("\n")
+    : "- None"
+
+  const inProgressLines = rec.alreadyInProgress.length
+    ? rec.alreadyInProgress
+        .slice(0, 6)
+        .map((course) => `- ${course.courseId}: ${course.title} [${course.semesterLabel}]`)
+        .join("\n")
+    : "- None"
+
+  return `Program: ${rec.programCode}
+Catalog Year: ${rec.catalogYear ?? "latest"}
+Completed Courses Count: ${rec.completedCount}
+In Progress Courses Count: ${rec.inProgressCount}
+
+Eligible To Take Next:
+${eligibleLines}
+
+Already In Progress:
+${inProgressLines}
+
+Blocked (Missing Prerequisites):
+${blockedLines}`
 }
 
 function extractCourseCodeFromQuestion(question: string): string | null {
@@ -39,14 +110,120 @@ function extractCourseCodeFromQuestion(question: string): string | null {
  */
 async function handleDbOnly(payload: ChatQueryRequest): Promise<Record<string, unknown>> {
   const question = payload.question.trim()
-  const catalogYear = resolveCatalogYearFromQuestion(question, payload.session?.bulletinYear)
+  const userProfile = payload.studentId
+    ? await fetchUserAcademicProfile(payload.studentId).catch(() => null)
+    : null
+
+  const fallbackBulletinYear = payload.session?.bulletinYear ?? userProfile?.bulletinYear ?? null
+  const catalogYear = resolveCatalogYearFromQuestion(question, fallbackBulletinYear)
   const programCode = await resolveProgramCodeFromQuestion(
     question,
-    payload.session?.programCode,
+    payload.session?.programCode ?? userProfile?.programCode ?? null,
     catalogYear
   )
   const normalizedQuestion = question.toLowerCase()
   const isPrereqQuery = asksPrerequisiteQuestion(question)
+  const isNextCoursesQuery = asksNextCoursesQuestion(question)
+  const isCompletedCoursesQuery = asksCompletedCoursesQuestion(question)
+
+  if (isCompletedCoursesQuery) {
+    if (!payload.studentId) {
+      const answer = await generateDbResponse(
+        question,
+        "Request type: Completed courses\nStatus: Missing studentId for user-specific records"
+      )
+      return {
+        mode: "DB_ONLY",
+        answer,
+        data: null,
+      }
+    }
+
+    const [completed, inProgress] = await Promise.all([
+      fetchUserCompletedCourses(payload.studentId),
+      fetchUserInProgressCourses(payload.studentId),
+    ])
+
+    const completedLines = completed.length
+      ? completed.map((course) => `- ${course.code}: ${course.title} (${course.creditHours} cr)`).join("\n")
+      : "- None"
+
+    const inProgressLines = inProgress.length
+      ? inProgress.map((course) => `- ${course.code}: ${course.title} (${course.creditHours} cr)`).join("\n")
+      : "- None"
+
+    const context = `Request type: Completed courses
+Completed courses (${completed.length}):
+${completedLines}
+
+In-progress courses (${inProgress.length}):
+${inProgressLines}`
+
+    const answer = await generateDbResponse(question, context)
+
+    return {
+      mode: "DB_ONLY",
+      answer,
+      data: {
+        completed,
+        inProgress,
+      },
+    }
+  }
+
+  if (isNextCoursesQuery) {
+    if (!payload.studentId) {
+      const answer = await generateDbResponse(
+        question,
+        "Request type: Next courses recommendation\nStatus: Missing studentId for user-specific planning context"
+      )
+      return {
+        mode: "DB_ONLY",
+        answer,
+        data: null,
+      }
+    }
+
+    if (!programCode) {
+      const answer = await generateDbResponse(
+        question,
+        "Request type: Next courses recommendation\nStatus: Missing or unresolved program code"
+      )
+      return {
+        mode: "DB_ONLY",
+        answer,
+        data: null,
+      }
+    }
+
+    const recommendation = await recommendNextCoursesForUser({
+      userId: payload.studentId,
+      programCode,
+      bulletinYear: fallbackBulletinYear,
+      maxRecommendations: 12,
+    })
+
+    if (!recommendation) {
+      const answer = await generateDbResponse(
+        question,
+        `Program Code: ${programCode}\nCatalog Year: ${catalogYear ?? "latest"}\nStatus: No recommendation data available`
+      )
+      return {
+        mode: "DB_ONLY",
+        answer,
+        data: null,
+      }
+    }
+
+    const planningContext = buildNextCoursesContext(recommendation)
+    const answer = await generateDbResponse(question, planningContext)
+
+    return {
+      mode: "DB_ONLY",
+      answer,
+      data: recommendation,
+    }
+  }
 
   if (isPrereqQuery) {
     const normalizedCourseCode = extractCourseCodeFromQuestion(question)
@@ -183,11 +360,14 @@ async function handleRagOnly(payload: ChatQueryRequest): Promise<Record<string, 
  * Handle HYBRID queries — both curriculum and bulletin
  */
 async function handleHybrid(payload: ChatQueryRequest): Promise<Record<string, unknown>> {
-  const bulletinYear = payload.session?.bulletinYear ?? "2025-2026"
+  const userProfile = payload.studentId
+    ? await fetchUserAcademicProfile(payload.studentId).catch(() => null)
+    : null
+  const bulletinYear = payload.session?.bulletinYear ?? userProfile?.bulletinYear ?? "2025-2026"
   const catalogYear = resolveCatalogYearFromQuestion(payload.question, bulletinYear)
   const programCode = await resolveProgramCodeFromQuestion(
     payload.question,
-    payload.session?.programCode ?? null,
+    payload.session?.programCode ?? userProfile?.programCode ?? null,
     catalogYear
   )
 

@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { mockCourses } from "@/lib/data"
+import { createClient } from "@/lib/supabase/client"
 import type { Message } from "@/lib/types"
 import type { ChatQueryRequest, RoutedResponse } from "@/shared/contracts"
 import { cn } from "@/lib/utils"
+
+const supabase = createClient()
 
 interface AISuggestionsProps {
   currentCourses?: string[]
@@ -32,6 +35,7 @@ const GRADUATION_REQUIREMENTS = {
 // Quick action prompts
 const QUICK_ACTIONS = [
   "What courses can I take?",
+  "What should I take next?",
   "Will I graduate on time?",
   "Check my requirements",
 ]
@@ -101,8 +105,22 @@ export function AISuggestions({ currentCourses = [] }: AISuggestionsProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+  const [studentId, setStudentId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const messageCounterRef = useRef(1)
+
+  useEffect(() => {
+    let isActive = true
+    ;(async () => {
+      const { data } = await supabase.auth.getSession()
+      if (!isActive) return
+      setStudentId(data.session?.user.id ?? null)
+    })()
+
+    return () => {
+      isActive = false
+    }
+  }, [])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -128,11 +146,15 @@ export function AISuggestions({ currentCourses = [] }: AISuggestionsProps) {
     setIsTyping(true)
 
     try {
+      const { data } = await supabase.auth.getSession()
+      const liveStudentId = data.session?.user.id ?? studentId ?? null
+
       const payload: ChatQueryRequest = {
         question: content,
+        studentId: liveStudentId ?? undefined,
         session: {
-          programCode: "BSCS-BS",
-          bulletinYear: "2025-2026",
+          programCode: undefined,
+          bulletinYear: undefined,
         },
       }
 

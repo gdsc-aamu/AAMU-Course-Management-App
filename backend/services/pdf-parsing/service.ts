@@ -11,6 +11,7 @@ import { readFile } from "node:fs/promises"
 import { basename } from "node:path"
 import type { DegreeWorksResult } from "@/shared/contracts"
 import {
+  getUserCourseStatuses,
   getUserCompletedCourses,
   upsertUserCompletedCourses,
   type UserCompletedCourseView,
@@ -178,4 +179,22 @@ export async function fetchUserCompletedCourses(userId: string): Promise<UserCom
   }
 
   return getUserCompletedCourses(userId)
+}
+
+/**
+ * Fetch in-progress courses mapped to a specific user.
+ */
+export async function fetchUserInProgressCourses(userId: string): Promise<UserCompletedCourseView[]> {
+  if (!userId.trim()) {
+    throw new Error("[pdf-parsing:fetchUserInProgressCourses] userId is required")
+  }
+
+  const all = await getUserCourseStatuses(userId)
+  return all
+    .filter((course) => course.status === "in_progress")
+    .map((course) => ({
+      code: course.code,
+      title: course.title,
+      creditHours: course.creditHours,
+    }))
 }

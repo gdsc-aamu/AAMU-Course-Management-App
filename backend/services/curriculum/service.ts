@@ -8,7 +8,11 @@
  */
 
 import type {
+  BlockedNextCourseOption,
   CurriculumContext,
+  EligibleNextCourseOption,
+  NextCoursesRecommendation,
+  NextCourseOption,
   ProgramOverview,
   PrerequisiteResult,
 } from "@/shared/contracts"
@@ -19,6 +23,7 @@ import {
   getCoursePrerequisites,
   listPrograms,
 } from "@/backend/data-access/curriculum"
+import { getUserCourseStatuses } from "@/backend/data-access/pdf-parsing"
 
 const SEMESTER_LABELS: Record<number, string> = {
   1: "Freshman Fall",
@@ -49,6 +54,176 @@ export function resolveCatalogYearFromQuestion(
   }
 
   return parseCatalogYear(fallbackBulletinYear)
+}
+
+interface SlotCourseSummary {
+  courseId: string
+  title: string
+  creditHours: number
+  semesterNumber: number
+  semesterLabel: string
+  slotOrder: number
+}
+
+function toSlotCourseSummary(slot: {
+  semester_number: number
+  slot_order: number
+  courses: { course_id: string; title: string; credit_hours: number } | { course_id: string; title: string; credit_hours: number }[] | null
+}): SlotCourseSummary | null {
+  const relation = Array.isArray(slot.courses) ? slot.courses[0] : slot.courses
+  if (!relation) return null
+
+  const semesterNumber = slot.semester_number
+  return {
+    courseId: relation.course_id,
+    title: relation.title,
+    creditHours: relation.credit_hours,
+    semesterNumber,
+    semesterLabel: SEMESTER_LABELS[semesterNumber] ?? `Semester ${semesterNumber}`,
+    slotOrder: slot.slot_order,
+  }
+}
+
+function buildMissingGroups(
+  prereq: PrerequisiteResult | null,
+  completedCourseCodes: Set<string>
+): string[] {
+  if (!prereq || prereq.groups.length === 0) {
+    return []
+  }
+
+  const missing: string[] = []
+  for (const group of prereq.groups) {
+    const satisfied = group.options.some((option) =>
+      completedCourseCodes.has(option.courseId.trim().toUpperCase())
+    )
+
+    if (!satisfied) {
+      missing.push(group.options.map((option) => option.courseId).join(" OR "))
+    }
+  }
+
+  return missing
+}
+
+/**
+ * Recommend next courses for a user based on completed/in-progress mappings
+ * and prerequisite satisfaction in a target program year.
+ */
+export async function recommendNextCoursesForUser(params: {
+  userId: string
+  programCode: string
+  bulletinYear?: string | null
+  maxRecommendations?: number
+}): Promise<NextCoursesRecommendation | null> {
+  const userId = params.userId.trim()
+  const programCode = params.programCode.trim().toUpperCase()
+  if (!userId || !programCode) return null
+
+  const catalogYear = parseCatalogYear(params.bulletinYear)
+  const program = await getProgram(programCode, catalogYear)
+  if (!program) return null
+
+  const [slots, userCourses] = await Promise.all([
+    getCurriculumSlots(program.id),
+    getUserCourseStatuses(userId),
+  ])
+
+  if (slots.length === 0) return null
+
+  const completedCourseCodes = new Set(
+    userCourses
+      .filter((course) => course.status === "completed")
+      .map((course) => course.code.trim().toUpperCase())
+  )
+
+  const inProgressCourseCodes = new Set(
+    userCourses
+      .filter((course) => course.status === "in_progress")
+      .map((course) => course.code.trim().toUpperCase())
+  )
+
+  const targetSlots = slots
+    .filter((slot) => !slot.is_elective_slot)
+    .map(toSlotCourseSummary)
+    .filter((course): course is SlotCourseSummary => Boolean(course))
+
+  const uniqueTargetCourseIds = Array.from(new Set(targetSlots.map((slot) => slot.courseId)))
+  const prereqResults = await Promise.all(
+    uniqueTargetCourseIds.map(async (courseId) => ({
+      courseId,
+      prereq: await fetchCoursePrerequisitesByCode(courseId),
+    }))
+  )
+
+  const prereqByCourse = new Map(prereqResults.map((result) => [result.courseId, result.prereq]))
+
+  const eligibleNow: (EligibleNextCourseOption & { slotOrder: number })[] = []
+  const blocked: (BlockedNextCourseOption & { slotOrder: number })[] = []
+  const alreadyInProgress: (NextCourseOption & { slotOrder: number })[] = []
+  const seen = new Set<string>()
+
+  for (const slot of targetSlots) {
+    const normalizedCourseId = slot.courseId.trim().toUpperCase()
+    if (seen.has(normalizedCourseId)) continue
+    seen.add(normalizedCourseId)
+
+    if (completedCourseCodes.has(normalizedCourseId)) {
+      continue
+    }
+
+    const base: NextCourseOption & { slotOrder: number } = {
+      courseId: slot.courseId,
+      title: slot.title,
+      creditHours: slot.creditHours,
+      semesterNumber: slot.semesterNumber,
+      semesterLabel: slot.semesterLabel,
+      slotOrder: slot.slotOrder,
+    }
+
+    if (inProgressCourseCodes.has(normalizedCourseId)) {
+      alreadyInProgress.push(base)
+      continue
+    }
+
+    const missingGroups = buildMissingGroups(prereqByCourse.get(slot.courseId) ?? null, completedCourseCodes)
+    if (missingGroups.length === 0) {
+      eligibleNow.push({
+        ...base,
+        reason: "All listed prerequisites are satisfied based on completed courses.",
+      })
+      continue
+    }
+
+    blocked.push({
+      ...base,
+      missingPrerequisiteGroups: missingGroups,
+    })
+  }
+
+  const sorter = <T extends { semesterNumber: number; slotOrder: number }>(a: T, b: T) => {
+    if (a.semesterNumber !== b.semesterNumber) {
+      return a.semesterNumber - b.semesterNumber
+    }
+    return a.slotOrder - b.slotOrder
+  }
+
+  const maxRecommendations = Math.max(1, params.maxRecommendations ?? 12)
+  eligibleNow.sort(sorter)
+  blocked.sort(sorter)
+  alreadyInProgress.sort(sorter)
+
+  return {
+    programCode: program.code,
+    catalogYear: program.catalog_year ?? null,
+    completedCount: completedCourseCodes.size,
+    inProgressCount: inProgressCourseCodes.size,
+    eligibleNow: eligibleNow.slice(0, maxRecommendations).map(({ slotOrder: _slotOrder, ...course }) => course),
+    blocked: blocked.slice(0, maxRecommendations).map(({ slotOrder: _slotOrder, ...course }) => course),
+    alreadyInProgress: alreadyInProgress
+      .slice(0, maxRecommendations)
+      .map(({ slotOrder: _slotOrder, ...course }) => course),
+  }
 }
 
 /**

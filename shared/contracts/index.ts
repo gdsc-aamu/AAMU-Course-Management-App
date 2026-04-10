@@ -82,6 +82,32 @@ export interface SearchOptions {
   matchCount?: number;
 }
 
+export interface NextCourseOption {
+  courseId: string;
+  title: string;
+  creditHours: number;
+  semesterNumber: number;
+  semesterLabel: string;
+}
+
+export interface EligibleNextCourseOption extends NextCourseOption {
+  reason: string;
+}
+
+export interface BlockedNextCourseOption extends NextCourseOption {
+  missingPrerequisiteGroups: string[];
+}
+
+export interface NextCoursesRecommendation {
+  programCode: string;
+  catalogYear: number | null;
+  completedCount: number;
+  inProgressCount: number;
+  eligibleNow: EligibleNextCourseOption[];
+  blocked: BlockedNextCourseOption[];
+  alreadyInProgress: NextCourseOption[];
+}
+
 // ============================================================================
 // RAG / Bulletin Search
 // ============================================================================

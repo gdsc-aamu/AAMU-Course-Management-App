@@ -49,6 +49,13 @@ export interface UserCompletedCourseView {
   creditHours: number
 }
 
+export interface UserCourseStatusView {
+  code: string
+  title: string
+  creditHours: number
+  status: "completed" | "in_progress"
+}
+
 function getSupabaseClient() {
   const url = process.env.SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_KEY
@@ -193,4 +200,35 @@ export async function getUserCompletedCourses(userId: string): Promise<UserCompl
       }
     })
     .filter((row): row is UserCompletedCourseView => Boolean(row))
+}
+
+/**
+ * Get all mapped courses for a user, including status.
+ */
+export async function getUserCourseStatuses(userId: string): Promise<UserCourseStatusView[]> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from("user_completed_courses")
+    .select("status, course:courses(course_id, title, credit_hours)")
+    .eq("user_id", userId)
+    .order("course_id", { ascending: true })
+
+  if (error) {
+    throw new Error(`[data-access:getUserCourseStatuses] ${error.message}`)
+  }
+
+  const rows = (data ?? []) as UserCompletedCourseRow[]
+  return rows
+    .map((row) => {
+      const course = Array.isArray(row.course) ? row.course[0] : row.course
+      if (!course) return null
+
+      return {
+        code: course.course_id,
+        title: course.title,
+        creditHours: course.credit_hours,
+        status: row.status,
+      }
+    })
+    .filter((row): row is UserCourseStatusView => Boolean(row))
 }

@@ -141,6 +141,18 @@ create table if not exists user_completed_courses (
 );
 
 
+-- ------------------------------------------------------------
+-- USER ACADEMIC PROFILES
+-- Stores user's major/program code and preferred bulletin year context.
+-- ------------------------------------------------------------
+create table if not exists user_academic_profiles (
+  user_id       uuid primary key references auth.users(id) on delete cascade,
+  program_code  text,
+  bulletin_year text,
+  updated_at    timestamptz not null default now()
+);
+
+
 -- ============================================================
 -- INDEXES
 -- ============================================================
@@ -164,3 +176,6 @@ create index if not exists idx_user_completed_courses_user
 
 create index if not exists idx_user_completed_courses_course
   on user_completed_courses (course_id);
+
+create index if not exists idx_user_academic_profiles_program
+  on user_academic_profiles (program_code);
