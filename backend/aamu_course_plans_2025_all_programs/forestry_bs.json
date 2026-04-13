@@ -1,0 +1,778 @@
+{
+  "program_metadata": {
+    "program_name": "Forestry",
+    "degree_type": "Bachelor of Science",
+    "degree_abbreviation": "BS",
+    "department": "Department of Natural Resources and Environmental Sciences",
+    "department_code": "NRE",
+    "college": "College of Agricultural, Life and Natural Sciences",
+    "college_abbreviation": "CALNS",
+    "total_credit_hours": 136,
+    "accreditation": "SAF (Society of American Foresters)",
+    "four_plus_one_available": false,
+    "four_plus_one_note": null,
+    "admission_requirements": [
+      "Meet all University admission requirements"
+    ],
+    "graduation_requirements": [
+      "Complete University General Education Curriculum requirements",
+      "Complete Department and Major Curriculum requirements",
+      "Complete minimum 136 credit hours",
+      "Grade of C or better required where noted",
+      "MinGrade of C required for NRE course prerequisites",
+      "Must earn at least 25% of credit hours at AAMU",
+      "Must earn at least 50% of major coursework at AAMU"
+    ],
+    "capstone_courses": [
+      "NRE 497"
+    ],
+    "capstone_rule": "[CS] = capstone course and cannot be substituted.",
+    "mutually_exclusive_courses": [],
+    "overlap_counting_rule": null,
+    "gen_ed_area_ii_exception": null,
+    "gen_ed_area_iv_exception": null,
+    "program_code": "FOR-BS"
+  },
+  "baseline_curriculum": [
+    {
+      "course_id": "ORI 101",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 101",
+      "course_title": "Composition I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MTH 113",
+      "course_title": "Pre-Calculus Trigonometry",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 101",
+      "course_title": "General Chemistry I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 101L",
+      "course_title": "General Chemistry I Lab",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 281",
+      "course_title": "Intro to Forestry",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 101",
+      "course_title": "Intro to Plant Science",
+      "credit_hours": 4,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "ORI 102",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 102",
+      "course_title": "Composition II",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CHE 102",
+      "course_title": "General Chemistry II",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 102L",
+      "course_title": "General Chemistry II Lab",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "BIO 103",
+      "course_title": "Principles of Biology I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "BIO 103L",
+      "course_title": "Principles of Biology I Lab",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Fine Arts \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "HIS Sequence \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Literature \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Soc/Beh Sci \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area IV",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "BIO 104",
+      "course_title": "Principles of Biology II",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "BIO 104L",
+      "course_title": "Principles of Biology II Lab",
+      "credit_hours": 1,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 251",
+      "course_title": "Intro to Soil Science",
+      "credit_hours": 4,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 282",
+      "course_title": "Dendrology",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "HIS Sequence \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 205",
+      "course_title": "General Speech",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "PHL 201",
+      "course_title": "Intro to Philosophy",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "HED 101",
+      "course_title": "Personal and Community Health",
+      "credit_hours": 2,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 199",
+      "course_title": "Technology in Ag & Bio Sciences",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Soc/Beh Sci \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area IV",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 365",
+      "course_title": "Intro to GIS",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 379",
+      "course_title": "Forest Ecology",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 382",
+      "course_title": "Forestry Field Techniques I",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 430",
+      "course_title": "Biostatistics",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": "Although concentrations are a minimum 21 hours, some may require additional hours."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 371",
+      "course_title": "Forest Mensuration",
+      "credit_hours": 4,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 375",
+      "course_title": "Silviculture",
+      "credit_hours": 4,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 383",
+      "course_title": "Forestry Field Techniques II",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 387",
+      "course_title": "Wildlife-Forestry Relationships",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 474",
+      "course_title": "Forest Ecological Management",
+      "credit_hours": 2,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 483",
+      "course_title": "Forest Resource Economics",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Free Elective",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "Any course except transitional courses",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 376",
+      "course_title": "Forest Pest Management",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 480",
+      "course_title": "Natural Resource Policy",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 491",
+      "course_title": "Seminar & Scientific Writing",
+      "credit_hours": 1,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 497",
+      "course_title": "Forest Ecological Mgt Project",
+      "credit_hours": 4,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "[CS] capstone course, cannot be substituted."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    }
+  ],
+  "concentrations_and_minors": [
+    {
+      "name": "Forest Management",
+      "code": "FMG",
+      "type": "concentration",
+      "applicable_to": [
+        "Forestry majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 21,
+      "required_courses": [
+        {
+          "course_id": "NRE 310",
+          "course_title": "General Ecology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 384",
+          "course_title": "Forest Inventory",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 385",
+          "course_title": "Forest Operations",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 460",
+          "course_title": "Advanced GIS and Remote Sensing",
+          "credit_hours": 4,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 475",
+          "course_title": "Advanced Silviculture",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 484",
+          "course_title": "Forest Finance & Valuation",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "Choose 1 elective",
+          "credit_hours": 3,
+          "eligible_courses": [
+            "NRE 320",
+            "NRE 340",
+            "NRE 350",
+            "NRE 370",
+            "NRE 420"
+          ]
+        }
+      ],
+      "special_rules": null
+    },
+    {
+      "name": "Forest Science",
+      "code": "FSC",
+      "type": "concentration",
+      "applicable_to": [
+        "Forestry majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 21,
+      "required_courses": [
+        {
+          "course_id": "NRE 310",
+          "course_title": "General Ecology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 320",
+          "course_title": "Aquatic Ecology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 420",
+          "course_title": "Ecosystems Ecology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 460",
+          "course_title": "Advanced GIS and Remote Sensing",
+          "credit_hours": 4,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 475",
+          "course_title": "Advanced Silviculture",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "Choose 2 electives",
+          "credit_hours": 6,
+          "eligible_courses": [
+            "NRE 340",
+            "NRE 350",
+            "NRE 370",
+            "NRE 384",
+            "NRE 385",
+            "NRE 484"
+          ]
+        }
+      ],
+      "special_rules": null
+    },
+    {
+      "name": "Forestry Business",
+      "code": "FBU",
+      "type": "concentration",
+      "applicable_to": [
+        "Forestry majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 21,
+      "required_courses": [
+        {
+          "course_id": "ACC 203",
+          "course_title": "Financial Accounting Principles",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "ECO 230",
+          "course_title": "Principles of Microeconomics",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "FIN 315",
+          "course_title": "Principles of Finance",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "MGT 315",
+          "course_title": "Principles of Management",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "MKT 315",
+          "course_title": "Principles of Marketing",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 484",
+          "course_title": "Forest Finance & Valuation",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "Choose 1 elective",
+          "credit_hours": 3,
+          "eligible_courses": [
+            "ACC 204",
+            "ECO 231",
+            "MGT 207"
+          ]
+        }
+      ],
+      "special_rules": null
+    }
+  ]
+}

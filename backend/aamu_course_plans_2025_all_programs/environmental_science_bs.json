@@ -1,0 +1,645 @@
+{
+  "program_metadata": {
+    "program_name": "Environmental Science",
+    "degree_type": "Bachelor of Science",
+    "degree_abbreviation": "BS",
+    "department": "Department of Natural Resources and Environmental Sciences",
+    "department_code": "NRE",
+    "college": "College of Agricultural, Life and Natural Sciences",
+    "college_abbreviation": "CALNS",
+    "total_credit_hours": 121,
+    "accreditation": null,
+    "four_plus_one_available": false,
+    "four_plus_one_note": null,
+    "admission_requirements": [
+      "Meet all University admission requirements"
+    ],
+    "graduation_requirements": [
+      "Complete University General Education Curriculum requirements",
+      "Complete Department and Major Curriculum requirements",
+      "Complete minimum 121 credit hours",
+      "Grade of C or better required where noted",
+      "MinGrade of C required for NRE course prerequisites",
+      "Must earn at least 25% of credit hours at AAMU",
+      "Must earn at least 50% of major coursework at AAMU"
+    ],
+    "capstone_courses": [
+      "NRE 470"
+    ],
+    "capstone_rule": "[CS] = capstone course and cannot be substituted.",
+    "mutually_exclusive_courses": [],
+    "overlap_counting_rule": null,
+    "gen_ed_area_ii_exception": null,
+    "gen_ed_area_iv_exception": null,
+    "program_code": "ENV-BS"
+  },
+  "baseline_curriculum": [
+    {
+      "course_id": "ORI 101",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 101",
+      "course_title": "Composition I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 103",
+      "course_title": "Princ of Biology",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "BIO 103L",
+      "course_title": "Princ of Biology Lab",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 101",
+      "course_title": "Intro to Plant Science",
+      "credit_hours": 4,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "FAS 101, HED 101, NHM 104",
+      "credit_hours": 2,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": true,
+      "eligible_courses": "FAS 101, HED 101, NHM 104",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ORI 102",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 102",
+      "course_title": "Composition II",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MTH 113",
+      "course_title": "Pre-Calculus Trigonometry",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CHE 101",
+      "course_title": "General Chemistry I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 101L",
+      "course_title": "General Chemistry I Lab",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 170",
+      "course_title": "Intro to Environmental Science",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Fine Arts \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "HIS Sequence \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 102",
+      "course_title": "General Chemistry II",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 102L",
+      "course_title": "General Chemistry II Lab",
+      "credit_hours": 1,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 199",
+      "course_title": "Technology in Ag & Bio Sciences",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Economics \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "ECO 200, ECO 230, ECO 231",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 251",
+      "course_title": "Intro to Soil Science",
+      "credit_hours": 4,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "HIS Sequence \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Literature \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Hum/Fine Art \u2013 See GenEd Listing",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "CHN 101, CHN 102, CHN 201, CHN 202, ENG 205, ENG 205H, FRE 101, FRE 102, FRE 201, FRE 202, PHL 201, PHL 203, PHL 206, SPA 101, SPA 102, SPA 201, SPA 202, ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "GEO 214",
+      "course_title": "World Regional Geography",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Free Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "Any course except transitional courses",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 205",
+      "course_title": "General Speech",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": "II",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 221",
+      "course_title": "Analytical Chemistry",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CHE 221L",
+      "course_title": "Analytical Chemistry Lab",
+      "credit_hours": 1,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MTH 125",
+      "course_title": "Calculus I",
+      "credit_hours": 4,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": "Although concentrations are a minimum 21 hours, some may require additional hours."
+    },
+    {
+      "course_id": "PHY 201",
+      "course_title": "General Physics with Trig I",
+      "credit_hours": 4,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 365",
+      "course_title": "Intro to GIS",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CHE 251",
+      "course_title": "Organic Chemistry I",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CHE 251L",
+      "course_title": "Organic Chemistry I Lab",
+      "credit_hours": 1,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "NRE 306",
+      "course_title": "Environmental Microbiology",
+      "credit_hours": 4,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 430",
+      "course_title": "Biostatistics",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 470",
+      "course_title": "Soil, Plant & Water Analysis",
+      "credit_hours": 4,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "[CS] capstone course, cannot be substituted."
+    },
+    {
+      "course_id": "NRE 491",
+      "course_title": "Seminar & Scientific Writing",
+      "credit_hours": 1,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "NRE 472",
+      "course_title": "Soil, Water & Air Pollution",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    }
+  ],
+  "concentrations_and_minors": [
+    {
+      "name": "Ecology",
+      "code": "ECO-ENV",
+      "type": "concentration",
+      "applicable_to": [
+        "Environmental Science majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 21,
+      "required_courses": [
+        {
+          "course_id": "BIO 330",
+          "course_title": "Microbiology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "BIO 330L",
+          "course_title": "Microbiology Lab",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 310",
+          "course_title": "General Ecology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 320",
+          "course_title": "Aquatic Ecology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 370",
+          "course_title": "Wildlife Biology",
+          "credit_hours": 4,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 420",
+          "course_title": "Ecosystems Ecology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 460",
+          "course_title": "Advanced GIS and Remote Sensing",
+          "credit_hours": 4,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": null,
+      "special_rules": null
+    },
+    {
+      "name": "Fish and Wildlife Science",
+      "code": "FWS",
+      "type": "concentration",
+      "applicable_to": [
+        "Environmental Science majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 21,
+      "required_courses": [
+        {
+          "course_id": "NRE 310",
+          "course_title": "General Ecology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 320",
+          "course_title": "Aquatic Ecology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 340",
+          "course_title": "Fish Biology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 350",
+          "course_title": "Wildlife Management",
+          "credit_hours": 4,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 370",
+          "course_title": "Wildlife Biology",
+          "credit_hours": 4,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 460",
+          "course_title": "Advanced GIS and Remote Sensing",
+          "credit_hours": 4,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": null,
+      "special_rules": null
+    }
+  ]
+}

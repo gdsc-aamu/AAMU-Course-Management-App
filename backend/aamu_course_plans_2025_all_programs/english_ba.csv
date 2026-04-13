@@ -1,0 +1,44 @@
+program,requirement_type,concentration_or_minor_name,semester_suggested,course_id,course_title,credit_hours,gen_ed_area,is_elective_slot,eligible_courses,min_grade,footnotes
+English,baseline,,freshman_fall,ORI 101,First Year Experience,1,V,False,,,
+English,baseline,,freshman_fall,ENG 105,Composition & Rhetoric I,3,I,False,,C,MinGrade of C required.
+English,baseline,,freshman_fall,,Math – See GenEd Listing,3,III,True,"MTH 108, MTH 108E, MTH 110, MTH 111, MTH 112, MTH 112E, MTH 113, MTH 115, MTH 120, MTH 125, MTH 126, MTH 227, MTH 237, MTH 238",,
+English,baseline,,freshman_fall,,*Elem Foreign Language Sequence,3,II,True,FRE 101/102 or SPA 101/102,,*French or Spanish.
+English,baseline,,freshman_fall,,Fine Arts – See GenEd Listing,3,II,True,"ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+English,baseline,,freshman_fall,,"PED, HED 101, MSC 101",2,V,True,"PED 102, PED 107, PED 111, PED 114, PED 132, PED 133, PED 137, HED 101, MSC 101, FAS 101, NHM 104",,
+English,baseline,,freshman_spring,ORI 102,First Year Experience,1,V,False,,,
+English,baseline,,freshman_spring,ENG 106,Composition & Rhetoric II,3,I,False,,C,MinGrade of C required.
+English,baseline,,freshman_spring,CS 101,Fund of Comp & Info Systems,3,V,False,,,
+English,baseline,,freshman_spring,,*Elem Foreign Language Sequence,3,II,True,FRE 101/102 or SPA 101/102,,*French or Spanish.
+English,baseline,,freshman_spring,,History – See GenEd Listing,3,IV,True,"HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",,
+English,baseline,,freshman_spring,,Soc/Beh Sci – See GenEd Listing,3,IV,True,See General Education Requirements Area IV,,
+English,baseline,,sophomore_fall,ENG 203,World Literature I Sequence,3,II,False,,,
+English,baseline,,sophomore_fall,,Science Elective,3,III,True,See General Education Requirements Area III,,
+English,baseline,,sophomore_fall,,Science Elective Lab,1,III,True,Matching lab,,
+English,baseline,,sophomore_fall,ENG 201,English Literature I,3,,False,,C,MinGrade of C required.
+English,baseline,,sophomore_fall,,Soc/Beh Sci – See GenEd Listing,3,IV,True,See General Education Requirements Area IV,,
+English,baseline,,sophomore_fall,,Hum/Fine Art – See GenEd Listing,3,II,True,"CHN 101, CHN 102, CHN 201, CHN 202, ENG 205, ENG 205H, FRE 101, FRE 102, FRE 201, FRE 202, PHL 201, PHL 203, PHL 206, SPA 101, SPA 102, SPA 201, SPA 202, ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+English,baseline,,sophomore_spring,ENG 204,World Literature II Sequence,3,II,False,,,
+English,baseline,,sophomore_spring,,Science Elective,3,III,True,See General Education Requirements Area III,,
+English,baseline,,sophomore_spring,,Science Elective Lab,1,III,True,Matching lab,,
+English,baseline,,sophomore_spring,ENG 202,English Literature II,3,,False,,C,MinGrade of C required.
+English,baseline,,sophomore_spring,,Economics – See GenEd Listing,3,IV,True,"ECO 200, ECO 230, ECO 231",,
+English,baseline,,sophomore_spring,ENG 300,Intro to Discipline of English,3,,False,,C,MinGrade of C required.
+English,baseline,,junior_fall,ENG 205,General Speech,3,II,False,,,
+English,baseline,,junior_fall,ENG 207,American Literature I,3,,False,,C,MinGrade of C required.
+English,baseline,,junior_fall,ENG 325,African American Literature I,3,,False,,C,MinGrade of C required.
+English,baseline,,junior_fall,ENG 405,Advanced Grammar,3,,False,,C,MinGrade of C required.
+English,baseline,,junior_fall,,Minor OR Track Course,3,,True,,,"Although Minors are a minimum 18 hours, some may require additional 1-2 hours."
+English,baseline,,junior_spring,ENG 208,American Literature II,3,,False,,C,MinGrade of C required.
+English,baseline,,junior_spring,ENG 308,Literary Criticism,3,,False,,C,MinGrade of C required.
+English,baseline,,junior_spring,ENG 316,Adv Writing for ENG Majors,3,,False,,C,MinGrade of C required.
+English,baseline,,junior_spring,ENG 326,African American Literature II,3,,False,,C,MinGrade of C required.
+English,baseline,,junior_spring,,Minor OR Track Course,3,,True,,,
+English,baseline,,senior_fall,ENG 407,Senior Seminar,3,,False,,C,"[CS] capstone course, cannot be substituted."
+English,baseline,,senior_fall,,Minor OR Track Course,3,,True,,,
+English,baseline,,senior_fall,,Minor OR Track Course,3,,True,,,
+English,baseline,,senior_fall,,ENG 3xx-4xx OR Free Elective,3,,True,ENG 3xx-4xx or Free Elective,,No overlap allowed of the baseline Free Electives. Students selecting a Minor complete 12 hrs of 3xx-4xx ENG Elcs. Students selecting a Track complete 15 hrs of Free Elcs. Tracks cannot be overlapped.
+English,baseline,,senior_fall,,ENG 3xx-4xx OR Free Elective,3,,True,ENG 3xx-4xx or Free Elective,,
+English,baseline,,senior_spring,,Minor OR Track Course,3,,True,,,
+English,baseline,,senior_spring,,Minor Course OR Free Elective,3,,True,,,
+English,baseline,,senior_spring,,ENG 3xx-4xx OR Free Elective,3,,True,ENG 3xx-4xx or Free Elective,,
+English,baseline,,senior_spring,,ENG 3xx-4xx OR Free Elective,3,,True,ENG 3xx-4xx or Free Elective,,

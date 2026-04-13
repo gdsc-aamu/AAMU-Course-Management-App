@@ -1,0 +1,46 @@
+program,requirement_type,concentration_or_minor_name,semester_suggested,course_id,course_title,credit_hours,gen_ed_area,is_elective_slot,eligible_courses,min_grade,footnotes
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_fall,ORI 101,First Year Experience,1,V,False,,,
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_fall,ENG 101,Composition I,3,I,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_fall,MTH 108,Quantitative Reasoning,3,III,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_fall,BIO 101,General Biology I,3,III,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_fall,BIO 101L,General Biology I Lab,1,III,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_fall,,Lit Sequence – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_fall,,"HED 101, PED, MSC 101",2,V,True,"HED 101, PED courses, MSC 101",,
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_spring,ORI 102,First Year Experience,1,V,False,,,
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_spring,ENG 102,Composition II,3,I,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_spring,,Fine Arts – ART 101 or MUS 101,3,II,True,"ART 101, MUS 101",,
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_spring,BIO 102,General Biology II,3,III,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_spring,BIO 102L,General Biology II Lab,1,III,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_spring,,Lit Sequence – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,
+Elementary Education (K-6) - Teacher Certification,baseline,,freshman_spring,MTH 112,Pre-Calculus Algebra,3,III,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_fall,HIS 201,American History,3,IV,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_fall,,ECO Economics Elective,3,IV,True,"ECO 200, ECO 230, ECO 231",,
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_fall,FED 215,Instructional Technology,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_fall,PHY 101,Physical Science I,3,III,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_fall,PHY 101L,Physical Science I Lab,1,III,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_fall,GEO 214,World Regional Geography,3,IV,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_spring,HIS 202,American History II,3,IV,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_spring,,MTH Elective,3,III,True,"MTH 112, 113, 115, 120, 125, 126, 227, 237, 238",,
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_spring,ENG 205,General Speech,3,II,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_spring,MTH 235,Math for Elementary Teachers,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_spring,FED 212,Human Growth/Development,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,sophomore_spring,FED 200,Introduction to Education,2,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_fall,SPE 201,Intro to Study of Excep Children,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_fall,FED 300,Foundations of Education,2,,False,,C,MinGrade of C required. Must be admitted to EPP.
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_fall,FED 404,Assessment & Evaluation,3,,False,,C,MinGrade of C required. Must be admitted to EPP.
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_fall,PSY 403,Educational Psychology,3,,False,,C,MinGrade of C required. Must be admitted to EPP.
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_fall,ELE 301,Project Based Learning,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_fall,SPE 326,Mgt of Classroom Behavior,3,,False,,C,MinGrade of C required. Must be admitted to EPP.
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_spring,ECE 300,Expressive Arts,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_spring,ECE 301,M/M of Teaching Language Arts,3,,False,,C,"MinGrade of C required. Must complete FED 300, 404, PSY 403, SPE 326."
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_spring,ECE 302,M/M of Teaching Social Studies,3,,False,,C,"MinGrade of C required. Must complete FED 300, 404, PSY 403, SPE 326."
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_spring,ECE 303,M/M of Teaching Science/Health,3,,False,,C,"MinGrade of C required. Must complete FED 300, 404, PSY 403, SPE 326."
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_spring,ELE 300,Elementary School Organization,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,junior_spring,SPE 304,Parent & Family Assessment,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,senior_fall,ECE 304,Teaching Reading to Young Child,3,,False,,C,"MinGrade of C required. Must complete FED 300, 404, PSY 403, SPE 326."
+Elementary Education (K-6) - Teacher Certification,baseline,,senior_fall,MAED 399,Measurement and Geometry Thinking,3,,False,,C,"MinGrade of C required. Must complete FED 300, 404, PSY 403, SPE 326."
+Elementary Education (K-6) - Teacher Certification,baseline,,senior_fall,ECE 407,Strategies for Teaching Reading,3,,False,,C,"MinGrade of C required. Must complete FED 300, 404, PSY 403, SPE 326."
+Elementary Education (K-6) - Teacher Certification,baseline,,senior_fall,ECE 412,Children's Literature,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,senior_fall,MAED 499,Probability and Statistical Reasoning for Educators,3,,False,,C,MinGrade of C required.
+Elementary Education (K-6) - Teacher Certification,baseline,,senior_spring,ELE 495,Internship,11,,False,,C,"Apply for Internship 1st Sem, Sr year."
+Elementary Education (K-6) - Teacher Certification,baseline,,senior_spring,ELE 496,Senior Seminar,1,,False,,,

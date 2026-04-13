@@ -1,0 +1,44 @@
+program,requirement_type,concentration_or_minor_name,semester_suggested,course_id,course_title,credit_hours,gen_ed_area,is_elective_slot,eligible_courses,min_grade,footnotes
+Entrepreneurship,baseline,,freshman_fall,ORI 101,First Year Experience,1,V,False,,,
+Entrepreneurship,baseline,,freshman_fall,ENG 101,Composition I,3,I,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,freshman_fall,MTH 112,Pre-Calculus Algebra,3,III,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,freshman_fall,,Sci lecture – See GenEd Listing,3,III,True,See General Education Requirements Area III,,
+Entrepreneurship,baseline,,freshman_fall,,Sci lab – See GenEd Listing,1,III,True,Matching lab for science lecture,,
+Entrepreneurship,baseline,,freshman_fall,,History – See GenEd Listing,3,IV,True,"HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",,
+Entrepreneurship,baseline,,freshman_fall,,PED/MSC/HED – See GenEd Listing,2,V,True,"PED 102, PED 107, PED 111, PED 114, PED 132, PED 133, PED 137, HED 101, MSC 101, FAS 101, NHM 104",,
+Entrepreneurship,baseline,,freshman_spring,ORI 102,First Year Experience,1,V,False,,,
+Entrepreneurship,baseline,,freshman_spring,ENG 102,Composition II,3,I,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,freshman_spring,,Fine Arts – See GenEd Listing,3,II,True,"ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+Entrepreneurship,baseline,,freshman_spring,,Sci lecture – See GenEd Listing,3,III,True,See General Education Requirements Area III,,
+Entrepreneurship,baseline,,freshman_spring,,Sci lab – See GenEd Listing,1,III,True,Matching lab for science lecture,,
+Entrepreneurship,baseline,,freshman_spring,,Soc/Beh Sci – See GenEd Listing,3,IV,True,See General Education Requirements Area IV,,
+Entrepreneurship,baseline,,freshman_spring,MTH 120,Calculus and its Applications,3,III,False,,,
+Entrepreneurship,baseline,,sophomore_fall,,Lit Sequence – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,
+Entrepreneurship,baseline,,sophomore_fall,MIS 213,Comp Applications in Business,3,V,False,,,
+Entrepreneurship,baseline,,sophomore_fall,ENG 205,General Speech,3,II,False,,,
+Entrepreneurship,baseline,,sophomore_fall,ECO 230,Princ of Microeconomics,3,IV,False,,,
+Entrepreneurship,baseline,,sophomore_fall,ACC 203,Financial Accounting Principles,3,,False,,,
+Entrepreneurship,baseline,,sophomore_spring,,Lit Sequence – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,
+Entrepreneurship,baseline,,sophomore_spring,ECO 271,Business Statistics I,3,,False,,,
+Entrepreneurship,baseline,,sophomore_spring,MGT 207,Legal Env and Ethics,3,,False,,,
+Entrepreneurship,baseline,,sophomore_spring,ECO 231,Princ of Macroeconomics,3,IV,False,,,
+Entrepreneurship,baseline,,sophomore_spring,ACC 204,Managerial Accounting Principles,3,,False,,,
+Entrepreneurship,baseline,,sophomore_spring,ELO 250,Prof Dev & Workforce Readiness,3,,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,junior_fall,FIN 315,Princ of Finance,3,,False,,,
+Entrepreneurship,baseline,,junior_fall,MIS 315,Princ of Mgt Info Systems,3,,False,,,
+Entrepreneurship,baseline,,junior_fall,MGT 315,Princ of Management,3,,False,,,
+Entrepreneurship,baseline,,junior_fall,ETR 315,Princ of Entrepreneurship,3,,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,junior_fall,ETR 319,ID/Eval New Venture Opps,3,,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,junior_spring,ETR 390,ELO in Entrepreneurship,3,,False,,C,"[CS] capstone course. To register, student must be at least a sophomore, registered with Career Dev Svcs, possess/maintain 2.0 MinGPA cumulative and major, pass prereq, and have prior signed permission from their advisor, dept chair, and dean."
+Entrepreneurship,baseline,,junior_spring,MKT 315,Princ of Marketing,3,,False,,,
+Entrepreneurship,baseline,,junior_spring,ETR 323,AI Unleashed by You,3,,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,junior_spring,,ETR xxx Major Elective,3,,True,ETR major elective,C,MinGrade of C required.
+Entrepreneurship,baseline,,junior_spring,,NonBusiness Elective,3,,True,Any non-business course,,
+Entrepreneurship,baseline,,senior_fall,ETR 445,Challenges of Growing New Ventures,3,,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,senior_fall,ETR 440,Entrepreneurial Counseling,3,,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,senior_fall,,"HIS 207, PSC 206, SOC 210",3,IV,True,"HIS 207, PSC 206, SOC 210",,
+Entrepreneurship,baseline,,senior_fall,MGT 413,Production Operations Mgt,3,,False,,,
+Entrepreneurship,baseline,,senior_spring,MGT 442,Strategic Mgt and Policy,3,,False,,,"[CS] capstone course, cannot be substituted."
+Entrepreneurship,baseline,,senior_spring,MGT 458,International Business,3,,False,,C,MinGrade of C required.
+Entrepreneurship,baseline,,senior_spring,,ETR xxx Major Elective,3,,True,ETR major elective,C,MinGrade of C required.
+Entrepreneurship,baseline,,senior_spring,,Free Elective,3,,True,Any course except transitional courses,,

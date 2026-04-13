@@ -1,0 +1,51 @@
+program,requirement_type,concentration_or_minor_name,semester_suggested,course_id,course_title,credit_hours,gen_ed_area,is_elective_slot,eligible_courses,min_grade,footnotes
+Physical Education Teacher (P-12),baseline,,freshman_fall,ORI 101,First Year Experience,1,V,False,,,
+Physical Education Teacher (P-12),baseline,,freshman_fall,ENG 101,Composition I,3,I,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,freshman_fall,MTH 112,Pre-Calculus Algebra,3,III,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,freshman_fall,,Science lecture Elective,3,III,True,See General Education Requirements Area III. Lecture and Lab must match. Sequence required.,,
+Physical Education Teacher (P-12),baseline,,freshman_fall,,Science lab Elective,1,III,True,Matching lab,,
+Physical Education Teacher (P-12),baseline,,freshman_fall,,HIS History Elective,3,IV,True,"HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",,
+Physical Education Teacher (P-12),baseline,,freshman_fall,,Fine Arts Elective – See GenEd Listing,3,II,True,"ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+Physical Education Teacher (P-12),baseline,,freshman_spring,ORI 102,First Year Experience,1,V,False,,,
+Physical Education Teacher (P-12),baseline,,freshman_spring,ENG 102,Composition II,3,I,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,freshman_spring,,"PED, HED 101, MSC 101",2,V,True,"PED courses, HED 101, MSC 101",,
+Physical Education Teacher (P-12),baseline,,freshman_spring,,Social Science Elc – See GenEd Listing,3,IV,True,See General Education Requirements Area IV,,
+Physical Education Teacher (P-12),baseline,,freshman_spring,,ECO Elective,3,IV,True,"ECO 200, ECO 230, ECO 231",,
+Physical Education Teacher (P-12),baseline,,freshman_spring,PED 137,Golf,1,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,freshman_spring,,Behavioral Sci Elc – See GenEd Listing,3,IV,True,See General Education Requirements Area IV – Behavioral Sciences,,
+Physical Education Teacher (P-12),baseline,,freshman_spring,PED 111,Tennis,1,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,sophomore_fall,,Literature Sequence Elective,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,
+Physical Education Teacher (P-12),baseline,,sophomore_fall,,Science lecture Elective,3,III,True,See General Education Requirements Area III. Lecture and Lab must match.,,
+Physical Education Teacher (P-12),baseline,,sophomore_fall,,Science lab Elective,1,III,True,Matching lab,,
+Physical Education Teacher (P-12),baseline,,sophomore_fall,FED 200,Intro to Education,2,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,sophomore_fall,PED 202,Officiating,2,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,sophomore_fall,SPE 201,Intro to Study of Excep Child,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,sophomore_fall,PED 225,Individual Sports Skills,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,sophomore_spring,,Literature Sequence Elective,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,
+Physical Education Teacher (P-12),baseline,,sophomore_spring,ENG 205,General Speech,3,II,False,,,
+Physical Education Teacher (P-12),baseline,,sophomore_spring,FED 215,Instructional Technology,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,sophomore_spring,FED 212,Human Growth/Development,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,sophomore_spring,PED 250,Foundations of HPE,2,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,sophomore_spring,PED 226,Team Sports Skills,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,sophomore_spring,PED 132,Beginning Swimming,1,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_fall,PED 315,Teaching Activity Sports,2,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_fall,HPE 301,Administration of Health & Phys Ed,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_fall,PED 427,Adapted Physical Education,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_fall,PED 409,Exercise Physiology,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_fall,FED 300,Foundations of Education,2,,False,,C,MinGrade of C required. Must be admitted to EPP to take.
+Physical Education Teacher (P-12),baseline,,junior_fall,PED 133,Intermediate Swimming,1,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_fall,PED 107,Gymnastics/Rhythms,1,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_spring,PSY 403,Educational Psychology,3,,False,,C,MinGrade of C required. Must be admitted to EPP to take.
+Physical Education Teacher (P-12),baseline,,junior_spring,HPE 304,Kinesiology,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_spring,SPE 326,Mgt of Classroom Behavior,3,,False,,C,MinGrade of C required. Must be admitted to EPP to take.
+Physical Education Teacher (P-12),baseline,,junior_spring,PED 412,Motor Behavior,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_spring,PED 422,Princ of Coaching/Intramurals,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,junior_spring,PED 207,First Aid/CPR,3,,False,,C,MinGrade of C required.
+Physical Education Teacher (P-12),baseline,,senior_fall,PED 305,M/M in Elementary Phys Ed,3,,False,,C,"MinGrade of C required. Must complete FED 300, 404, PSY 403, SPE 326 to take."
+Physical Education Teacher (P-12),baseline,,senior_fall,PED 306,M/M in Secondary Phys Ed,3,,False,,C,"MinGrade of C required. Must complete FED 300, 404, PSY 403, SPE 326 to take."
+Physical Education Teacher (P-12),baseline,,senior_fall,HPE 312,Assessments & Evaluations in PE,3,,False,,C,MinGrade of C required. Must be admitted to EPP to take.
+Physical Education Teacher (P-12),baseline,,senior_fall,SED 409,Reading in the Content Area,3,,False,,C,"MinGrade of C required. Must complete FED 300, 404, PSY 403, SPE 326 to take."
+Physical Education Teacher (P-12),baseline,,senior_fall,BIO 221,Human Anat & Physiology I,3,,False,,,
+Physical Education Teacher (P-12),baseline,,senior_fall,BIO 221L,Human Anat & Physiology I & Lab,1,,False,,,
+Physical Education Teacher (P-12),baseline,,senior_spring,PED 495,Internship,11,,False,,C,"[CS] capstone course, cannot be substituted. Apply for Internship 1st sem, senior year."
+Physical Education Teacher (P-12),baseline,,senior_spring,PED 499,Senior Seminar,1,,False,,C,"Must complete FED 300, 404, PSY 403, SPE 326 to take."

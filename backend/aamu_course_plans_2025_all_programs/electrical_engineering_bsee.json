@@ -1,0 +1,993 @@
+{
+  "program_metadata": {
+    "program_name": "Electrical Engineering",
+    "degree_type": "Bachelor of Science in Electrical Engineering",
+    "degree_abbreviation": "BSEE",
+    "department": "Department of Electrical Engineering and Computer Science",
+    "department_code": "EECS",
+    "college": "College of Engineering, Technology and Physical Sciences",
+    "college_abbreviation": "CETPS",
+    "total_credit_hours": 130,
+    "accreditation": "ABET",
+    "four_plus_one_available": true,
+    "four_plus_one_note": "Apply for admission to 5-year program at beginning of second semester, junior year. AMP option students must have MinGPA 3.0 at end of junior year to be accepted into EE-AMP Graduate Program. MinGrade of B required for 5xx-6xx courses.",
+    "admission_requirements": [
+      "High school GPA of at least C in English, mathematics, science, and history/political science",
+      "Math: 2 units algebra, 1 unit plane geometry, 0.5 unit trigonometry/advanced math (3.5 units total)",
+      "Science: 1 unit chemistry, 1 unit physics (2 units total)",
+      "Must complete Freshman Academy requirements before entering program",
+      "Minimum overall GPA of 2.5",
+      "Complete at least first course of calculus with grade of C or better",
+      "Transfer students must be in good standing with 2.5+ GPA"
+    ],
+    "graduation_requirements": [
+      "Complete University General Education Curriculum requirements",
+      "Complete Department and Major Curriculum requirements",
+      "Complete minimum 130 credit hours",
+      "Grade of C or better in all CS and EE courses",
+      "Grade of C or better in any course used as substitute for an EE course",
+      "Must earn at least 25% of credit hours at AAMU",
+      "Must earn at least 50% of major coursework at AAMU",
+      "Prerequisites must be carefully followed"
+    ],
+    "capstone_courses": [
+      "EE 470",
+      "EE 471"
+    ],
+    "capstone_rule": "[CS] = capstone course and cannot be substituted. EE 470 and EE 471 appear within each concentration, not in the baseline.",
+    "mutually_exclusive_courses": [
+      {
+        "course_a": "PHY 213",
+        "course_b": "PHY 201"
+      },
+      {
+        "course_a": "PHY 214",
+        "course_b": "PHY 202"
+      }
+    ],
+    "overlap_counting_rule": "Parenthesized hours in concentrations indicate overlap with baseline restricted elective slots. The student takes the course once; hours count toward the concentration. EE concentrations show +(12) overlap hours.",
+    "gen_ed_area_ii_exception": "CE, EE, ME majors only need 9 hours in Area II (3 hours in Humanities is not required).",
+    "gen_ed_area_iv_exception": "CE, EE, ME majors only need 9 hours in Area IV (3 hours in Social or Behavioral Science is not required)."
+  },
+  "baseline_curriculum": [
+    {
+      "course_id": "ORI 101",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 101",
+      "course_title": "Composition I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MTH 125",
+      "course_title": "Calculus I",
+      "credit_hours": 4,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 101",
+      "course_title": "General Chemistry I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 101L",
+      "course_title": "General Chemistry I Lab",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "EE 101",
+      "course_title": "Intro to Electrical Engineering",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "PED/MSC/HED Elective",
+      "credit_hours": 2,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area V",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "ORI 102",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 102",
+      "course_title": "Composition II",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MTH 126",
+      "course_title": "Calculus II",
+      "credit_hours": 4,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "PHY 213",
+      "course_title": "General Physics with Calculus I",
+      "credit_hours": 4,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "EE 109",
+      "course_title": "Engineering Computing",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "HIS Sequence",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "HIS Sequence",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "MTH 227",
+      "course_title": "Calculus III",
+      "credit_hours": 4,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "PHY 214",
+      "course_title": "General Physics with Calculus II",
+      "credit_hours": 4,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "EE 201",
+      "course_title": "Linear Circuit Analysis I",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "EE 201L",
+      "course_title": "Linear Circuit Analysis I Lab",
+      "credit_hours": 1,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Fine Arts Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Literature Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "MTH 238",
+      "course_title": "Applied Differential Equations",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "EE 202",
+      "course_title": "Linear Circuit Analysis II",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "EE 203",
+      "course_title": "Analog Circuit Design/Analysis I",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "EE 203L",
+      "course_title": "Analog Circuit Design/Analysis I Lab",
+      "credit_hours": 1,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "EE 204",
+      "course_title": "Digital Circuit Design/Analysis",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "EE 301",
+      "course_title": "Signals & Systems I",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Restricted Elective",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, >= ME 2xx except 481, >= CE 2xx",
+      "min_grade": null,
+      "footnotes": "Restricted electives limited to EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, (>= ME 2xx except 481 or >= CE 2xx) within each concentration."
+    },
+    {
+      "course_id": "EE 320",
+      "course_title": "Computer Architecture",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "EE 320L",
+      "course_title": "Digital Systems Lab",
+      "credit_hours": 1,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "EE 333",
+      "course_title": "Analog Circuit Design/Analysis II",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Economics Elective",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "ECO 200, ECO 230, ECO 231",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected EE concentration (VLSI, CME, General, Nuclear Power)",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Restricted Elective",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, >= ME 2xx except 481, >= CE 2xx",
+      "min_grade": null,
+      "footnotes": "Restricted electives per concentration rules."
+    },
+    {
+      "course_id": "EE 304",
+      "course_title": "Numerical Methods/Digital Comp",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "EE 330",
+      "course_title": "Microprocessors",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected EE concentration",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Restricted Elective",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, >= ME 2xx except 481, >= CE 2xx",
+      "min_grade": null,
+      "footnotes": "Restricted electives per concentration rules."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Lab Course OR eligible 5xx-6xx grad course (if in 5-yr prgm)",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration or 5xx-6xx with MinGrade B if in 5-yr program",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "EE 403",
+      "course_title": "Feedback System Analysis/Design",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course OR eligible 5xx-6xx grad course (if in 5-yr prgm)",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration or 5xx-6xx with MinGrade B",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Humanities Elective",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area II Humanities list",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course OR eligible 5xx-6xx grad course (if in 5-yr prgm)",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration or 5xx-6xx with MinGrade B",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Restricted Elective",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, >= ME 2xx except 481, >= CE 2xx",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "MTH 237, 303, 452, (MTH 453 or ST 453), PHY 303",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": [
+        "MTH 237",
+        "MTH 303",
+        "MTH 452",
+        "MTH 453",
+        "ST 453",
+        "PHY 303"
+      ],
+      "min_grade": null,
+      "footnotes": "Choose one advanced math/physics course."
+    }
+  ],
+  "concentrations_and_minors": [
+    {
+      "name": "Microelectronic-VLSI",
+      "code": "VLSI",
+      "type": "concentration",
+      "applicable_to": [
+        "Electrical Engineering"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": "21 + (12) overlap = 33",
+      "required_courses": [
+        {
+          "course_id": "EE 303",
+          "course_title": "Electromagnetic Field Theory",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 305",
+          "course_title": "Semiconductor Engineering I",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": null,
+          "course_title": "EE 340L or 360L",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 350",
+          "course_title": "VLSI Design & Testing",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 404",
+          "course_title": "Communication Theory",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 431",
+          "course_title": "Semiconductor Engg II (or EE 531 Adv Semiconductor Engg w/ MinGrd B if in 5-yr prgm)",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 451",
+          "course_title": "Integrated Circuit Fabrication (or EE 551 w/ MinGrd B if in 5-yr prgm)",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 451L",
+          "course_title": "Integrated Circuit Fab Lab",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 470",
+          "course_title": "Engg Analysis & Design I [CS]",
+          "credit_hours": 2,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 471",
+          "course_title": "Engg Analysis & Design II [CS]",
+          "credit_hours": 2,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": null,
+          "course_title": "EE 4xx not already required (or EE 5xx-6xx w/ MinGrd B if in 5-yr prgm)",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "ME 481",
+          "course_title": "Quality & Reliability Assurance",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap with baseline restricted elective"
+        },
+        {
+          "course_id": null,
+          "course_title": ">= ME 2xx except 481 OR >= CE 2xx",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap with baseline restricted elective"
+        }
+      ],
+      "elective_pool": [],
+      "special_rules": "Not open to Liberal Studies majors unless approved by Chair and Dean. UG MinGPA 2.0 MinGrade C. GR MinGPA 3.0 MinGrade B."
+    },
+    {
+      "name": "Computer Engineering",
+      "code": "CME",
+      "type": "concentration",
+      "applicable_to": [
+        "Electrical Engineering"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": "21 + (12) overlap = 33",
+      "required_courses": [
+        {
+          "course_id": "CS 215",
+          "course_title": "Data Structures",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 384",
+          "course_title": "Operating Systems",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": null,
+          "course_title": "CS 4xx not already required (or CS 5xx-6xx w/ MinGrd B if in 5-yr prgm)",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 303",
+          "course_title": "Electromagnetic Field Theory",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 305",
+          "course_title": "Semiconductor Engineering I",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": null,
+          "course_title": "EE 340L or 360L",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": null,
+          "course_title": "EE 350 or EE 4xx not already required (or EE 5xx-6xx w/ MinGrd B if in 5-yr prgm)",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 404",
+          "course_title": "Communication Theory (or EE 504 w/ MinGrd B if in 5-yr prgm)",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 405L",
+          "course_title": "Simulation Techniques",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 470",
+          "course_title": "Engg Analysis & Design I [CS]",
+          "credit_hours": 2,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 471",
+          "course_title": "Engg Analysis & Design II [CS]",
+          "credit_hours": 2,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "ME 481",
+          "course_title": "Quality & Reliability Assurance",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap with baseline restricted elective"
+        },
+        {
+          "course_id": null,
+          "course_title": ">= ME 2xx except 481 OR >= CE 2xx",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap with baseline restricted elective"
+        }
+      ],
+      "elective_pool": [],
+      "special_rules": "Not open to Liberal Studies majors unless approved by Chair and Dean."
+    },
+    {
+      "name": "General",
+      "code": "ENGG",
+      "type": "concentration",
+      "applicable_to": [
+        "Electrical Engineering"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": "21 + (12) overlap = 33",
+      "required_courses": [
+        {
+          "course_id": "EE 303",
+          "course_title": "Electromagnetic Field Theory",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 305",
+          "course_title": "Semiconductor Engineering I",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": null,
+          "course_title": "EE 340L or 360L",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": null,
+          "course_title": "EE 350 or EE 4xx not already required",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 404",
+          "course_title": "Communication Theory",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 405L",
+          "course_title": "Simulation Techniques",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 410",
+          "course_title": "Microwave Engineering",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 470",
+          "course_title": "Engg Analysis & Design I [CS]",
+          "credit_hours": 2,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 471",
+          "course_title": "Engg Analysis & Design II [CS]",
+          "credit_hours": 2,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": null,
+          "course_title": "EE 4xx not already required",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": null,
+          "course_title": "EE 4xx not already required",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "ME 481",
+          "course_title": "Quality & Reliability Assurance",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap"
+        },
+        {
+          "course_id": null,
+          "course_title": ">= ME 2xx except 481 OR >= CE 2xx",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap"
+        }
+      ],
+      "elective_pool": [],
+      "special_rules": "Not open to Liberal Studies majors unless approved by Chair and Dean."
+    },
+    {
+      "name": "Nuclear Power",
+      "code": "NPW",
+      "type": "concentration",
+      "applicable_to": [
+        "Electrical Engineering"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": "21 + (12) overlap = 33",
+      "required_courses": [
+        {
+          "course_id": "EE 303",
+          "course_title": "Electromagnetic Field Theory",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap"
+        },
+        {
+          "course_id": "EE 306",
+          "course_title": "Survey of Energy Systems",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap"
+        },
+        {
+          "course_id": "EE 307",
+          "course_title": "Fund of Nuclear Engg (also ME 307)",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap"
+        },
+        {
+          "course_id": "EE 308",
+          "course_title": "Thermal Systems Engg",
+          "credit_hours": 3,
+          "overlaps_with_baseline": true,
+          "overlap_note": "(3) overlap"
+        },
+        {
+          "course_id": "EE 340L",
+          "course_title": "Energy Conversion Laboratory",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 405L",
+          "course_title": "Simulation Techniques",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 420",
+          "course_title": "Power Systems I",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 421",
+          "course_title": "Power Systems II",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 460",
+          "course_title": "Nuclear Reactor Engg I (also ME 460)",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 461",
+          "course_title": "Nuclear Reactor Engg II (also ME 461)",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 470",
+          "course_title": "Engg Analysis & Design I [CS]",
+          "credit_hours": 2,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "EE 471",
+          "course_title": "Engg Analysis & Design II [CS]",
+          "credit_hours": 2,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "ME 481",
+          "course_title": "Quality & Reliability Assurance",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [],
+      "special_rules": "Not open to Liberal Studies majors unless approved by Chair and Dean."
+    }
+  ]
+}

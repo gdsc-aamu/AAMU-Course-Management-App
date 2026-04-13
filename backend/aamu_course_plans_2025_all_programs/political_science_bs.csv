@@ -1,0 +1,45 @@
+program,requirement_type,concentration_or_minor_name,semester_suggested,course_id,course_title,credit_hours,gen_ed_area,is_elective_slot,eligible_courses,min_grade,footnotes
+Political Science,baseline,,freshman_fall,ORI 101,First Year Experience,1,V,False,,,
+Political Science,baseline,,freshman_fall,ENG 101,Composition I,3,I,False,,C,MinGrade of C required.
+Political Science,baseline,,freshman_fall,,Math – See GenEd Listing,3,III,True,"MTH 108, MTH 108E, MTH 110, MTH 111, MTH 112, MTH 112E, MTH 113, MTH 115, MTH 120, MTH 125, MTH 126, MTH 227, MTH 237, MTH 238",,
+Political Science,baseline,,freshman_fall,,Sci lecture – See GenEd Listing,3,III,True,See General Education Requirements Area III,,
+Political Science,baseline,,freshman_fall,,Sci lab – See GenEd Listing,1,III,True,Matching lab for science lecture,,
+Political Science,baseline,,freshman_fall,,"HIS 101, 102",3,IV,True,"HIS 101, HIS 102",,
+Political Science,baseline,,freshman_fall,,PED/MSC/HED – See GenEd Listing,2,V,True,"PED 102, PED 107, PED 111, PED 114, PED 132, PED 133, PED 137, HED 101, MSC 101, FAS 101, NHM 104",,
+Political Science,baseline,,freshman_spring,ORI 102,First Year Experience,1,V,False,,,
+Political Science,baseline,,freshman_spring,ENG 102,Composition II,3,I,False,,C,MinGrade of C required.
+Political Science,baseline,,freshman_spring,,Fine Arts – See GenEd Listing,3,II,True,"ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+Political Science,baseline,,freshman_spring,,Sci lecture – See GenEd Listing,3,III,True,See General Education Requirements Area III,,
+Political Science,baseline,,freshman_spring,,Sci lab – See GenEd Listing,1,III,True,Matching lab for science lecture,,
+Political Science,baseline,,freshman_spring,,"CS 101, MIS 213",3,V,True,CS 101 or MIS 213,,
+Political Science,baseline,,freshman_spring,,Hum/Fine Art – See GenEd Listing,3,II,True,"CHN 101, CHN 102, CHN 201, CHN 202, ENG 205, ENG 205H, FRE 101, FRE 102, FRE 201, FRE 202, PHL 201, PHL 203, PHL 206, SPA 101, SPA 102, SPA 201, SPA 202, ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+Political Science,baseline,,sophomore_fall,,HIS Sequence – See GenEd Listing,3,IV,True,"HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",,
+Political Science,baseline,,sophomore_fall,,Literature – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,
+Political Science,baseline,,sophomore_fall,,Economics – See GenEd Listing,3,IV,True,"ECO 200, ECO 230, ECO 231",,
+Political Science,baseline,,sophomore_fall,ENG 205,General Speech,3,II,False,,,
+Political Science,baseline,,sophomore_fall,,PSC Major Elective,3,,True,PSC 3xx-4xx,C,MinGrade of C required.
+Political Science,baseline,,sophomore_fall,PSC 201,Intro to Political Science,3,,False,,C,MinGrade of C required.
+Political Science,baseline,,sophomore_spring,,HIS Sequence – See GenEd Listing,3,IV,True,"HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",,
+Political Science,baseline,,sophomore_spring,,Soc/Beh Sci – See GenEd Listing,3,IV,True,See General Education Requirements Area IV,,
+Political Science,baseline,,sophomore_spring,PSC 205,American Government,3,,False,,C,MinGrade of C required.
+Political Science,baseline,,sophomore_spring,,Minor Course,3,,True,,,"Although minors are a minimum 18 hours, some may require additional 1-2 hours."
+Political Science,baseline,,sophomore_spring,HIS 204,Intro to African-American History,3,,False,,,
+Political Science,baseline,,junior_fall,ENG 304,Advanced Composition,3,,False,,,
+Political Science,baseline,,junior_fall,GEO 214,World Regional Geography,3,,False,,,
+Political Science,baseline,,junior_fall,PSC 206,State and Local Government,3,,False,,C,MinGrade of C required.
+Political Science,baseline,,junior_fall,,Minor Course,3,,True,,,
+Political Science,baseline,,junior_fall,,Minor Course,3,,True,,,
+Political Science,baseline,,junior_spring,,"SOC 265/PSC 265/CRJ 265/PSY 265, ECO 271",3,,True,"SOC 265, PSC 265, CRJ 265, PSY 265, or ECO 271",C,MinGrade of C required.
+Political Science,baseline,,junior_spring,PSC 310,African American Politics,3,,False,,C,MinGrade of C required.
+Political Science,baseline,,junior_spring,,Free Elective,3,,True,Any course except transitional courses,,
+Political Science,baseline,,junior_spring,,Minor Course,3,,True,,,
+Political Science,baseline,,junior_spring,,Minor Course,3,,True,,,
+Political Science,baseline,,junior_spring,DSS 390,Dept of Soc Sciences ELO,3,,False,,C,[CS] capstone course.
+Political Science,baseline,,senior_fall,PSC 307,Comparative Govt,3,,False,,C,MinGrade of C required.
+Political Science,baseline,,senior_fall,,CRJ 443/PSC 443/SOC 443,3,,True,"CRJ 443, PSC 443, or SOC 443",C,MinGrade of C required.
+Political Science,baseline,,senior_fall,,PSC Major Elective,3,,True,PSC 3xx-4xx,C,MinGrade of C required.
+Political Science,baseline,,senior_fall,,Minor Course,3,,True,,,
+Political Science,baseline,,senior_spring,PSC 401,Western Political Thought,3,,False,,C,MinGrade of C required.
+Political Science,baseline,,senior_spring,PSC 408,International Relations,3,,False,,C,MinGrade of C required.
+Political Science,baseline,,senior_spring,,PSC Major Elective,3,,True,PSC 3xx-4xx,C,MinGrade of C required.
+Political Science,baseline,,senior_spring,,PSC Major Elective,3,,True,PSC 3xx-4xx,C,MinGrade of C required.
