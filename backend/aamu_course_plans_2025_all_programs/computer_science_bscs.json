@@ -1,0 +1,817 @@
+{
+  "program_metadata": {
+    "program_name": "Computer Science",
+    "degree_type": "Bachelor of Science",
+    "degree_abbreviation": "BSCS",
+    "department": "Department of Electrical Engineering and Computer Science",
+    "department_code": "EECS",
+    "college": "College of Engineering, Technology and Physical Sciences",
+    "college_abbreviation": "CETPS",
+    "total_credit_hours": "125 or 131 (5-yr prgm)",
+    "accreditation": "ABET",
+    "four_plus_one_available": true,
+    "four_plus_one_note": "Apply for admission to 5-year program at the beginning of second semester, junior year. 5xx CMP Core courses replace some senior slots. MinGrade of B required for 5xx courses.",
+    "admission_requirements": [
+      "High school GPA of at least C in English, mathematics, science, and history/political science",
+      "Math: 2 units algebra, 1 unit plane geometry, 0.5 unit trigonometry/advanced math (3.5 units total)",
+      "Science: 1 unit chemistry, 1 unit physics (2 units total)",
+      "Must complete Freshman Academy requirements before entering program",
+      "Minimum overall GPA of 2.5",
+      "Complete at least first course of calculus with grade of C or better",
+      "Transfer students must be in good standing with 2.5+ GPA"
+    ],
+    "graduation_requirements": [
+      "Complete University General Education Curriculum requirements",
+      "Complete Department and Major Curriculum requirements",
+      "Complete minimum 125 credit hours (or 131 for 5-yr program)",
+      "Grade of C or better in all CS and EE courses",
+      "Grade of C or better in any course used as substitute for an EE course",
+      "Must earn at least 25% of credit hours at AAMU",
+      "Must earn at least 50% of major coursework at AAMU",
+      "Take departmental Exit Exam in senior year and achieve 70% passing rate",
+      "Prerequisites must be carefully followed"
+    ],
+    "capstone_courses": [
+      "CS 403"
+    ],
+    "capstone_rule": "[CS] = capstone course and cannot be substituted.",
+    "mutually_exclusive_courses": [
+      {
+        "course_a": "PHY 213",
+        "course_b": "PHY 201"
+      },
+      {
+        "course_a": "PHY 214",
+        "course_b": "PHY 202"
+      }
+    ],
+    "overlap_counting_rule": "Parenthesized hours in concentrations indicate overlap with baseline. The student takes the course once; hours count toward the concentration.",
+    "gen_ed_area_ii_exception": null,
+    "gen_ed_area_iv_exception": null
+  },
+  "baseline_curriculum": [
+    {
+      "course_id": "ORI 101",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 101",
+      "course_title": "Composition I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MTH 125",
+      "course_title": "Calculus I",
+      "credit_hours": 4,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "PED/MSC/HED Elective",
+      "credit_hours": 2,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area V: PED 102, PED 107, PED 111, PED 114, PED 132, PED 133, PED 137, HED 101, MSC 101, FAS 101, NHM 104",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "CS 104",
+      "course_title": "Intro to Computers & Ethics",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ORI 102",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 102",
+      "course_title": "Composition II",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Fine Arts Elective",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "History Elective",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "MTH 126",
+      "course_title": "Calculus II",
+      "credit_hours": 4,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CS 102",
+      "course_title": "Intro to Programming I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Literature Sequence I",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "PHY 213",
+      "course_title": "General Physics with Calculus I",
+      "credit_hours": 4,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "History Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "CS 109",
+      "course_title": "Intro to Programming II",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CS 203",
+      "course_title": "Discrete Structures",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Literature Sequence II",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "PHY 214",
+      "course_title": "General Physics with Calculus II",
+      "credit_hours": 4,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Economics Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "ECO 200, ECO 230, ECO 231",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "CS 206",
+      "course_title": "Intro Java Programming I",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CS 209",
+      "course_title": "Intro to Digital Logic Design",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CS 215",
+      "course_title": "Data Structures",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MTH 237",
+      "course_title": "Linear Algebra",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CS 314",
+      "course_title": "Advanced Programming",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "CS 3xx-4xx Elective",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "See General Computer Science Electives list",
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration (AI, Cyber Security, or General CS)",
+      "min_grade": null,
+      "footnotes": "Although concentrations are a minimum 21 hours, some may require additional hours. Concentration must be from those listed for this department."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration",
+      "min_grade": null,
+      "footnotes": "See concentration requirements."
+    },
+    {
+      "course_id": null,
+      "course_title": "Humanities/Fine Arts Elective",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area II Humanities list",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Social/Behavioral Science Elective",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "PSY 201, PSY 211, SOC 201, SOC 210, SOC 212, GEO 213, GEO 214, PSC 201, UPL 103",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Free Elective",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "Any course except transitional courses",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "MTH 453 or ST 453 Probability & Statistics",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": [
+        "MTH 453",
+        "ST 453"
+      ],
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CS 401",
+      "course_title": "Software Engineering",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CS 425",
+      "course_title": "Theory of Algorithms",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CS 403",
+      "course_title": "Senior Problems",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required. [CS] capstone course, cannot be substituted."
+    },
+    {
+      "course_id": "CS 405",
+      "course_title": "Linux w/ Appl Programming",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Concentration Course",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "From selected concentration",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Free Elective",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "Any course except transitional courses",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "CS 410 Seminar OR 5xx CMP Core course (if in 5-yr prgm)",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": [
+        "CS 410",
+        "5xx CMP Core (5-yr program only, MinGrade B)"
+      ],
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required for CS 410. MinGrade of B required for 5xx courses in 5-yr program."
+    }
+  ],
+  "concentrations_and_minors": [
+    {
+      "name": "Artificial Intelligence",
+      "code": "AI",
+      "type": "concentration",
+      "applicable_to": [
+        "Computer Science"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 21,
+      "required_courses": [
+        {
+          "course_id": "CS 381",
+          "course_title": "Computer Organization",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 384",
+          "course_title": "Operating Systems",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 389",
+          "course_title": "Programming in Robotics System",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 409",
+          "course_title": "Introduction to Digital Image Processing",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 430",
+          "course_title": "Machine Learning",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 450",
+          "course_title": "Artificial Intelligence",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 488",
+          "course_title": "Database Systems",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [],
+      "special_rules": "Not open to Liberal Studies majors unless approved by Chair and Dean."
+    },
+    {
+      "name": "Cyber Security",
+      "code": "CYB",
+      "type": "concentration",
+      "applicable_to": [
+        "Computer Science"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 21,
+      "required_courses": [
+        {
+          "course_id": "CS 381",
+          "course_title": "Computer Organization",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 384",
+          "course_title": "Operating Systems",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 488",
+          "course_title": "Database Systems",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 321",
+          "course_title": "Principles of Information Security",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 386",
+          "course_title": "Cryptography",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 414",
+          "course_title": "Forensic Computing",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 421",
+          "course_title": "Computer Security",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [],
+      "special_rules": "Not open to Liberal Studies majors unless approved by Chair and Dean."
+    },
+    {
+      "name": "General Computer Science",
+      "code": "GCS",
+      "type": "concentration",
+      "applicable_to": [
+        "Computer Science"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": "18 + (3) overlap = 21",
+      "required_courses": [
+        {
+          "course_id": "CS 381",
+          "course_title": "Computer Organization",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 384",
+          "course_title": "Operating Systems",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 488",
+          "course_title": "Database Systems",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "CS 3xx General Computer Science Elective",
+          "credit_hours": 3,
+          "eligible_courses": "See General Computer Science Electives list"
+        },
+        {
+          "slot_name": "CS 3xx General Computer Science Elective",
+          "credit_hours": 3,
+          "eligible_courses": "See General Computer Science Electives list"
+        },
+        {
+          "slot_name": "CS 4xx General Computer Science Elective",
+          "credit_hours": 3,
+          "eligible_courses": "See General Computer Science Electives list"
+        },
+        {
+          "slot_name": "CS 4xx General Computer Science Elective (overlap)",
+          "credit_hours": 3,
+          "eligible_courses": "One of the 3xx or 4xx GCS Electives is an overlap with baseline CS 3xx-4xx Elective slot"
+        }
+      ],
+      "special_rules": "Not open to Liberal Studies majors unless approved by Chair and Dean. One of the 3xx or 4xx GCS Electives is an overlap. No more than three elective courses from any CMP Dept Concentration may be applied to the GCS Concentration."
+    },
+    {
+      "name": "Computer Science Minor",
+      "code": "CMP",
+      "type": "minor",
+      "applicable_to": [
+        "Non-CMP majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 18,
+      "required_courses": [
+        {
+          "course_id": "CS 102",
+          "course_title": "Intro to Programming I",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 104",
+          "course_title": "Intro to Computers & Ethics",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 109",
+          "course_title": "Intro to Programming II",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 203",
+          "course_title": "Discrete Structures",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 206",
+          "course_title": "Intro Java Programming I",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "CS 3xx-4xx Elective",
+          "credit_hours": 3,
+          "eligible_courses": "Includes Cyber Security and General Computer Science Electives"
+        }
+      ],
+      "special_rules": null
+    },
+    {
+      "name": "Data Science Minor",
+      "code": "DSC",
+      "type": "minor",
+      "applicable_to": [
+        "Non-CMP majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 18,
+      "required_courses": [
+        {
+          "course_id": "CS 104",
+          "course_title": "Intro to Computers & Ethics",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 413",
+          "course_title": "Data Science",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "CS 430",
+          "course_title": "Machine Learning",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "Statistics course (choose 1)",
+          "credit_hours": 3,
+          "eligible_courses": [
+            "ECO 271",
+            "MTH 111",
+            "MTH 355",
+            "MTH 453"
+          ]
+        },
+        {
+          "slot_name": "Elective courses (choose 2)",
+          "credit_hours": 6,
+          "eligible_courses": "nonCMP 3xx Elective, nonCMP 4xx Elective, or MTH 237 (advisor and CMP Chair approval required)"
+        }
+      ],
+      "special_rules": "Open to all except CMP students. Advisor and CMP Chair approval required for nonCMP elective courses."
+    }
+  ]
+}

@@ -1,0 +1,599 @@
+{
+  "program_metadata": {
+    "program_name": "Accounting",
+    "degree_type": "Bachelor of Science",
+    "degree_abbreviation": "BS",
+    "department": "Department of Accounting and Finance",
+    "department_code": "ACC",
+    "college": "College of Business and Public Affairs",
+    "college_abbreviation": "CBPA",
+    "total_credit_hours": 120,
+    "accreditation": null,
+    "four_plus_one_available": false,
+    "four_plus_one_note": null,
+    "admission_requirements": [
+      "Meet all University admission requirements"
+    ],
+    "graduation_requirements": [
+      "Complete University General Education Curriculum requirements",
+      "Complete Department and Major Curriculum requirements",
+      "Complete minimum 120 credit hours",
+      "Grade of C or better in major coursework",
+      "Grade of D or better in minor coursework",
+      "Must take Senior Exit Exam",
+      "Must earn at least 25% of credit hours at AAMU",
+      "Must earn at least 50% of major coursework at AAMU",
+      "Transfer students must earn at least 50% of business credit hours at AAMU",
+      "All business electives must be upper-level (300-499) unless otherwise stated"
+    ],
+    "capstone_courses": [
+      "ACC 395",
+      "MGT 442"
+    ],
+    "capstone_rule": "[CS] = capstone course and cannot be substituted.",
+    "mutually_exclusive_courses": [],
+    "overlap_counting_rule": null,
+    "gen_ed_area_ii_exception": null,
+    "gen_ed_area_iv_exception": null
+  },
+  "baseline_curriculum": [
+    {
+      "course_id": "ORI 101",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 101",
+      "course_title": "Composition I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MTH 112",
+      "course_title": "Pre-Calculus Algebra",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Science Lecture",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area III",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Science Lab",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": true,
+      "eligible_courses": "Matching lab for science lecture",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "History Elective",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101-202 series",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "PED/MSC/HED Elective",
+      "credit_hours": 2,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area V",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "ACC 101",
+      "course_title": "Accounting Prof Development I",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ORI 102",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 102",
+      "course_title": "Composition II",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Fine Arts Elective",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ART 101, MUS 101, etc.",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Science Lecture",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area III",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Science Lab",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": true,
+      "eligible_courses": "Matching lab",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "MIS 213",
+      "course_title": "Comp Applications in Business",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "MTH 120",
+      "course_title": "Calculus and its Applications",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Literature Sequence I",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ENG 201-208 series",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Social/Behavioral Science Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "PSY 201, SOC 201, etc.",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ECO 230",
+      "course_title": "Principles of Microeconomics",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 205",
+      "course_title": "General Speech",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "II",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ACC 203",
+      "course_title": "Financial Accounting Principles",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ACC 304",
+      "course_title": "Accounting Prof Development II",
+      "credit_hours": 1,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Literature Sequence II",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ENG 201-208 series",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "HIS 207, PSC 206, or SOC 210",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": [
+        "HIS 207",
+        "PSC 206",
+        "SOC 210"
+      ],
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ECO 231",
+      "course_title": "Principles of Macroeconomics",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ECO 271",
+      "course_title": "Business Statistics I",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ACC 204",
+      "course_title": "Managerial Accounting Principles",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "MGT 207",
+      "course_title": "Legal Env and Ethics",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ACC 301",
+      "course_title": "Intermediate Accounting I",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "ACC 321",
+      "course_title": "Accounting Analytics & Decisions",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "FIN 315",
+      "course_title": "Principles of Finance",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "MKT 315",
+      "course_title": "Principles of Marketing",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ACC 395",
+      "course_title": "Accounting Internship",
+      "credit_hours": 1,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required. [CS] capstone course. To register, student must have advisor consent."
+    },
+    {
+      "course_id": "ACC 302",
+      "course_title": "Intermediate Accounting II",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "ACC 303",
+      "course_title": "Cost Accounting and Analytics",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MGT 315",
+      "course_title": "Principles of Management",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "ACC/MIS/CS 3xx-4xx Elective",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "ACC 3xx-4xx, MIS 3xx-4xx, or CS 3xx-4xx",
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MGT 413",
+      "course_title": "Production Operations Mgt",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ACC 306",
+      "course_title": "Intermediate Accounting III",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "ACC 372",
+      "course_title": "AIS, Bus Processes & Analytics",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "Free Elective",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "Any course except transitional courses",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "ACC/MIS/CS 3xx-4xx Elective",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "ACC 3xx-4xx, MIS 3xx-4xx, or CS 3xx-4xx",
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "ACC 351",
+      "course_title": "Taxation I",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "ACC 441",
+      "course_title": "Auditing, Risk Assess & Control",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "MGT 442",
+      "course_title": "Strategic Mgt and Policy",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": "[CS] capstone course, cannot be substituted."
+    },
+    {
+      "course_id": null,
+      "course_title": "3xx-4xx ACC/MIS/CS Elective",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "ACC 3xx-4xx, MIS 3xx-4xx, or CS 3xx-4xx",
+      "min_grade": null,
+      "footnotes": null
+    }
+  ],
+  "concentrations_and_minors": [
+    {
+      "name": "Accounting Minor",
+      "code": "ACC",
+      "type": "minor",
+      "applicable_to": [
+        "Non-ACC majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "D",
+      "total_hours": 18,
+      "required_courses": [
+        {
+          "course_id": "ACC 301",
+          "course_title": "Intermediate Accounting I",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "ACC 302",
+          "course_title": "Intermediate Accounting II",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "ACC 303",
+          "course_title": "Cost Accounting and Analytics",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "ACC 351",
+          "course_title": "Taxation I",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "Choose 2 courses",
+          "credit_hours": 6,
+          "eligible_courses": [
+            "ACC 403",
+            "ACC 421",
+            "ACC 441",
+            "ACC 450",
+            "ACC 451",
+            "ACC 461",
+            "ACC 372"
+          ]
+        }
+      ],
+      "special_rules": null
+    }
+  ]
+}

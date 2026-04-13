@@ -1,0 +1,781 @@
+{
+    "program_metadata": {
+        "program_name": "Family and Consumer Sciences",
+        "degree_type": "Bachelor of Science",
+        "degree_abbreviation": "BS",
+        "department": "Department of Family and Consumer Sciences",
+        "department_code": "FCS",
+        "college": "College of Agricultural, Life and Natural Sciences",
+        "college_abbreviation": "CALNS",
+        "total_credit_hours": 120,
+        "accreditation": null,
+        "four_plus_one_available": false,
+        "four_plus_one_note": null,
+        "admission_requirements": [
+            "Meet all University admission requirements"
+        ],
+        "graduation_requirements": [
+            "Complete University General Education Curriculum requirements",
+            "Complete Department and Major Curriculum requirements",
+            "Complete minimum 120 credit hours",
+            "Grade of C or better required where noted",
+            "Grade of B or better required where noted",
+            "Must earn at least 25% of credit hours at AAMU",
+            "Must earn at least 50% of major coursework at AAMU",
+            "Elective hours must first be used towards fulfilling concentration hours"
+        ],
+        "capstone_courses": [
+            "FCS 418",
+            "FCS 420"
+        ],
+        "capstone_rule": "[CS] = capstone course and cannot be substituted.",
+        "mutually_exclusive_courses": [],
+        "overlap_counting_rule": null,
+        "gen_ed_area_ii_exception": null,
+        "gen_ed_area_iv_exception": null
+    },
+    "baseline_curriculum": [
+        {
+            "course_id": "ORI 101",
+            "course_title": "First Year Experience",
+            "credit_hours": 1,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "V",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "ENG 101",
+            "course_title": "Composition I",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "I",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Math \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "MTH 108, MTH 108E, MTH 110, MTH 111, MTH 112, MTH 112E, MTH 113, MTH 115, MTH 120, MTH 125, MTH 126, MTH 227, MTH 237, MTH 238",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Sci lecture \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "See General Education Requirements Area III",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Sci lab \u2013 See GenEd Listing",
+            "credit_hours": 1,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "Matching lab for science lecture",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "History \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "IV",
+            "is_elective_slot": true,
+            "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "NHM 104",
+            "course_title": "Nutrition Today",
+            "credit_hours": 2,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "V",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "FCS 101",
+            "course_title": "Intro to the Profession",
+            "credit_hours": 2,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "ORI 102",
+            "course_title": "First Year Experience",
+            "credit_hours": 1,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "V",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "ENG 102",
+            "course_title": "Composition II",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "I",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Fine Arts \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "II",
+            "is_elective_slot": true,
+            "eligible_courses": "ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Sci lecture \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "See General Education Requirements Area III",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Sci lab \u2013 See GenEd Listing",
+            "credit_hours": 1,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "Matching lab for science lecture",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Soc/Beh Sci \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "IV",
+            "is_elective_slot": true,
+            "eligible_courses": "See General Education Requirements Area IV",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "AMD 104L",
+            "course_title": "Aesthetics in FCS",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Lit Sequence \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": "II",
+            "is_elective_slot": true,
+            "eligible_courses": "ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Economics \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": "IV",
+            "is_elective_slot": true,
+            "eligible_courses": "ECO 200, ECO 230, ECO 231",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "NRE 199",
+            "course_title": "Technology in Ag & Bio Sciences",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": "V",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "AMD 201L",
+            "course_title": "Basic Clothing Construction",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "NHM 201L",
+            "course_title": "Science of Food Preparation",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "B",
+            "footnotes": "MinGrade of B required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Elective from Areas II-IV not taken",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": "See General Education Requirements Areas II-IV",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Lit Sequence \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": "II",
+            "is_elective_slot": true,
+            "eligible_courses": "ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Soc/Beh Sci \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": "IV",
+            "is_elective_slot": true,
+            "eligible_courses": "See General Education Requirements Area IV",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "ENG 205",
+            "course_title": "General Speech",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": "II",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "NHM 105",
+            "course_title": "Princ of Nutrition",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Free Elective",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Free Elective",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Free Elective",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Concentration Course",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": "Although Concentrations are a minimum 21 hours, some may require additional hours."
+        },
+        {
+            "course_id": null,
+            "course_title": "Concentration Course",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "HDF 314",
+            "course_title": "Family & Society",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "HDF 312",
+            "course_title": "Family Economics/Resource Mgt",
+            "credit_hours": 3,
+            "semester_suggested": "junior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Free Elective",
+            "credit_hours": 3,
+            "semester_suggested": "junior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Free Elective",
+            "credit_hours": 3,
+            "semester_suggested": "junior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Concentration Course",
+            "credit_hours": 3,
+            "semester_suggested": "junior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Concentration Course",
+            "credit_hours": 3,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "FCS 418",
+            "course_title": "Directed Field Experience",
+            "credit_hours": 3,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "[CS] capstone course, cannot be substituted. MinGrade of C required."
+        },
+        {
+            "course_id": "FCS 420",
+            "course_title": "Senior Seminar",
+            "credit_hours": 1,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "[CS] capstone course, cannot be substituted. MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Free Elective",
+            "credit_hours": 3,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Concentration Course",
+            "credit_hours": 3,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Free Elective",
+            "credit_hours": 3,
+            "semester_suggested": "senior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Free Elective",
+            "credit_hours": 3,
+            "semester_suggested": "senior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Concentration Course",
+            "credit_hours": 3,
+            "semester_suggested": "senior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Concentration Course",
+            "credit_hours": 3,
+            "semester_suggested": "senior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        }
+    ],
+    "concentrations_and_minors": [
+        {
+            "name": "Apparel, Merchandising and Design",
+            "code": "AMD",
+            "type": "concentration",
+            "applicable_to": [
+                "FCS majors"
+            ],
+            "min_gpa": 2.0,
+            "min_grade": "C",
+            "total_hours": 21,
+            "required_courses": [
+                {
+                    "course_id": "AMD 102",
+                    "course_title": "Survey of Fashion Industry",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "AMD 202L",
+                    "course_title": "Intermediate Clothing Construction",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "AMD 303L",
+                    "course_title": "Flat Pattern Design",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "AMD 306",
+                    "course_title": "Fashion Merchandising",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "AMD 308",
+                    "course_title": "Historic Costume",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "AMD 314L",
+                    "course_title": "Textile Science",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "AMD 401",
+                    "course_title": "Fashion Buying",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                }
+            ],
+            "elective_pool": null,
+            "special_rules": null
+        },
+        {
+            "name": "Human Development and Family Studies",
+            "code": "HDF",
+            "type": "concentration",
+            "applicable_to": [
+                "FCS majors"
+            ],
+            "min_gpa": 2.0,
+            "min_grade": "C",
+            "total_hours": 21,
+            "required_courses": [
+                {
+                    "course_id": "HDF 204",
+                    "course_title": "Early Childhood Development",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "HDF 205",
+                    "course_title": "Individual and Family Life Cycle",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "HDF 211",
+                    "course_title": "Child Growth & Development",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "HDF 303L",
+                    "course_title": "Family Relations",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "HDF 305",
+                    "course_title": "Parenting",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "HDF 310",
+                    "course_title": "Human Sexuality",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "HDF 413",
+                    "course_title": "Family Counseling Techniques",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                }
+            ],
+            "elective_pool": null,
+            "special_rules": null
+        },
+        {
+            "name": "Nutrition and Hospitality Management \u2013 General Dietetics",
+            "code": "NHM-GD",
+            "type": "concentration",
+            "applicable_to": [
+                "FCS majors"
+            ],
+            "min_gpa": 2.0,
+            "min_grade": "C",
+            "total_hours": 21,
+            "required_courses": [
+                {
+                    "course_id": "NHM 251",
+                    "course_title": "Quantity Food Production",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 353L",
+                    "course_title": "Advanced Nutrition",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 355",
+                    "course_title": "Diet Therapy",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 357",
+                    "course_title": "Nutrition Education",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 360",
+                    "course_title": "Food Service Systems Management",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 452L",
+                    "course_title": "Experimental Foods",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 459",
+                    "course_title": "Community Nutrition",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                }
+            ],
+            "elective_pool": null,
+            "special_rules": null
+        },
+        {
+            "name": "Nutrition and Hospitality Management \u2013 Hospitality Management",
+            "code": "NHM-HM",
+            "type": "concentration",
+            "applicable_to": [
+                "FCS majors"
+            ],
+            "min_gpa": 2.0,
+            "min_grade": "C",
+            "total_hours": 21,
+            "required_courses": [
+                {
+                    "course_id": "NHM 251",
+                    "course_title": "Quantity Food Production",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 310",
+                    "course_title": "Hospitality Management I",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 311",
+                    "course_title": "Hospitality Management II",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 360",
+                    "course_title": "Food Service Systems Management",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 410",
+                    "course_title": "Advanced Hospitality Management",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 452L",
+                    "course_title": "Experimental Foods",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "NHM 459",
+                    "course_title": "Community Nutrition",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                }
+            ],
+            "elective_pool": null,
+            "special_rules": null
+        }
+    ]
+}

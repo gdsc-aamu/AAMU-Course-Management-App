@@ -1,0 +1,43 @@
+program,requirement_type,concentration_or_minor_name,semester_suggested,course_id,course_title,credit_hours,gen_ed_area,is_elective_slot,eligible_courses,min_grade,footnotes
+Mathematics,baseline,,freshman_fall,ORI 101,First Year Experience,1,V,False,,,
+Mathematics,baseline,,freshman_fall,ENG 101,Composition I,3,I,False,,C,MinGrade of C required.
+Mathematics,baseline,,freshman_fall,MTH 125,Calculus I,4,III,False,,,
+Mathematics,baseline,,freshman_fall,,Sci lecture – See GenEd Listing,3,III,True,See General Education Requirements Area III,,
+Mathematics,baseline,,freshman_fall,,Sci lab – See GenEd Listing,1,III,True,Matching lab,,
+Mathematics,baseline,,freshman_fall,,HIS – See GenEd Listing,3,IV,True,"HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",,"A six (6) hour sequence is required in either Literature or History. If Lit sequence is chosen, the second lit would be placed in one of the Hum/FA slots."
+Mathematics,baseline,,freshman_fall,,PED/MSC/HED – See GenEd Listing,2,V,True,"PED 102, PED 107, PED 111, PED 114, PED 132, PED 133, PED 137, HED 101, MSC 101, FAS 101, NHM 104",,
+Mathematics,baseline,,freshman_spring,ORI 102,First Year Experience,1,V,False,,,
+Mathematics,baseline,,freshman_spring,ENG 102,Composition II,3,I,False,,C,MinGrade of C required.
+Mathematics,baseline,,freshman_spring,,Fine Arts – See GenEd Listing,3,II,True,"ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+Mathematics,baseline,,freshman_spring,,Sci lecture – See GenEd Listing,3,III,True,See General Education Requirements Area III,,
+Mathematics,baseline,,freshman_spring,,Sci lab – See GenEd Listing,1,III,True,Matching lab,,
+Mathematics,baseline,,freshman_spring,MTH 126,Calculus II,4,III,False,,,
+Mathematics,baseline,,sophomore_fall,,Literature – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,A six (6) hour sequence is required in either Literature or History.
+Mathematics,baseline,,sophomore_fall,,Soc/Beh Sci – See GenEd Listing,3,IV,True,See General Education Requirements Area IV,,
+Mathematics,baseline,,sophomore_fall,,Economics – See GenEd Listing,3,IV,True,"ECO 200, ECO 230, ECO 231",,
+Mathematics,baseline,,sophomore_fall,,Hum/Fine Art – See GE Listing,3,II,True,"CHN 101, CHN 102, CHN 201, CHN 202, ENG 205, ENG 205H, FRE 101, FRE 102, FRE 201, FRE 202, PHL 201, PHL 203, PHL 206, SPA 101, SPA 102, SPA 201, SPA 202, ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,"Preferred but EE 109, EGC 104, ME 104 also acceptable."
+Mathematics,baseline,,sophomore_fall,MTH 227,Calculus III,4,III,False,,,
+Mathematics,baseline,,sophomore_spring,CS 102,Intro to Programming,3,V,False,,,"Preferred but EE 109, EGC 104, ME 104 also acceptable."
+Mathematics,baseline,,sophomore_spring,,Soc/Beh Sci – See GenEd Listing,3,IV,True,See General Education Requirements Area IV,,
+Mathematics,baseline,,sophomore_spring,,Hum/Fine Art – See GE Listing,3,II,True,"CHN 101, CHN 102, CHN 201, CHN 202, ENG 205, ENG 205H, FRE 101, FRE 102, FRE 201, FRE 202, PHL 201, PHL 203, PHL 206, SPA 101, SPA 102, SPA 201, SPA 202, ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+Mathematics,baseline,,sophomore_spring,MTH 237,Intro to Linear Algebra,3,,False,,C,
+Mathematics,baseline,,sophomore_spring,MTH 238,Applied Diff Equations,3,,False,,C,
+Mathematics,baseline,,junior_fall,MTH 301,Abstract Algebra I,3,,False,,C,
+Mathematics,baseline,,junior_fall,MTH 351,Intro to Real Analysis I,3,,False,,C,
+Mathematics,baseline,,junior_fall,,Minor OR 2nd Major course,3,,True,,,"If Second Major is chosen, student would take 6ch of MTH Major Elc. Disregard 'Minor Course.' If Attached Minor is chosen, student would take 12ch of MTH Major Elc. Disregard '2nd Major Course.'"
+Mathematics,baseline,,junior_fall,,Minor OR 2nd Major course,3,,True,,,
+Mathematics,baseline,,junior_spring,,Free Elective,3,,True,Any course except transitional courses,,May be applied toward fulfilling Minor/Second Major with the understanding that AGSC fulfillment comes first.
+Mathematics,baseline,,junior_spring,,MTH Major Elective,3,,True,"MTH 302 (MTH 303 or PHY 303), (MTH 324 or ST 324), (MTH 327 or ST 327), (MTH 344 or ST 344), 352, 371, 383, (MTH 444 or ST 444), 452",,
+Mathematics,baseline,,junior_spring,,Minor OR 2nd Major course,3,,True,,,
+Mathematics,baseline,,junior_spring,,Minor OR 2nd Major course,3,,True,,,
+Mathematics,baseline,,junior_spring,,Free Elective,3,,True,,,
+Mathematics,baseline,,senior_fall,,MTH Major Elective,3,,True,,C,
+Mathematics,baseline,,senior_fall,,"MTH 453, ST 453 Probability & Statistics",3,,True,MTH 453 or ST 453,,
+Mathematics,baseline,,senior_fall,,Minor OR 2nd Major course,3,,True,,,
+Mathematics,baseline,,senior_fall,,Free Elective,3,,True,,,
+Mathematics,baseline,,senior_fall,,2nd Major course OR MTH Major Elective,3,,True,,,0-3 hrs depending on Minor vs 2nd Major choice.
+Mathematics,baseline,,senior_spring,,Free Elective,3,,True,,,
+Mathematics,baseline,,senior_spring,MTH 481,Senior Project,3,,False,,C,"[CS] capstone course, cannot be substituted."
+Mathematics,baseline,,senior_spring,,Minor OR 2nd Major course,3,,True,,,
+Mathematics,baseline,,senior_spring,,Free Elective,3,,True,,,
+Mathematics,baseline,,senior_spring,,2nd Major course OR MTH Major Elective,3,,True,,,0-3 hrs depending on Minor vs 2nd Major choice.

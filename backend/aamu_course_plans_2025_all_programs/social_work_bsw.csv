@@ -1,0 +1,43 @@
+program,requirement_type,concentration_or_minor_name,semester_suggested,course_id,course_title,credit_hours,gen_ed_area,is_elective_slot,eligible_courses,min_grade,footnotes
+Social Work,baseline,,freshman_fall,ORI 101,First Year Experience,1,V,False,,,
+Social Work,baseline,,freshman_fall,ENG 101,Composition I,3,I,False,,C,MinGrade of C required.
+Social Work,baseline,,freshman_fall,,"HIS 101, 201 Sequence",3,IV,True,HIS 101 or HIS 201,,
+Social Work,baseline,,freshman_fall,BIO 101,General Biology I,3,III,False,,,
+Social Work,baseline,,freshman_fall,BIO 101L,General Biology I Lab,1,III,False,,,
+Social Work,baseline,,freshman_fall,,Fine Arts – See GenEd Listing,3,II,True,"ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+Social Work,baseline,,freshman_fall,HED 101,Personal & Community Health,2,V,False,,,
+Social Work,baseline,,freshman_spring,ORI 102,First Year Experience,1,V,False,,,
+Social Work,baseline,,freshman_spring,ENG 102,Composition II,3,I,False,,C,MinGrade of C required.
+Social Work,baseline,,freshman_spring,,"HIS 102, 202 Sequence",3,IV,True,HIS 102 or HIS 202,,
+Social Work,baseline,,freshman_spring,,Sci lecture – See GenEd Listing,3,III,True,See General Education Requirements Area III,,
+Social Work,baseline,,freshman_spring,,Sci lab – See GenEd Listing,1,III,True,Matching lab,,
+Social Work,baseline,,freshman_spring,CS 101,Fund of Comp & Info Systems,3,V,False,,,
+Social Work,baseline,,freshman_spring,,"PSC 201, 205, 206",3,IV,True,"PSC 201, PSC 205, PSC 206",,
+Social Work,baseline,,sophomore_fall,SWK 202,Intro Social Welfare & Social Work,3,,False,,C,MinGrade of C required. Prerequisites to SWK 202: Have successfully completed 31 hours of General Education and 2.5 cumulative GPA.
+Social Work,baseline,,sophomore_fall,,Literature – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,Literatures must be in a sequence.
+Social Work,baseline,,sophomore_fall,PHL 201,Intro to Philosophy,3,II,False,,,
+Social Work,baseline,,sophomore_fall,SOC 201,Intro to Sociology,3,IV,False,,,
+Social Work,baseline,,sophomore_fall,,Elem Foreign Language Sequence,3,,True,FRE 101/102 or SPA 101/102,,101/102 French or Spanish.
+Social Work,baseline,,sophomore_fall,,Math – See GenEd Listing,3,III,True,"MTH 108, MTH 108E, MTH 110, MTH 111, MTH 112, MTH 112E, MTH 113, MTH 115, MTH 120, MTH 125, MTH 126, MTH 227, MTH 237, MTH 238",,
+Social Work,baseline,,sophomore_spring,,Soc/Beh Sci – See GenEd Listing,3,IV,True,See General Education Requirements Area IV,,
+Social Work,baseline,,sophomore_spring,,Literature – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,Literatures must be in a sequence.
+Social Work,baseline,,sophomore_spring,SWK 301,Human Behavior I,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,sophomore_spring,PSY 201,General Psychology,3,IV,False,,,
+Social Work,baseline,,sophomore_spring,,Elem Foreign Language Sequence,3,,True,FRE 101/102 or SPA 101/102,,101/102 French or Spanish.
+Social Work,baseline,,junior_fall,,Hum/Fine Art – See GenEd Listing,3,II,True,"CHN 101, CHN 102, CHN 201, CHN 202, ENG 205, ENG 205H, FRE 101, FRE 102, FRE 201, FRE 202, PHL 201, PHL 203, PHL 206, SPA 101, SPA 102, SPA 201, SPA 202, ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+Social Work,baseline,,junior_fall,SWK 302,Human Behavior II,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,junior_fall,SWK 304,Diverse Populations,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,junior_fall,SWK 312,Social Work Methods I,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,junior_fall,,"SWK 205, 311",3,,True,SWK 205 or SWK 311,C,MinGrade of C required.
+Social Work,baseline,,junior_spring,ENG 304,Advanced Composition,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,junior_spring,,PSY 265/SOC 265 Elem Statistics,3,,True,PSY 265 or SOC 265,,
+Social Work,baseline,,junior_spring,SWK 313,Social Work Methods II,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,junior_spring,SOC 210,Social Problems,3,,False,,,
+Social Work,baseline,,junior_spring,SWK 305,Rural Human Services,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,senior_fall,SWK 314,Social Work Methods III,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,senior_fall,SWK 403,Social Welfare Policies,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,senior_fall,SWK 410,Social Work Research Methods,3,,False,,C,MinGrade of C required.
+Social Work,baseline,,senior_fall,,"SWK 205, 303, 308, 311, 315",3,,True,"SWK 205, SWK 303, SWK 308, SWK 311, SWK 315",C,MinGrade of C required.
+Social Work,baseline,,senior_spring,SWK 414,Field Instruction,8,,False,,C,"[CS] capstone course, cannot be substituted."
+Social Work,baseline,,senior_spring,SWK 414L,Field Instruction Seminar,3,,False,,C,"[CS] capstone course, cannot be substituted."
+Social Work,baseline,,senior_spring,SWK 415,Senior Seminar Research,2,,False,,C,"[CS] capstone course, cannot be substituted."

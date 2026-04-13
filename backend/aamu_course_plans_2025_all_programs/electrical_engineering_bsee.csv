@@ -1,0 +1,99 @@
+program,requirement_type,concentration_or_minor_name,semester_suggested,course_id,course_title,credit_hours,gen_ed_area,is_elective_slot,eligible_courses,min_grade,footnotes
+Electrical Engineering,baseline,,freshman_fall,ORI 101,First Year Experience,1,V,False,,,
+Electrical Engineering,baseline,,freshman_fall,ENG 101,Composition I,3,I,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,freshman_fall,MTH 125,Calculus I,4,III,False,,,
+Electrical Engineering,baseline,,freshman_fall,CHE 101,General Chemistry I,3,III,False,,,
+Electrical Engineering,baseline,,freshman_fall,CHE 101L,General Chemistry I Lab,1,III,False,,,
+Electrical Engineering,baseline,,freshman_fall,EE 101,Intro to Electrical Engineering,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,freshman_fall,,PED/MSC/HED Elective,2,V,True,See General Education Requirements Area V,,See General Education Requirements section for eligible courses.
+Electrical Engineering,baseline,,freshman_spring,ORI 102,First Year Experience,1,V,False,,,
+Electrical Engineering,baseline,,freshman_spring,ENG 102,Composition II,3,I,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,freshman_spring,MTH 126,Calculus II,4,III,False,,,
+Electrical Engineering,baseline,,freshman_spring,PHY 213,General Physics with Calculus I,4,III,False,,,
+Electrical Engineering,baseline,,freshman_spring,EE 109,Engineering Computing,3,V,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,freshman_spring,,HIS Sequence,3,IV,True,"HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",,See General Education Requirements section for eligible courses.
+Electrical Engineering,baseline,,sophomore_fall,,HIS Sequence,3,IV,True,"HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",,See General Education Requirements section for eligible courses.
+Electrical Engineering,baseline,,sophomore_fall,MTH 227,Calculus III,4,,False,,,
+Electrical Engineering,baseline,,sophomore_fall,PHY 214,General Physics with Calculus II,4,III,False,,,
+Electrical Engineering,baseline,,sophomore_fall,EE 201,Linear Circuit Analysis I,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,sophomore_fall,EE 201L,Linear Circuit Analysis I Lab,1,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,sophomore_fall,,Fine Arts Elective,3,II,True,"ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,See General Education Requirements section for eligible courses.
+Electrical Engineering,baseline,,sophomore_spring,,Literature Elective,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,See General Education Requirements section for eligible courses.
+Electrical Engineering,baseline,,sophomore_spring,MTH 238,Applied Differential Equations,3,,False,,,
+Electrical Engineering,baseline,,sophomore_spring,EE 202,Linear Circuit Analysis II,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,sophomore_spring,EE 203,Analog Circuit Design/Analysis I,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,sophomore_spring,EE 203L,Analog Circuit Design/Analysis I Lab,1,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,sophomore_spring,EE 204,Digital Circuit Design/Analysis,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,junior_fall,EE 301,Signals & Systems I,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,junior_fall,,Restricted Elective,3,,True,"EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, >= ME 2xx except 481, >= CE 2xx",,"Restricted electives limited to EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, (>= ME 2xx except 481 or >= CE 2xx) within each concentration."
+Electrical Engineering,baseline,,junior_fall,EE 320,Computer Architecture,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,junior_fall,EE 320L,Digital Systems Lab,1,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,junior_fall,EE 333,Analog Circuit Design/Analysis II,3,,False,,,
+Electrical Engineering,baseline,,junior_fall,,Economics Elective,3,IV,True,"ECO 200, ECO 230, ECO 231",,See General Education Requirements section for eligible courses.
+Electrical Engineering,baseline,,junior_spring,,Concentration Course,3,,True,"From selected EE concentration (VLSI, CME, General, Nuclear Power)",,
+Electrical Engineering,baseline,,junior_spring,,Restricted Elective,3,,True,"EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, >= ME 2xx except 481, >= CE 2xx",,Restricted electives per concentration rules.
+Electrical Engineering,baseline,,junior_spring,EE 304,Numerical Methods/Digital Comp,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,junior_spring,EE 330,Microprocessors,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,junior_spring,,Concentration Course,3,,True,From selected EE concentration,,
+Electrical Engineering,baseline,,junior_spring,,Restricted Elective,3,,True,"EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, >= ME 2xx except 481, >= CE 2xx",,Restricted electives per concentration rules.
+Electrical Engineering,baseline,,senior_fall,,Concentration Lab Course OR eligible 5xx-6xx grad course (if in 5-yr prgm),3,,True,From selected concentration or 5xx-6xx with MinGrade B if in 5-yr program,,
+Electrical Engineering,baseline,,senior_fall,EE 403,Feedback System Analysis/Design,3,,False,,C,MinGrade of C required.
+Electrical Engineering,baseline,,senior_fall,,Concentration Course OR eligible 5xx-6xx grad course (if in 5-yr prgm),3,,True,From selected concentration or 5xx-6xx with MinGrade B,,
+Electrical Engineering,baseline,,senior_fall,,Humanities Elective,3,II,True,See General Education Requirements Area II Humanities list,,See General Education Requirements section for eligible courses.
+Electrical Engineering,baseline,,senior_fall,,Concentration Course OR eligible 5xx-6xx grad course (if in 5-yr prgm),3,,True,From selected concentration or 5xx-6xx with MinGrade B,,
+Electrical Engineering,baseline,,senior_spring,,Concentration Course,3,,True,From selected concentration,,
+Electrical Engineering,baseline,,senior_spring,,Restricted Elective,3,,True,"EE 303, EE 305, EE 306, EE 307, EE 308, EE 404, >= ME 2xx except 481, >= CE 2xx",,
+Electrical Engineering,baseline,,senior_spring,,Concentration Course,3,,True,From selected concentration,,
+Electrical Engineering,baseline,,senior_spring,,"MTH 237, 303, 452, (MTH 453 or ST 453), PHY 303",3,,True,MTH 237; MTH 303; MTH 452; MTH 453; ST 453; PHY 303,,Choose one advanced math/physics course.
+Electrical Engineering,concentration,Microelectronic-VLSI,,EE 303,Electromagnetic Field Theory,3,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,EE 305,Semiconductor Engineering I,3,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,,EE 340L or 360L,1,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,EE 350,VLSI Design & Testing,3,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,EE 404,Communication Theory,3,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,EE 431,Semiconductor Engg II (or EE 531 Adv Semiconductor Engg w/ MinGrd B if in 5-yr prgm),3,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,EE 451,Integrated Circuit Fabrication (or EE 551 w/ MinGrd B if in 5-yr prgm),3,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,EE 451L,Integrated Circuit Fab Lab,1,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,EE 470,Engg Analysis & Design I [CS],2,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,EE 471,Engg Analysis & Design II [CS],2,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,,EE 4xx not already required (or EE 5xx-6xx w/ MinGrd B if in 5-yr prgm),3,,False,,C,
+Electrical Engineering,concentration,Microelectronic-VLSI,,ME 481,Quality & Reliability Assurance,3,,False,,C,(3) overlap with baseline restricted elective
+Electrical Engineering,concentration,Microelectronic-VLSI,,,>= ME 2xx except 481 OR >= CE 2xx,3,,False,,C,(3) overlap with baseline restricted elective
+Electrical Engineering,concentration,Computer Engineering,,CS 215,Data Structures,3,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,CS 384,Operating Systems,3,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,,CS 4xx not already required (or CS 5xx-6xx w/ MinGrd B if in 5-yr prgm),3,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,EE 303,Electromagnetic Field Theory,3,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,EE 305,Semiconductor Engineering I,3,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,,EE 340L or 360L,1,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,,EE 350 or EE 4xx not already required (or EE 5xx-6xx w/ MinGrd B if in 5-yr prgm),3,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,EE 404,Communication Theory (or EE 504 w/ MinGrd B if in 5-yr prgm),3,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,EE 405L,Simulation Techniques,1,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,EE 470,Engg Analysis & Design I [CS],2,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,EE 471,Engg Analysis & Design II [CS],2,,False,,C,
+Electrical Engineering,concentration,Computer Engineering,,ME 481,Quality & Reliability Assurance,3,,False,,C,(3) overlap with baseline restricted elective
+Electrical Engineering,concentration,Computer Engineering,,,>= ME 2xx except 481 OR >= CE 2xx,3,,False,,C,(3) overlap with baseline restricted elective
+Electrical Engineering,concentration,General,,EE 303,Electromagnetic Field Theory,3,,False,,C,
+Electrical Engineering,concentration,General,,EE 305,Semiconductor Engineering I,3,,False,,C,
+Electrical Engineering,concentration,General,,,EE 340L or 360L,1,,False,,C,
+Electrical Engineering,concentration,General,,,EE 350 or EE 4xx not already required,3,,False,,C,
+Electrical Engineering,concentration,General,,EE 404,Communication Theory,3,,False,,C,
+Electrical Engineering,concentration,General,,EE 405L,Simulation Techniques,1,,False,,C,
+Electrical Engineering,concentration,General,,EE 410,Microwave Engineering,3,,False,,C,
+Electrical Engineering,concentration,General,,EE 470,Engg Analysis & Design I [CS],2,,False,,C,
+Electrical Engineering,concentration,General,,EE 471,Engg Analysis & Design II [CS],2,,False,,C,
+Electrical Engineering,concentration,General,,,EE 4xx not already required,3,,False,,C,
+Electrical Engineering,concentration,General,,,EE 4xx not already required,3,,False,,C,
+Electrical Engineering,concentration,General,,ME 481,Quality & Reliability Assurance,3,,False,,C,(3) overlap
+Electrical Engineering,concentration,General,,,>= ME 2xx except 481 OR >= CE 2xx,3,,False,,C,(3) overlap
+Electrical Engineering,concentration,Nuclear Power,,EE 303,Electromagnetic Field Theory,3,,False,,C,(3) overlap
+Electrical Engineering,concentration,Nuclear Power,,EE 306,Survey of Energy Systems,3,,False,,C,(3) overlap
+Electrical Engineering,concentration,Nuclear Power,,EE 307,Fund of Nuclear Engg (also ME 307),3,,False,,C,(3) overlap
+Electrical Engineering,concentration,Nuclear Power,,EE 308,Thermal Systems Engg,3,,False,,C,(3) overlap
+Electrical Engineering,concentration,Nuclear Power,,EE 340L,Energy Conversion Laboratory,1,,False,,C,
+Electrical Engineering,concentration,Nuclear Power,,EE 405L,Simulation Techniques,1,,False,,C,
+Electrical Engineering,concentration,Nuclear Power,,EE 420,Power Systems I,3,,False,,C,
+Electrical Engineering,concentration,Nuclear Power,,EE 421,Power Systems II,3,,False,,C,
+Electrical Engineering,concentration,Nuclear Power,,EE 460,Nuclear Reactor Engg I (also ME 460),3,,False,,C,
+Electrical Engineering,concentration,Nuclear Power,,EE 461,Nuclear Reactor Engg II (also ME 461),3,,False,,C,
+Electrical Engineering,concentration,Nuclear Power,,EE 470,Engg Analysis & Design I [CS],2,,False,,C,
+Electrical Engineering,concentration,Nuclear Power,,EE 471,Engg Analysis & Design II [CS],2,,False,,C,
+Electrical Engineering,concentration,Nuclear Power,,ME 481,Quality & Reliability Assurance,3,,False,,C,

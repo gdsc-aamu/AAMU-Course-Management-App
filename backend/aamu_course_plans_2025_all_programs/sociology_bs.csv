@@ -1,0 +1,44 @@
+program,requirement_type,concentration_or_minor_name,semester_suggested,course_id,course_title,credit_hours,gen_ed_area,is_elective_slot,eligible_courses,min_grade,footnotes
+Sociology,baseline,,freshman_fall,ORI 101,First Year Experience,1,V,False,,,
+Sociology,baseline,,freshman_fall,ENG 101,Composition I,3,I,False,,C,MinGrade of C required.
+Sociology,baseline,,freshman_fall,,Math – See GenEd Listing,3,III,True,"MTH 108, MTH 108E, MTH 110, MTH 111, MTH 112, MTH 112E, MTH 113, MTH 115, MTH 120, MTH 125, MTH 126, MTH 227, MTH 237, MTH 238",,
+Sociology,baseline,,freshman_fall,,Sci lecture – See GenEd Listing,3,III,True,See General Education Requirements Area III,,
+Sociology,baseline,,freshman_fall,,Sci lab – See GenEd Listing,1,III,True,Matching lab for science lecture,,
+Sociology,baseline,,freshman_fall,,History – See GenEd Listing,3,IV,True,"HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",,
+Sociology,baseline,,freshman_fall,,PED/MSC/HED – See GenEd Listing,2,V,True,"PED 102, PED 107, PED 111, PED 114, PED 132, PED 133, PED 137, HED 101, MSC 101, FAS 101, NHM 104",,
+Sociology,baseline,,freshman_spring,ORI 102,First Year Experience,1,V,False,,,
+Sociology,baseline,,freshman_spring,ENG 102,Composition II,3,I,False,,C,MinGrade of C required.
+Sociology,baseline,,freshman_spring,,Fine Arts – See GenEd Listing,3,II,True,"ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",,
+Sociology,baseline,,freshman_spring,,Sci lecture – See GenEd Listing,3,III,True,See General Education Requirements Area III,,
+Sociology,baseline,,freshman_spring,,Sci lab – See GenEd Listing,1,III,True,Matching lab for science lecture,,
+Sociology,baseline,,freshman_spring,,"CS 101, 102, 104, MIS 213",3,V,True,"CS 101, CS 102, CS 104, or MIS 213",,
+Sociology,baseline,,sophomore_fall,,Lit Sequence – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,
+Sociology,baseline,,sophomore_fall,SOC 201,Intro to Sociology,3,,False,,C,MinGrade of C required.
+Sociology,baseline,,sophomore_fall,GEO 214,World Regional Geography,3,,False,,,
+Sociology,baseline,,sophomore_fall,,"HIS 101, 102",3,IV,True,HIS 101 or HIS 102,,
+Sociology,baseline,,sophomore_fall,,SOC Major Elective,3,,True,SOC 3xx-4xx,C,MinGrade of C required.
+Sociology,baseline,,sophomore_spring,,Lit Sequence – See GenEd Listing,3,II,True,"ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",,
+Sociology,baseline,,sophomore_spring,SOC 210,Social Problems,3,,False,,C,MinGrade of C required.
+Sociology,baseline,,sophomore_spring,ENG 205,General Speech,3,II,False,,,
+Sociology,baseline,,sophomore_spring,,Economics – See GenEd Listing,3,IV,True,"ECO 200, ECO 230, ECO 231",,
+Sociology,baseline,,sophomore_spring,,PHL Elective,3,II,True,"PHL 201, PHL 203, PHL 206",,
+Sociology,baseline,,junior_fall,ENG 304,Advanced Composition,3,,False,,,
+Sociology,baseline,,junior_fall,,"SOC 265/PSY 265, ECO 271",3,,True,"SOC 265, PSY 265, or ECO 271",C,MinGrade of C required.
+Sociology,baseline,,junior_fall,,SOC Major Elective,3,,True,SOC 3xx-4xx,C,MinGrade of C required.
+Sociology,baseline,,junior_fall,HIS 204,Intro to African American History,3,,False,,,
+Sociology,baseline,,junior_fall,,Minor Course,3,,True,,,"Although minors are a minimum 18 hours, some may require additional 1-2 hours."
+Sociology,baseline,,junior_spring,,SOC Major Elective,3,,True,SOC 3xx-4xx,C,MinGrade of C required.
+Sociology,baseline,,junior_spring,,SOC Major Elective,3,,True,SOC 3xx-4xx,C,MinGrade of C required.
+Sociology,baseline,,junior_spring,,Minor Course,3,,True,,,
+Sociology,baseline,,junior_spring,,Minor Course,3,,True,,,
+Sociology,baseline,,junior_spring,,Minor Course,3,,True,,,
+Sociology,baseline,,junior_spring,DSS 390,Dept of Soc Sciences ELO,3,,False,,C,[CS] capstone course.
+Sociology,baseline,,senior_fall,SOC 212,Marriage and the Family,3,,False,,C,MinGrade of C required.
+Sociology,baseline,,senior_fall,SOC 441,Sociological Theory,3,,False,,C,MinGrade of C required.
+Sociology,baseline,,senior_fall,,Free Elective,3,,True,Any course except transitional courses,,
+Sociology,baseline,,senior_fall,HIS 304,Studies in African American History,3,,False,,,
+Sociology,baseline,,senior_fall,,Minor Course,3,,True,,,
+Sociology,baseline,,senior_spring,,SOC 443/CRJ 443/PSC 443,3,,True,"SOC 443, CRJ 443, or PSC 443",C,MinGrade of C required.
+Sociology,baseline,,senior_spring,SOC 450,Senior Seminar,3,,False,,C,"[CS] capstone course, cannot be substituted."
+Sociology,baseline,,senior_spring,PSC 310,African American Politics,3,,False,,,
+Sociology,baseline,,senior_spring,,Minor Course,3,,True,,,

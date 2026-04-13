@@ -1,0 +1,879 @@
+{
+  "program_metadata": {
+    "program_name": "Biology",
+    "degree_type": "Bachelor of Science",
+    "degree_abbreviation": "BS",
+    "department": "Department of Biological Sciences",
+    "department_code": "BIO",
+    "college": "College of Agricultural, Life and Natural Sciences",
+    "college_abbreviation": "CALNS",
+    "total_credit_hours": 123,
+    "accreditation": null,
+    "four_plus_one_available": false,
+    "four_plus_one_note": null,
+    "admission_requirements": [
+      "Meet all University admission requirements"
+    ],
+    "graduation_requirements": [
+      "Complete University General Education Curriculum requirements",
+      "Complete Department and Major Curriculum requirements",
+      "Complete minimum 123 credit hours",
+      "Grade of C or better in all BIO-prefix courses",
+      "Must earn at least 25% of credit hours at AAMU",
+      "Must earn at least 50% of major coursework at AAMU",
+      "Take departmental Exit Exam in senior year and achieve passing score of 125",
+      "Pre-Professional Health majors must have >= 3.0 GPA upon entering second semester freshman portion"
+    ],
+    "capstone_courses": [],
+    "capstone_rule": "No capstone course designated in baseline Biology curriculum.",
+    "mutually_exclusive_courses": [
+      {
+        "course_a": "BIO 101",
+        "course_b": "BIO 103"
+      },
+      {
+        "course_a": "BIO 102",
+        "course_b": "BIO 104"
+      },
+      {
+        "course_a": "PHY 201",
+        "course_b": "PHY 213"
+      },
+      {
+        "course_a": "PHY 202",
+        "course_b": "PHY 214"
+      }
+    ],
+    "overlap_counting_rule": "Parenthesized hours indicate overlap with baseline.",
+    "gen_ed_area_ii_exception": null,
+    "gen_ed_area_iv_exception": null
+  },
+  "baseline_curriculum": [
+    {
+      "course_id": "ORI 101",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 101",
+      "course_title": "Composition I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Math Elective (See GenEd except MTH 110)",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": true,
+      "eligible_courses": "Any GenEd Math except MTH 110",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section. MTH 110 excluded."
+    },
+    {
+      "course_id": "BIO 103",
+      "course_title": "Principles of Biology",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 103L",
+      "course_title": "Principles of Biology Lab",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "HIS Sequence",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "HED 101, MSC 101, or PED 102",
+      "credit_hours": 2,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": true,
+      "eligible_courses": [
+        "HED 101",
+        "MSC 101",
+        "PED 102"
+      ],
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "BIO 100",
+      "course_title": "Careers in Life Science",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ORI 102",
+      "course_title": "First Year Experience",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "V",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "ENG 102",
+      "course_title": "Composition II",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "I",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Fine Arts Elective",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "BIO 203 or BIO 204 (Gen Botany I or II)",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": [
+        "BIO 203",
+        "BIO 204"
+      ],
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required. MinGrade of D for non-BIO courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "BIO 203L or BIO 204L (Gen Botany Lab)",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": [
+        "BIO 203L",
+        "BIO 204L"
+      ],
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Hum/Fine Art Elective",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area II",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "BIO 221",
+      "course_title": "Human Anatomy/Physiology I",
+      "credit_hours": 3,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 221L",
+      "course_title": "Human Anat/Phys Lab I",
+      "credit_hours": 1,
+      "semester_suggested": "freshman_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Literature Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ENG 201-208 series",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Economics Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "ECO 200, ECO 230, ECO 231",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Computer Literacy (NRE 199 or CS 101)",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "V",
+      "is_elective_slot": true,
+      "eligible_courses": [
+        "NRE 199",
+        "CS 101"
+      ],
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 101",
+      "course_title": "General Chemistry I",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 101L",
+      "course_title": "General Chemistry I Lab",
+      "credit_hours": 1,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "MTH 113",
+      "course_title": "Pre-Calculus Trigonometry",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": null,
+      "course_title": "HIS Sequence",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "HIS 101-202 series",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Social/Behavioral Science Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "IV",
+      "is_elective_slot": true,
+      "eligible_courses": "PSY 201, SOC 201, etc.",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Hum/Fine Art Elective",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "See General Education Requirements Area II",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": null,
+      "course_title": "Literature Elective (Area II sequence)",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "II",
+      "is_elective_slot": true,
+      "eligible_courses": "ENG 201-208 series",
+      "min_grade": null,
+      "footnotes": "See General Education Requirements section for eligible courses."
+    },
+    {
+      "course_id": "CHE 102",
+      "course_title": "General Chemistry II",
+      "credit_hours": 3,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "CHE 102L",
+      "course_title": "General Chemistry II Lab",
+      "credit_hours": 1,
+      "semester_suggested": "sophomore_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": "PHY 213",
+      "course_title": "General Physics with Calculus I",
+      "credit_hours": 4,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": "CHE 251",
+      "course_title": "Organic Chemistry I",
+      "credit_hours": 3,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": "CHE 251L",
+      "course_title": "Organic Chemistry I Lab",
+      "credit_hours": 1,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": "MTH 125",
+      "course_title": "Calculus I",
+      "credit_hours": 4,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": null,
+      "course_title": "BIO Major Elective",
+      "credit_hours": 4,
+      "semester_suggested": "junior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "See Recommended Biology Elective Courses list",
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "PHY 214",
+      "course_title": "General Physics with Calculus II",
+      "credit_hours": 4,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": "III",
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": "CHE 252",
+      "course_title": "Organic Chemistry II",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": "CHE 252L",
+      "course_title": "Organic Chemistry II Lab",
+      "credit_hours": 1,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": "BIO 222",
+      "course_title": "Human Anatomy/Physiology II",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 222L",
+      "course_title": "Human Anat/Phys Lab II",
+      "credit_hours": 1,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 311",
+      "course_title": "Genetics",
+      "credit_hours": 3,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 311L",
+      "course_title": "Genetics Lab",
+      "credit_hours": 1,
+      "semester_suggested": "junior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 330",
+      "course_title": "Microbiology",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 330L",
+      "course_title": "Microbiology Lab",
+      "credit_hours": 1,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 411",
+      "course_title": "Cell and Molecular Biology",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 411L",
+      "course_title": "Cell and Molecular Biology Lab",
+      "credit_hours": 1,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "CHE 407",
+      "course_title": "Biochemistry",
+      "credit_hours": 3,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": "CHE 407L",
+      "course_title": "Biochemistry Lab",
+      "credit_hours": 1,
+      "semester_suggested": "senior_fall",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "D",
+      "footnotes": "MinGrade of D required."
+    },
+    {
+      "course_id": "BIO 434",
+      "course_title": "Physiology",
+      "credit_hours": 3,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": "BIO 434L",
+      "course_title": "Physiology Lab",
+      "credit_hours": 1,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": false,
+      "eligible_courses": null,
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    },
+    {
+      "course_id": null,
+      "course_title": "Free Elective",
+      "credit_hours": 4,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "Any course except transitional courses",
+      "min_grade": null,
+      "footnotes": null
+    },
+    {
+      "course_id": null,
+      "course_title": "BIO Major Elective",
+      "credit_hours": 4,
+      "semester_suggested": "senior_spring",
+      "gen_ed_area": null,
+      "is_elective_slot": true,
+      "eligible_courses": "See Recommended Biology Elective Courses list",
+      "min_grade": "C",
+      "footnotes": "MinGrade of C required."
+    }
+  ],
+  "concentrations_and_minors": [
+    {
+      "name": "Environmental Health",
+      "code": "EVH",
+      "type": "concentration",
+      "applicable_to": [
+        "Biology"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": "21-22",
+      "required_courses": [
+        {
+          "course_id": "BIO 200",
+          "course_title": "Environmental Biology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "BIO 223",
+          "course_title": "Intro to Environmental Health",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "BIO 324",
+          "course_title": "Ecotoxicology I/Env Toxicology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "BIO 433",
+          "course_title": "Fundamentals of Epidemiology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": "Prereq: Applied Statistics (MTH 324, MTH 355, ST 324, or ST 355)"
+        },
+        {
+          "course_id": "BIO 490",
+          "course_title": "Biology Internships",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "NRE 486",
+          "course_title": "Environmental Policy and Law",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "Choose one",
+          "credit_hours": "3-4",
+          "eligible_courses": [
+            "BIO 205",
+            "BIO 321/L",
+            "BIO 430/L",
+            "BIO 450",
+            "MTH 355/ST 355",
+            "SOC 265/PSY 265"
+          ]
+        }
+      ],
+      "special_rules": "MinGrade C in NRE course prerequisites."
+    },
+    {
+      "name": "Pre-Nursing",
+      "code": "PNR",
+      "type": "concentration",
+      "applicable_to": [
+        "Biology"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 23,
+      "required_courses": [
+        {
+          "course_id": "BIO 221/L",
+          "course_title": "Human Anat & Phys I & Lab",
+          "credit_hours": 4,
+          "overlaps_with_baseline": true,
+          "overlap_note": "Overlaps with baseline BIO 221/221L"
+        },
+        {
+          "course_id": "BIO 222/L",
+          "course_title": "Human Anat & Phys II & Lab",
+          "credit_hours": 4,
+          "overlaps_with_baseline": true,
+          "overlap_note": "Overlaps with baseline BIO 222/222L"
+        },
+        {
+          "course_id": null,
+          "course_title": "PSY 265 or SOC 265 Elementary Statistics",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "ENG 205",
+          "course_title": "General Speech",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "SOC 201",
+          "course_title": "Introduction to Sociology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "PHL 201",
+          "course_title": "Introduction to Philosophy",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "HDF 211",
+          "course_title": "Child Growth & Development",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [],
+      "special_rules": "Two-year pre-nursing program. Upon completion, student transfers to partnered nursing school (Emory, UAB, UAH, UNA)."
+    },
+    {
+      "name": "Pre-Professional Health",
+      "code": "PPHB",
+      "type": "concentration",
+      "applicable_to": [
+        "Biology"
+      ],
+      "min_gpa": 3.0,
+      "min_grade": "C",
+      "total_hours": 21,
+      "required_courses": [],
+      "elective_pool": [
+        {
+          "slot_name": "Choose 21 hours from list",
+          "credit_hours": 21,
+          "eligible_courses": [
+            "BIO 340/L",
+            "BIO 430/L",
+            "BIO 431/L",
+            "BIO 471",
+            "CHE 408/L",
+            "MTH 126",
+            "SOC 327 or SOC 201"
+          ]
+        }
+      ],
+      "special_rules": "MinGPA 3.0 cumulative, major, and concentration required."
+    },
+    {
+      "name": "Biology Minor",
+      "code": "BIO",
+      "type": "minor",
+      "applicable_to": [
+        "Non-BIO majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 20,
+      "required_courses": [
+        {
+          "course_id": "BIO 103",
+          "course_title": "Principles of Biology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "BIO 103L",
+          "course_title": "Principles of Biology Lab",
+          "credit_hours": 1,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "4 Lec/Lab courses (2 at 2xx, 1 at 3xx, 1 at 4xx level)",
+          "credit_hours": 16,
+          "eligible_courses": [
+            "BIO 202/L",
+            "BIO 203/L",
+            "BIO 204/L",
+            "BIO 221/L",
+            "BIO 222/L",
+            "BIO 330/L",
+            "BIO 340/L",
+            "BIO 411/L",
+            "BIO 434/L"
+          ]
+        }
+      ],
+      "special_rules": null
+    },
+    {
+      "name": "Environmental Health Minor",
+      "code": "EVH",
+      "type": "minor",
+      "applicable_to": [
+        "Non-BIO majors"
+      ],
+      "min_gpa": 2.0,
+      "min_grade": "C",
+      "total_hours": 18,
+      "required_courses": [
+        {
+          "course_id": "BIO 223",
+          "course_title": "Intro to Environmental Health",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "BIO 490",
+          "course_title": "Biology Internships",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": null
+        },
+        {
+          "course_id": "BIO 433",
+          "course_title": "Fundamentals of Epidemiology",
+          "credit_hours": 3,
+          "overlaps_with_baseline": false,
+          "overlap_note": "Prereq: Applied Statistics"
+        }
+      ],
+      "elective_pool": [
+        {
+          "slot_name": "Electives to reach 18 hour minimum",
+          "credit_hours": 9,
+          "eligible_courses": [
+            "BIO 200",
+            "BIO 205",
+            "BIO 321/L",
+            "BIO 324",
+            "BIO 330/L",
+            "BIO 430/L",
+            "BIO 450",
+            "NRE 453",
+            "NRE 486",
+            "MTH 355/ST 355",
+            "PSY 265/SOC 265"
+          ]
+        }
+      ],
+      "special_rules": "MinGrade C in NRE course prerequisites."
+    }
+  ]
+}

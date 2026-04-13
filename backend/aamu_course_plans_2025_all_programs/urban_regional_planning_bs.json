@@ -1,0 +1,708 @@
+{
+    "program_metadata": {
+        "program_name": "Urban and Regional Planning",
+        "degree_type": "Bachelor of Science",
+        "degree_abbreviation": "BS",
+        "department": "Department of Community and Regional Planning",
+        "department_code": "URP",
+        "college": "College of Agricultural, Life and Natural Sciences",
+        "college_abbreviation": "CALNS",
+        "total_credit_hours": 123,
+        "accreditation": null,
+        "four_plus_one_available": true,
+        "four_plus_one_note": "Apply for admission to 5-year program at the beginning of second semester, junior year.",
+        "admission_requirements": [
+            "Meet all University admission requirements"
+        ],
+        "graduation_requirements": [
+            "Complete University General Education Curriculum requirements",
+            "Complete Department and Major Curriculum requirements",
+            "Complete minimum 123 credit hours",
+            "Grade of C or better required where noted",
+            "MinGrade of B required for 5-yr program courses",
+            "Must earn at least 25% of credit hours at AAMU",
+            "Must earn at least 50% of major coursework at AAMU"
+        ],
+        "capstone_courses": [
+            "UPL 420"
+        ],
+        "capstone_rule": "[CS] = capstone course and cannot be substituted.",
+        "mutually_exclusive_courses": [],
+        "overlap_counting_rule": null,
+        "gen_ed_area_ii_exception": null,
+        "gen_ed_area_iv_exception": null
+    },
+    "baseline_curriculum": [
+        {
+            "course_id": "ORI 101",
+            "course_title": "First Year Experience",
+            "credit_hours": 1,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "V",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "ENG 101",
+            "course_title": "Composition I",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "I",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Computer Lit \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "V",
+            "is_elective_slot": true,
+            "eligible_courses": "ART 103, CMG 225, CS 101, CS 102, CS 104, EE 109, EGC 104, FED 215, ME 104, MIS 213, NRE 199",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Sci lecture \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "See General Education Requirements Area III",
+            "min_grade": null,
+            "footnotes": "Lecture and Lab must match."
+        },
+        {
+            "course_id": null,
+            "course_title": "Sci lab \u2013 See GenEd Listing",
+            "credit_hours": 1,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "Matching lab for science lecture",
+            "min_grade": null,
+            "footnotes": "Lecture and Lab must match."
+        },
+        {
+            "course_id": "UPL 103",
+            "course_title": "Community and You",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "IV",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "NHM 104, FAS 101, HED 101",
+            "credit_hours": 2,
+            "semester_suggested": "freshman_fall",
+            "gen_ed_area": "V",
+            "is_elective_slot": true,
+            "eligible_courses": "NHM 104, FAS 101, HED 101",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "ORI 102",
+            "course_title": "First Year Experience",
+            "credit_hours": 1,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "V",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "ENG 102",
+            "course_title": "Composition II",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "I",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Fine Arts \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "II",
+            "is_elective_slot": true,
+            "eligible_courses": "ART 101, MUS 101, ART 220, ART 221, COMM 101, UPL 102",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Sci lecture \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "See General Education Requirements Area III",
+            "min_grade": null,
+            "footnotes": "Lecture and Lab must match."
+        },
+        {
+            "course_id": null,
+            "course_title": "Sci lab \u2013 See GenEd Listing",
+            "credit_hours": 1,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "Matching lab for science lecture",
+            "min_grade": null,
+            "footnotes": "Lecture and Lab must match."
+        },
+        {
+            "course_id": null,
+            "course_title": "Math \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "III",
+            "is_elective_slot": true,
+            "eligible_courses": "MTH 108, MTH 108E, MTH 110, MTH 111, MTH 112, MTH 112E, MTH 113, MTH 115, MTH 120, MTH 125, MTH 126, MTH 227, MTH 237, MTH 238",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "History \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "freshman_spring",
+            "gen_ed_area": "IV",
+            "is_elective_slot": true,
+            "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Lit Sequence \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": "II",
+            "is_elective_slot": true,
+            "eligible_courses": "ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Soc/Beh Sci \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": "IV",
+            "is_elective_slot": true,
+            "eligible_courses": "See General Education Requirements Area IV",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "PSC 206",
+            "course_title": "State and Local Government",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": "IV",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "UPL 203",
+            "course_title": "History & Theory of Planning",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "UPL 101",
+            "course_title": "Intro to Urban Planning",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Lit Sequence \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": "II",
+            "is_elective_slot": true,
+            "eligible_courses": "ENG 201, ENG 202, ENG 203, ENG 203H, ENG 204, ENG 204H, ENG 207, ENG 208",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Soc/Beh Sci \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": "IV",
+            "is_elective_slot": true,
+            "eligible_courses": "See General Education Requirements Area IV",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "ENG 205",
+            "course_title": "General Speech",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": "II",
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "History \u2013 See GenEd Listing",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": "IV",
+            "is_elective_slot": true,
+            "eligible_courses": "HIS 101, HIS 101E, HIS 101H, HIS 102, HIS 102H, HIS 201, HIS 202",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "UPL 250",
+            "course_title": "Basic Planning Studies",
+            "credit_hours": 3,
+            "semester_suggested": "sophomore_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "UPL 275",
+            "course_title": "Statistics for Urban Planning",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "UPL 301",
+            "course_title": "Drawing for Visual & Planners",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "UPL 317",
+            "course_title": "Studio I: Graphic and Site Design",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "UPL 404",
+            "course_title": "Social Issues in Planning",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Free Elective",
+            "credit_hours": 3,
+            "semester_suggested": "junior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": "Any course except transitional courses",
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": "UPL 350",
+            "course_title": "Research Methods and Design",
+            "credit_hours": 3,
+            "semester_suggested": "junior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "UPL 327",
+            "course_title": "Land Use Planning",
+            "credit_hours": 3,
+            "semester_suggested": "junior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": "UPL 357",
+            "course_title": "Studio II: Comprehensive Planning",
+            "credit_hours": 3,
+            "semester_suggested": "junior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required."
+        },
+        {
+            "course_id": null,
+            "course_title": "Minor Course",
+            "credit_hours": 3,
+            "semester_suggested": "junior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": "Although minors are a minimum 18 hours, some may require additional 1-2 hours. Please check the Bulletin."
+        },
+        {
+            "course_id": null,
+            "course_title": "Minor Course",
+            "credit_hours": 3,
+            "semester_suggested": "junior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "UPL 310 or URP 531 (if in 5-yr prgm)",
+            "credit_hours": 3,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": "UPL 310 Urban Economic Analysis OR URP 531 Econ & Pop Anal (if in 5-yr prgm)",
+            "min_grade": "C",
+            "footnotes": "MinGrade of C required. MinGrade of B required for 5-yr prgm courses."
+        },
+        {
+            "course_id": null,
+            "course_title": "NRE 365 or URP 526 (if in 5-yr prgm)",
+            "credit_hours": 3,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": "NRE 365 Intro Geographic Info Systems OR URP 526 Comp Appl in Plan (if in 5-yr prgm)",
+            "min_grade": "C",
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "UPL 407 or URP 520 (if in 5-yr prgm)",
+            "credit_hours": 3,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": "UPL 407 Legal Basis of Planning OR URP 520 Plan Legis/Zoning (if in 5-yr prgm)",
+            "min_grade": "C",
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Minor Course",
+            "credit_hours": 3,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Minor Course",
+            "credit_hours": 3,
+            "semester_suggested": "senior_fall",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "GEO 401 or UPL 200",
+            "credit_hours": 3,
+            "semester_suggested": "senior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": "GEO 401, UPL 200",
+            "min_grade": "C",
+            "footnotes": null
+        },
+        {
+            "course_id": "UPL 420",
+            "course_title": "Senior Project",
+            "credit_hours": 3,
+            "semester_suggested": "senior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": false,
+            "eligible_courses": null,
+            "min_grade": "C",
+            "footnotes": "[CS] capstone course, cannot be substituted."
+        },
+        {
+            "course_id": null,
+            "course_title": "UPL 429 or URP 529 (if in 5-yr prgm)",
+            "credit_hours": 3,
+            "semester_suggested": "senior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": "UPL 429 Professional Practice OR URP 529 Prof Practice (if in 5-yr prgm)",
+            "min_grade": "C",
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Minor Course",
+            "credit_hours": 3,
+            "semester_suggested": "senior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        },
+        {
+            "course_id": null,
+            "course_title": "Minor Course",
+            "credit_hours": 3,
+            "semester_suggested": "senior_spring",
+            "gen_ed_area": null,
+            "is_elective_slot": true,
+            "eligible_courses": null,
+            "min_grade": null,
+            "footnotes": null
+        }
+    ],
+    "concentrations_and_minors": [
+        {
+            "name": "Urban Planning and Design",
+            "code": "UPD",
+            "type": "concentration",
+            "applicable_to": [
+                "URP majors"
+            ],
+            "min_gpa": 2.5,
+            "min_grade": "D",
+            "total_hours": 21,
+            "required_courses": [
+                {
+                    "course_id": "UPL 101",
+                    "course_title": "Introduction to Urban Planning",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 200",
+                    "course_title": "Global Cities",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 250",
+                    "course_title": "Basic Planning Studies",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 317",
+                    "course_title": "Studio I: Graphic and Site Design",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 327",
+                    "course_title": "Land Use Planning II",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 357",
+                    "course_title": "Studio II: Comprehensive Planning",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 404",
+                    "course_title": "Social Issues in Planning",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                }
+            ],
+            "elective_pool": null,
+            "special_rules": null
+        },
+        {
+            "name": "Transportation Management",
+            "code": "TRM",
+            "type": "concentration",
+            "applicable_to": [
+                "URP majors"
+            ],
+            "min_gpa": 2.5,
+            "min_grade": "D",
+            "total_hours": 21,
+            "required_courses": [
+                {
+                    "course_id": "LSM 201",
+                    "course_title": "Intro to Logistics & SCM",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "LSM 323",
+                    "course_title": "Transportation Management",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "LSM 340",
+                    "course_title": "Advanced Logistics & SCM",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 250",
+                    "course_title": "Basic Planning Studies",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 420",
+                    "course_title": "Senior Project",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 435",
+                    "course_title": "Transportation Planning",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 438",
+                    "course_title": "Transportation Modeling",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                }
+            ],
+            "elective_pool": null,
+            "special_rules": null
+        },
+        {
+            "name": "Urban and Regional Planning Minor",
+            "code": "URP",
+            "type": "minor",
+            "applicable_to": [
+                "Non-URP majors"
+            ],
+            "min_gpa": 2.0,
+            "min_grade": "C",
+            "total_hours": 18,
+            "required_courses": [
+                {
+                    "course_id": "UPL 101",
+                    "course_title": "Introduction to Urban Planning",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 200",
+                    "course_title": "Global Cities",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 250",
+                    "course_title": "Basic Planning Studies",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 317",
+                    "course_title": "Studio I: Graphic and Site Design",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 357",
+                    "course_title": "Studio II: Comprehensive Planning",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                },
+                {
+                    "course_id": "UPL 404",
+                    "course_title": "Social Issues in Planning",
+                    "credit_hours": 3,
+                    "overlaps_with_baseline": false,
+                    "overlap_note": null
+                }
+            ],
+            "elective_pool": null,
+            "special_rules": null
+        }
+    ]
+}
