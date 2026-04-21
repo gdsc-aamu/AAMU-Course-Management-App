@@ -14,6 +14,9 @@ export default function DashboardPage() {
   const [userInitials, setUserInitials] = useState("ST")
   const [classification, setClassification] = useState("—")
   const [gpa, setGpa] = useState("—")
+  const [creditsEarned, setCreditsEarned] = useState("—")
+  const [degreeProgress, setDegreeProgress] = useState("—")
+  const [nextSemester, setNextSemester] = useState("—")
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
 
   useEffect(() => {
@@ -30,19 +33,37 @@ export default function DashboardPage() {
           const initials = name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
           setUserInitials(initials)
 
-          // Get user's profile data from database
-          const { data: profile } = await supabase
-            .from("user_academic_profiles")
-            .select("classification")
-            .eq("user_id", user.id)
-            .single()
+          // Get user's profile + degree summary in parallel
+          const [{ data: profile }, { data: summary }] = await Promise.all([
+            supabase
+              .from("user_academic_profiles")
+              .select("classification")
+              .eq("user_id", user.id)
+              .single(),
+            supabase
+              .from("student_degree_summary")
+              .select("overall_gpa, credits_applied, degree_progress_pct, catalog_year")
+              .eq("user_id", user.id)
+              .single(),
+          ])
 
           if (profile) {
             setClassification(profile.classification || "—")
           }
-          
-          // TODO: Fetch GPA from a completed_courses table or similar
-          setGpa("—")
+
+          if (summary) {
+            setGpa(summary.overall_gpa != null ? summary.overall_gpa.toFixed(2) : "—")
+            setCreditsEarned(summary.credits_applied != null ? String(summary.credits_applied) : "—")
+            setDegreeProgress(summary.degree_progress_pct != null ? `${Math.round(summary.degree_progress_pct)}%` : "—")
+          }
+
+          // Derive next semester from current date
+          const now = new Date()
+          const month = now.getMonth() + 1
+          const year = now.getFullYear()
+          // If Jan–May → next semester is Fall same year; if Jun–Dec → next is Spring next year
+          const next = month <= 5 ? `Fall ${year}` : `Spring ${year + 1}`
+          setNextSemester(next)
         }
       } catch (error) {
         console.error("Error loading user profile:", error)
@@ -55,10 +76,10 @@ export default function DashboardPage() {
   }, [])
 
   const stats = [
-    { label: "Credits Earned", value: "—" },
+    { label: "Credits Earned", value: creditsEarned },
     { label: "Current GPA", value: gpa },
-    { label: "Next Semester", value: "—" },
-    { label: "Degree Progress", value: "—" },
+    { label: "Next Semester", value: nextSemester },
+    { label: "Degree Progress", value: degreeProgress },
   ]
 
   const sortedPlans = [...plans].sort(
