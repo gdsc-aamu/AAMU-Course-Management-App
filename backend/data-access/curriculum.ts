@@ -235,6 +235,37 @@ export interface ConcentrationSlotRow {
   courses: { course_id: string; title: string; credit_hours: number } | { course_id: string; title: string; credit_hours: number }[] | null
 }
 
+export interface ConcentrationWithProgramRow extends ConcentrationRow {
+  program_code: string
+  program_name: string
+}
+
+/**
+ * Search concentrations/minors by name across ALL programs (global search).
+ * Used when a student asks about a minor not in their own program (e.g. Finance minor).
+ */
+export async function searchConcentrationsByName(name: string): Promise<ConcentrationWithProgramRow[]> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from("concentrations")
+    .select("id, code, name, type, total_hours, min_grade, programs(code, name)")
+    .ilike("name", `%${name.trim()}%`)
+    .order("type")
+    .order("name")
+
+  if (error || !data) return []
+  return data.map((row: any) => ({
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    type: row.type,
+    total_hours: row.total_hours,
+    min_grade: row.min_grade,
+    program_code: Array.isArray(row.programs) ? (row.programs[0]?.code ?? "") : (row.programs?.code ?? ""),
+    program_name: Array.isArray(row.programs) ? (row.programs[0]?.name ?? "") : (row.programs?.name ?? ""),
+  }))
+}
+
 /**
  * List concentrations (and minors) for a program.
  */

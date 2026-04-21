@@ -29,6 +29,7 @@ export interface ChatQueryRequest {
     programCode?: string;
     bulletinYear?: string;
     classification?: string;
+    studentName?: string;
   };
   conversationHistory?: ConversationMessage[];
 }

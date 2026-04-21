@@ -105,14 +105,6 @@ function formatServerAnswer(response: RoutedResponse): string {
   return `${answer}\n\nSources:\n${citations}`
 }
 
-const initialMessages: Message[] = [
-  {
-    id: "msg-welcome",
-    role: "assistant",
-    content: "Hi! I'm your AI Course Assistant. I can help you:\n\n- Find courses that fit your schedule\n- Check if you're on track to graduate\n- Analyze how adding a course affects your degree progress\n\nWhat would you like to know?",
-  },
-]
-
 interface SavePlanAction {
   suggestedName: string | null
   suggestedCourses: string[]
@@ -125,6 +117,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
   const [isTyping, setIsTyping] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [studentId, setStudentId] = useState<string | null>(null)
+  const [studentName, setStudentName] = useState<string | null>(null)
   const [sessionContext, setSessionContext] = useState<{
     programCode?: string
     bulletinYear?: string
@@ -136,7 +129,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
   }>({ open: false, action: null })
   const [savePlanName, setSavePlanName] = useState("")
   const [isSavingPlan, setIsSavingPlan] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
   const messageCounterRef = useRef(1)
   const { toast } = useToast()
 
@@ -168,7 +161,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
             id: "msg-welcome",
             role: "assistant",
             content:
-              "Hi! I'm your AI Course Assistant. I can help you:\n\n- Find courses that fit your schedule\n- Check if you're on track to graduate\n- Analyze how adding a course affects your degree progress\n\nWhat would you like to know?",
+              `Hi${studentName ? ` ${studentName.split(" ")[0]}` : ""}! I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.`,
           })
         }
 
@@ -187,7 +180,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
             id: "msg-welcome",
             role: "assistant",
             content:
-              "Hi! I'm your AI Course Assistant. I can help you:\n\n- Find courses that fit your schedule\n- Check if you're on track to graduate\n- Analyze how adding a course affects your degree progress\n\nWhat would you like to know?",
+              `Hi${studentName ? ` ${studentName.split(" ")[0]}` : ""}! I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.`,
           },
         ])
       } finally {
@@ -205,6 +198,12 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
       if (!isActive) return
       const uid = data.session?.user.id ?? null
       setStudentId(uid)
+
+      const name =
+        data.session?.user.user_metadata?.full_name ??
+        data.session?.user.user_metadata?.name ??
+        null
+      if (name) setStudentName(name)
 
       if (uid && data.session?.access_token) {
         try {
@@ -233,9 +232,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
   }, [threadId, toast])
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
   const sendMessage = async (content: string) => {
@@ -275,6 +272,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
           programCode: sessionContext.programCode,
           bulletinYear: sessionContext.bulletinYear,
           classification: sessionContext.classification,
+          studentName: studentName ?? undefined,
         },
         conversationHistory: historySnapshot,
       }
@@ -411,7 +409,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
         ))}
       </div>
 
-      <ScrollArea className="min-h-0 flex-1 p-3" ref={scrollRef}>
+      <ScrollArea className="min-h-0 flex-1 p-3">
         <div className="space-y-4">
           {isLoading ? (
             <div className="flex justify-center items-center h-full">
@@ -464,6 +462,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
               </div>
             </div>
           )}
+          <div ref={bottomRef} />
             </>
           )}
         </div>

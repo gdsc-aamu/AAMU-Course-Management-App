@@ -30,6 +30,7 @@ import {
   listPrograms,
   getConcentrations,
   getConcentrationSlots,
+  searchConcentrationsByName,
 } from "@/backend/data-access/curriculum"
 import { getUserCourseStatuses } from "@/backend/data-access/pdf-parsing"
 
@@ -859,11 +860,37 @@ export function formatElectiveOptionsForLLM(options: ElectiveSlotOption[]): stri
 }
 
 /**
+ * Extract a minor/concentration name from a natural language question.
+ * e.g. "minor in finance" → "finance", "psychology minor" → "psychology"
+ */
+export function extractMinorNameFromQuestion(question: string): string | null {
+  const q = question.trim()
+  // "minor in X" / "concentration in X" / "major in X"
+  const afterIn = q.match(/\b(?:minor|concentration|minor in|concentrate in|major in)\s+(?:in\s+)?([a-zA-Z\s]+?)(?:\s*\?|$|,|\band\b)/i)
+  if (afterIn) return afterIn[1].trim()
+
+  // "X minor" / "X concentration"
+  const beforeLabel = q.match(/\b([a-zA-Z\s]+?)\s+(?:minor|concentration)\b/i)
+  if (beforeLabel) {
+    const candidate = beforeLabel[1].trim()
+    // Filter out noise words
+    if (!/^(a|the|my|this|that|double|second|another)$/i.test(candidate)) {
+      return candidate
+    }
+  }
+
+  return null
+}
+
+/**
  * Fetch concentration (and minor) requirements for a program.
+ * Falls back to a global cross-program search if the student's program has no matching result.
  */
 export async function fetchConcentrationRequirements(params: {
   programCode: string
   bulletinYear?: string | null
+  fallbackSearchName?: string       // name to search globally if program has no concentrations
+  completedCourseCodes?: Set<string> // for cross-referencing what the student has done
 }): Promise<ConcentrationRequirementsResult | null> {
   const programCode = params.programCode.trim().toUpperCase()
   const catalogYear = parseCatalogYear(params.bulletinYear)
@@ -872,56 +899,104 @@ export async function fetchConcentrationRequirements(params: {
   if (!program) return null
 
   const concentrations = await getConcentrations(program.id)
-  if (concentrations.length === 0) return { programCode: program.code, concentrations: [] }
 
-  const withSlots: ConcentrationRequirement[] = await Promise.all(
+  // Filter to just the concentration/minor the student asked about if we have a search name
+  const searchName = params.fallbackSearchName?.trim().toLowerCase()
+  const matched = searchName
+    ? concentrations.filter((c) => c.name.toLowerCase().includes(searchName))
+    : concentrations
+
+  // If we found something in the student's own program, use it
+  if (matched.length > 0) {
+    const withSlots = await buildConcentrationWithSlots(matched, params.completedCourseCodes)
+    return { programCode: program.code, concentrations: withSlots }
+  }
+
+  // If student's program has no match AND we have a search name, try global search
+  if (searchName) {
+    const globalResults = await searchConcentrationsByName(searchName)
+    if (globalResults.length > 0) {
+      const withSlots = await buildConcentrationWithSlots(globalResults, params.completedCourseCodes)
+      return {
+        programCode: globalResults[0].program_code || program.code,
+        concentrations: withSlots,
+        crossProgram: true,
+        sourceProgram: globalResults[0].program_name || globalResults[0].program_code,
+      } as ConcentrationRequirementsResult & { crossProgram: boolean; sourceProgram: string }
+    }
+  }
+
+  // Nothing found anywhere
+  return { programCode: program.code, concentrations: [] }
+}
+
+async function buildConcentrationWithSlots(
+  concentrations: Array<{ id: string; code: string; name: string; type: string; total_hours: number; min_grade: string | null }>,
+  completedCourseCodes?: Set<string>
+): Promise<ConcentrationRequirement[]> {
+  return Promise.all(
     concentrations.map(async (c) => {
       const slots = await getConcentrationSlots(c.id)
+      const mappedSlots = slots.map((s) => {
+        const courseRaw = s.courses
+        const course = Array.isArray(courseRaw) ? courseRaw[0] ?? null : courseRaw
+        return {
+          slotLabel: s.slot_label,
+          isElective: s.is_elective_slot,
+          levelRestriction: s.level_restriction,
+          creditHours: s.credit_hours,
+          courseId: course?.course_id ?? null,
+          courseTitle: course?.title ?? null,
+          completed: completedCourseCodes && course?.course_id
+            ? completedCourseCodes.has(course.course_id.trim().toUpperCase())
+            : false,
+        }
+      })
       return {
         code: c.code,
         name: c.name,
-        type: c.type,
+        type: c.type as "concentration" | "minor",
         totalHours: c.total_hours,
-        slots: slots.map((s) => {
-          const courseRaw = s.courses
-          const course = Array.isArray(courseRaw) ? courseRaw[0] ?? null : courseRaw
-          return {
-            slotLabel: s.slot_label,
-            isElective: s.is_elective_slot,
-            levelRestriction: s.level_restriction,
-            creditHours: s.credit_hours,
-            courseId: course?.course_id ?? null,
-            courseTitle: course?.title ?? null,
-          }
-        }),
+        slots: mappedSlots,
       }
     })
   )
-
-  return { programCode: program.code, concentrations: withSlots }
 }
 
 /**
  * Format concentration requirements for LLM.
  */
-export function formatConcentrationForLLM(result: ConcentrationRequirementsResult): string {
+export function formatConcentrationForLLM(
+  result: ConcentrationRequirementsResult & { crossProgram?: boolean; sourceProgram?: string }
+): string {
   if (result.concentrations.length === 0) {
     return `Program ${result.programCode} has no concentrations or minors on record. Please check the bulletin or contact your advisor.`
   }
 
+  const crossProgramNote = result.crossProgram && result.sourceProgram
+    ? `Note: These requirements come from the ${result.sourceProgram} program (not the student's primary program). The student should confirm eligibility and any additional requirements with their advisor.\n\n`
+    : ""
+
   const blocks = result.concentrations.map((c) => {
-    const header = `${c.type === "minor" ? "Minor" : "Concentration"}: ${c.name} (${c.code}) — ${c.totalHours} total hours`
-    const slotLines = c.slots.map((s) => {
+    const header = `${c.type === "minor" ? "Minor" : "Concentration"}: ${c.name} (${c.code}) — ${c.totalHours} total hours required`
+
+    const slotLines = c.slots.map((s: any) => {
+      const doneTag = s.completed ? " ✓ (completed)" : ""
       if (s.isElective) {
         const restriction = s.levelRestriction ? ` [${s.levelRestriction}]` : ""
-        return `  - [Elective${restriction}] ${s.slotLabel} (${s.creditHours} cr)`
+        return `  - [Elective${restriction}] ${s.slotLabel} (${s.creditHours} cr)${doneTag}`
       }
-      return `  - ${s.courseId ?? s.slotLabel}: ${s.courseTitle ?? s.slotLabel} (${s.creditHours} cr)`
+      return `  - ${s.courseId ?? s.slotLabel}: ${s.courseTitle ?? s.slotLabel} (${s.creditHours} cr)${doneTag}`
     })
-    return `${header}\n${slotLines.join("\n")}`
+
+    const completed = c.slots.filter((s: any) => s.completed).length
+    const total = c.slots.filter((s: any) => !s.isElective).length
+    const progress = total > 0 ? `\n  Progress: ${completed}/${total} required courses completed` : ""
+
+    return `${header}${progress}\n${slotLines.join("\n")}`
   })
 
-  return `Concentrations & Minors for ${result.programCode}:\n\n${blocks.join("\n\n")}`
+  return `${crossProgramNote}Concentrations & Minors:\n\n${blocks.join("\n\n")}`
 }
 
 /**

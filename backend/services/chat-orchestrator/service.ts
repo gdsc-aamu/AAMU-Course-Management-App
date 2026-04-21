@@ -17,6 +17,7 @@ import {
   formatPrerequisiteForLLM,
   formatCurriculumForLLM,
   recommendNextCoursesForUser,
+  extractMinorNameFromQuestion,
   resolveCatalogYearFromQuestion,
   resolveProgramCodeFromQuestion,
   computeGraduationGap,
@@ -175,9 +176,11 @@ function buildStudentContextBlock(profile: {
   programCode?: string | null
   bulletinYear?: string | null
   classification?: string | null
+  studentName?: string | null
 } | null): string {
   if (!profile) return ""
   const parts: string[] = []
+  if (profile.studentName) parts.push(`Student Name: ${profile.studentName}`)
   if (profile.classification) parts.push(`Classification: ${profile.classification}`)
   if (profile.programCode) parts.push(`Program: ${profile.programCode}`)
   if (profile.bulletinYear) parts.push(`Catalog Year: ${profile.bulletinYear}`)
@@ -308,10 +311,12 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
 
   const classification = payload.session?.classification ?? userProfile?.classification ?? null
   const fallbackBulletinYear = payload.session?.bulletinYear ?? userProfile?.bulletinYear ?? null
+  const studentName = payload.session?.studentName ?? null
   const studentContextBlock = buildStudentContextBlock({
     programCode: payload.session?.programCode ?? userProfile?.programCode ?? null,
     bulletinYear: fallbackBulletinYear,
     classification,
+    studentName,
   })
   const catalogYear = resolveCatalogYearFromQuestion(question, fallbackBulletinYear)
   const programCode = await resolveProgramCodeFromQuestion(
@@ -340,13 +345,18 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
 
 Once those are done, I can tell you exactly what courses to register for next, what you've completed, and how close you are to graduating.`
 
-  // Greetings and small talk — respond directly, no DB or RAG needed
+  // Greetings and small talk — respond directly unless it's an identity question
   if (intent === "CHITCHAT") {
-    return {
-      mode: "DB_ONLY",
-      answer: "Hey! I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.",
-      data: null,
+    const isIdentityQuestion = /\b(my name|who am i|what.*my name|tell me.*my name)\b/i.test(question)
+    if (!isIdentityQuestion) {
+      const greeting = studentName ? `Hey ${studentName.split(" ")[0]}!` : "Hey!"
+      return {
+        mode: "DB_ONLY",
+        answer: `${greeting} I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.`,
+        data: null,
+      }
     }
+    // Identity questions fall through to generateDbResponse with student context
   }
 
   // Advisor escalation — questions requiring human judgment
@@ -522,20 +532,29 @@ ${upcomingLines}`
       return { mode: "DB_ONLY", answer: SETUP_NEEDED_MESSAGE, data: null }
     }
 
+    // Build completed course codes for cross-referencing minor requirements
+    let completedCodes: Set<string> | undefined
+    if (payload.studentId) {
+      const userCourses = await fetchUserCompletedCourses(payload.studentId).catch(() => [])
+      completedCodes = new Set(userCourses.map((c) => c.code.trim().toUpperCase()))
+    }
+
+    const minorName = extractMinorNameFromQuestion(question)
     const concentrationData = await fetchConcentrationRequirements({
       programCode,
       bulletinYear: fallbackBulletinYear,
+      fallbackSearchName: minorName ?? undefined,
+      completedCourseCodes: completedCodes,
     })
 
     if (!concentrationData || concentrationData.concentrations.length === 0) {
-      return {
-        mode: "DB_ONLY",
-        answer: `I don't have concentration or minor data for your program (${programCode}) on file yet. Please check the AAMU bulletin or contact your academic advisor for concentration requirements.`,
-        data: null,
-      }
+      const notFoundMsg = minorName
+        ? `I couldn't find a concentration or minor matching "${minorName}" in our database. Please check the AAMU bulletin or contact your academic advisor.`
+        : `I don't have concentration or minor data for your program (${programCode}) on file yet. Please check the AAMU bulletin or contact your academic advisor.`
+      return { mode: "DB_ONLY", answer: notFoundMsg, data: null }
     }
 
-    const concentrationContext = formatConcentrationForLLM(concentrationData)
+    const concentrationContext = formatConcentrationForLLM(concentrationData as any)
     const answer = await generateDbResponse(
       question,
       `${studentContextBlock}${concentrationContext}`,
