@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Search, Upload, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
@@ -28,6 +29,7 @@ interface ProgramOption {
 }
 
 export default function SettingsPage() {
+  const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -81,9 +83,12 @@ export default function SettingsPage() {
         throw new Error(payload.error ?? "Failed to fetch user profile.")
       }
 
+      const p = payload.profile ?? { classification: null, programCode: null, bulletinYear: null }
       setProfile({
         fullName,
-        ...(payload.profile ?? { classification: null, programCode: null, bulletinYear: null }),
+        classification: p.classification ?? null,
+        programCode: p.programCode ?? null,
+        bulletinYear: p.bulletinYear ?? null,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unexpected profile load error"
@@ -303,7 +308,7 @@ export default function SettingsPage() {
     .join("") || "ST"
 
   return (
-    <div className="flex min-h-screen bg-[#fafafa]">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-[#fafafa]">
       <Sidebar />
       
       <main className="flex-1 px-8 py-6">
@@ -454,11 +459,16 @@ export default function SettingsPage() {
                               }
                               return acc
                             }, [] as string[])
-                            .map((year) => (
-                              <option key={year} value={year}>
-                                {year}
-                              </option>
-                            ))}
+                            .map((year) => {
+                              const y = parseInt(year)
+                              const label = isNaN(y) ? year : `${y}-${y + 1}`
+                              const value = isNaN(y) ? year : `${y}-${y + 1}`
+                              return (
+                                <option key={year} value={value}>
+                                  {label}
+                                </option>
+                              )
+                            })}
                         </select>
                       </div>
                       
@@ -617,7 +627,7 @@ export default function SettingsPage() {
                   <p className="text-sm text-red-700 mt-0.5">Protect your academic records by signing out when finished.</p>
                 </div>
               </div>
-              <button className="whitespace-nowrap rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-700 shadow-sm hover:bg-red-50 transition-colors cursor-pointer">
+              <button onClick={async () => { await supabase.auth.signOut(); router.push("/login"); }} className="whitespace-nowrap rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-700 shadow-sm hover:bg-red-50 transition-colors cursor-pointer">
                 Secure Logout
               </button>
             </div>

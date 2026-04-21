@@ -16,6 +16,12 @@ import {
   upsertUserCompletedCourses,
   type UserCompletedCourseView,
 } from "@/backend/data-access/pdf-parsing"
+import { upsertUserAcademicProfile } from "@/backend/data-access/user-profile"
+import {
+  upsertDegreeSummary,
+  upsertRequirementBlocks,
+  replaceBlockRequirements,
+} from "@/backend/data-access/degree-summary"
 
 const DEFAULT_PARSER_ENDPOINT = "http://127.0.0.1:8000/parse-degreeworks"
 
@@ -44,48 +50,7 @@ function normalizeDegreeWorksPayload(value: unknown): DegreeWorksResult {
     throw new Error("[pdf-parsing:parseDegreeWorksPdf] Invalid parser payload shape")
   }
 
-  const v = value as {
-    student?: {
-      name?: string
-      student_id?: string
-      degree?: string
-      audit_date?: string
-      degree_progress_pct?: number | null
-    }
-    completed_courses?: Array<{
-      code?: string
-      title?: string
-      grade?: string
-      credits?: number
-      term?: string
-      status?: "completed" | "in_progress"
-      section?: string
-    }>
-    in_progress_courses?: Array<{
-      code?: string
-      title?: string
-      grade?: string
-      credits?: number
-      term?: string
-      status?: "completed" | "in_progress"
-      section?: string
-    }>
-    all_courses?: Array<{
-      code?: string
-      title?: string
-      grade?: string
-      credits?: number
-      term?: string
-      status?: "completed" | "in_progress"
-      section?: string
-    }>
-  }
-
-  if (!v.student || !Array.isArray(v.all_courses)) {
-    throw new Error("[pdf-parsing:parseDegreeWorksPdf] Invalid parser payload shape")
-  }
-
-  const mapCourse = (course: {
+  type RawCourse = {
     code?: string
     title?: string
     grade?: string
@@ -93,15 +58,62 @@ function normalizeDegreeWorksPayload(value: unknown): DegreeWorksResult {
     term?: string
     status?: "completed" | "in_progress"
     section?: string
-  }) => ({
+    is_registered?: boolean
+  }
+
+  type RawBlock = {
+    block_name?: string
+    status?: string
+    credits_required?: number | null
+    credits_applied?: number | null
+  }
+
+  type RawBlockReq = {
+    block_name?: string
+    description?: string
+    is_met?: boolean
+  }
+
+  const v = value as {
+    student?: {
+      name?: string
+      student_id?: string
+      degree?: string
+      audit_date?: string
+      degree_progress_pct?: number | null
+      overall_gpa?: number | null
+      classification?: string | null
+      catalog_year?: string | null
+      concentration?: string | null
+      credits_required?: number | null
+      credits_applied?: number | null
+    }
+    completed_courses?: RawCourse[]
+    in_progress_courses?: RawCourse[]
+    all_courses?: RawCourse[]
+    requirement_blocks?: RawBlock[]
+    block_requirements?: RawBlockReq[]
+  }
+
+  if (!v.student || !Array.isArray(v.all_courses)) {
+    throw new Error("[pdf-parsing:parseDegreeWorksPdf] Invalid parser payload shape")
+  }
+
+  const mapCourse = (course: RawCourse) => ({
     code: course.code ?? "",
     title: course.title ?? "",
     grade: course.grade ?? "",
     credits: course.credits ?? 0,
     term: course.term ?? "",
-    status: course.status ?? "completed",
+    status: course.status ?? "completed" as "completed" | "in_progress",
     section: course.section ?? "General",
   })
+
+  const normalizeBlockStatus = (s?: string): "complete" | "in_progress" | "incomplete" => {
+    if (s === "complete") return "complete"
+    if (s === "in_progress") return "in_progress"
+    return "incomplete"
+  }
 
   return {
     student: {
@@ -110,10 +122,27 @@ function normalizeDegreeWorksPayload(value: unknown): DegreeWorksResult {
       degree: v.student.degree ?? "Unknown",
       auditDate: v.student.audit_date ?? "Unknown",
       degreeProgressPct: v.student.degree_progress_pct ?? null,
+      overallGpa: v.student.overall_gpa ?? null,
+      classification: v.student.classification ?? null,
+      catalogYear: v.student.catalog_year ?? null,
+      concentration: v.student.concentration ?? null,
+      creditsRequired: v.student.credits_required ?? null,
+      creditsApplied: v.student.credits_applied ?? null,
     },
     completedCourses: (v.completed_courses ?? []).map(mapCourse),
     inProgressCourses: (v.in_progress_courses ?? []).map(mapCourse),
     allCourses: v.all_courses.map(mapCourse),
+    requirementBlocks: (v.requirement_blocks ?? []).map((b) => ({
+      blockName: b.block_name ?? "Unknown",
+      status: normalizeBlockStatus(b.status),
+      creditsRequired: b.credits_required ?? null,
+      creditsApplied: b.credits_applied ?? null,
+    })),
+    blockRequirements: (v.block_requirements ?? []).map((r) => ({
+      blockName: r.block_name ?? "Unknown",
+      description: r.description ?? "",
+      isMet: r.is_met ?? false,
+    })),
   }
 }
 
@@ -167,6 +196,53 @@ export async function parseDegreeWorksPdf(
   const payload = normalizeDegreeWorksPayload((await response.json()) as unknown)
 
   await upsertUserCompletedCourses(userId, payload)
+
+  // Persist all structured DegreeWorks data in parallel (all non-fatal)
+  await Promise.all([
+    // Academic profile — classification, bulletin year, program
+    upsertUserAcademicProfile({
+      userId,
+      classification: payload.student.classification ?? undefined,
+      // Normalize em-dash/en-dash variants → regular hyphen to match DB format "YYYY-YYYY"
+      bulletinYear: payload.student.catalogYear
+        ? payload.student.catalogYear.replace(/[–—]/g, "-")
+        : undefined,
+    }).catch(() => null),
+
+    // Degree summary — GPA, progress %, credits, concentration
+    upsertDegreeSummary({
+      user_id: userId,
+      degree_progress_pct: payload.student.degreeProgressPct ?? null,
+      credits_required: payload.student.creditsRequired ?? null,
+      credits_applied: payload.student.creditsApplied ?? null,
+      overall_gpa: payload.student.overallGpa ?? null,
+      catalog_year: payload.student.catalogYear ?? null,
+      concentration: payload.student.concentration ?? null,
+      audit_date: payload.student.auditDate ?? null,
+    }).catch(() => null),
+
+    // Requirement blocks — GenEd, Major, Core, Concentration, etc.
+    upsertRequirementBlocks(
+      userId,
+      payload.requirementBlocks.map((b) => ({
+        block_name: b.blockName,
+        status: b.status,
+        credits_required: b.creditsRequired,
+        credits_applied: b.creditsApplied,
+      }))
+    ).catch(() => null),
+
+    // Still-needed / unmet requirements per block
+    replaceBlockRequirements(
+      userId,
+      payload.blockRequirements.map((r) => ({
+        block_name: r.blockName,
+        description: r.description,
+        is_met: r.isMet,
+      }))
+    ).catch(() => null),
+  ])
+
   return payload
 }
 
@@ -196,5 +272,7 @@ export async function fetchUserInProgressCourses(userId: string): Promise<UserCo
       code: course.code,
       title: course.title,
       creditHours: course.creditHours,
+      grade: course.grade,
+      term: course.term,
     }))
 }

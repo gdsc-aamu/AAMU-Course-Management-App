@@ -37,6 +37,7 @@ export interface CourseRelationRow {
 }
 
 export interface CurriculumSlotRow {
+  id: string
   semester_number: number
   slot_label: string
   slot_order: number
@@ -132,6 +133,7 @@ export async function getCurriculumSlots(programId: string): Promise<CurriculumS
   const { data: slots, error } = await supabase
     .from("curriculum_slots")
     .select(`
+      id,
       semester_number,
       slot_label,
       slot_order,
@@ -167,6 +169,110 @@ export async function getCourseByCode(courseCode: string): Promise<CourseRow | n
 
   if (error || !course) return null
   return course
+}
+
+export interface ElectiveEligibleRow {
+  slot_id: string
+  slot_label: string
+  semester_number: number
+  credit_hours: number
+  courses: { course_id: string; title: string; credit_hours: number } | { course_id: string; title: string; credit_hours: number }[] | null
+}
+
+/**
+ * Fetch elective slots with their eligible course lists for a program
+ */
+export async function getElectiveSlotsWithEligible(programId: string): Promise<ElectiveEligibleRow[]> {
+  const supabase = getSupabaseClient()
+
+  // First get elective slots
+  const { data: slots, error: slotsError } = await supabase
+    .from("curriculum_slots")
+    .select("id, slot_label, semester_number, credit_hours")
+    .eq("program_id", programId)
+    .eq("is_elective_slot", true)
+    .order("semester_number")
+    .order("slot_order")
+
+  if (slotsError || !slots || slots.length === 0) return []
+
+  // For each slot, get eligible courses
+  const results: ElectiveEligibleRow[] = []
+  for (const slot of slots) {
+    const { data: eligible } = await supabase
+      .from("elective_slot_eligible_courses")
+      .select("courses(course_id, title, credit_hours)")
+      .eq("slot_id", slot.id)
+
+    results.push({
+      slot_id: slot.id,
+      slot_label: slot.slot_label,
+      semester_number: slot.semester_number,
+      credit_hours: slot.credit_hours,
+      courses: eligible?.map((e: any) => e.courses).flat() ?? [],
+    })
+  }
+
+  return results
+}
+
+// ── Concentration / Minor ─────────────────────────────────────────────────────
+
+export interface ConcentrationRow {
+  id: string
+  code: string
+  name: string
+  type: "concentration" | "minor"
+  total_hours: number
+  min_grade: string | null
+}
+
+export interface ConcentrationSlotRow {
+  slot_label: string
+  is_elective_slot: boolean
+  level_restriction: string | null
+  credit_hours: number
+  courses: { course_id: string; title: string; credit_hours: number } | { course_id: string; title: string; credit_hours: number }[] | null
+}
+
+/**
+ * List concentrations (and minors) for a program.
+ */
+export async function getConcentrations(programId: string): Promise<ConcentrationRow[]> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from("concentrations")
+    .select("id, code, name, type, total_hours, min_grade")
+    .eq("program_id", programId)
+    .order("type")
+    .order("name")
+
+  if (error || !data) return []
+  return data
+}
+
+/**
+ * Fetch slots for a specific concentration with course details.
+ */
+export async function getConcentrationSlots(concentrationId: string): Promise<ConcentrationSlotRow[]> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from("concentration_slots")
+    .select(`
+      slot_label,
+      is_elective_slot,
+      level_restriction,
+      credit_hours,
+      courses (
+        course_id,
+        title,
+        credit_hours
+      )
+    `)
+    .eq("concentration_id", concentrationId)
+
+  if (error || !data) return []
+  return data
 }
 
 /**

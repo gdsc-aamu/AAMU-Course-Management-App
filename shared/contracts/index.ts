@@ -17,13 +17,20 @@ export interface MatchedRule {
   reason: string;
 }
 
+export interface ConversationMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export interface ChatQueryRequest {
   question: string;
   studentId?: string;
   session?: {
     programCode?: string;
     bulletinYear?: string;
+    classification?: string;
   };
+  conversationHistory?: ConversationMessage[];
 }
 
 export interface RoutingDecision {
@@ -102,10 +109,73 @@ export interface NextCoursesRecommendation {
   programCode: string;
   catalogYear: number | null;
   completedCount: number;
-  inProgressCount: number;
+  currentTermCount: number;      // courses enrolled in current term
+  preRegisteredCount: number;    // courses locked in for a future term
+  currentTermCredits: number;    // credit hours currently enrolled
+  preRegisteredCredits: number;  // credit hours pre-registered
+  semesterCreditCap: 19;         // AAMU hard cap
   eligibleNow: EligibleNextCourseOption[];
   blocked: BlockedNextCourseOption[];
-  alreadyInProgress: NextCourseOption[];
+  alreadyInProgress: NextCourseOption[];  // current-term courses
+  alreadyPlanned: NextCourseOption[];     // pre-registered (future terms)
+}
+
+export interface SemesterRemainingSlot {
+  courseId: string | null;      // null = elective slot
+  title: string;
+  creditHours: number;
+  isElective: boolean;
+  eligibleCourses?: string[];   // populated for elective slots
+}
+
+export interface SemesterRemaining {
+  semesterNumber: number;
+  semesterLabel: string;
+  slots: SemesterRemainingSlot[];
+}
+
+export interface GraduationGap {
+  programCode: string;
+  programName: string;
+  creditsRequired: number;
+  creditsCompleted: number;
+  creditsCurrentTerm: number;    // credits enrolled in current term
+  creditsPreRegistered: number;  // credits locked in for future terms
+  creditsInProgress: number;     // total in-progress (currentTerm + preRegistered) — kept for compat
+  creditsRemaining: number;
+  remainingBySemester: SemesterRemaining[];
+  electiveSlotsRemaining: number;
+  isOnTrack: boolean;
+}
+
+export interface ConcentrationSlot {
+  slotLabel: string;
+  isElective: boolean;
+  levelRestriction: string | null;
+  creditHours: number;
+  courseId: string | null;
+  courseTitle: string | null;
+}
+
+export interface ConcentrationRequirement {
+  code: string;
+  name: string;
+  type: "concentration" | "minor";
+  totalHours: number;
+  slots: ConcentrationSlot[];
+}
+
+export interface ConcentrationRequirementsResult {
+  programCode: string;
+  concentrations: ConcentrationRequirement[];
+}
+
+export interface ElectiveSlotOption {
+  semesterNumber: number;
+  semesterLabel: string;
+  slotLabel: string;
+  creditHours: number;
+  eligibleCourses: Array<{ courseId: string; title: string }>;
 }
 
 // ============================================================================
@@ -124,6 +194,8 @@ export interface BulletinChunk {
 
 export interface StudentProfile {
   bulletinYear: string;
+  classification?: string | null;
+  programCode?: string | null;
 }
 
 export interface RagSearchRequest {
@@ -175,6 +247,25 @@ export interface StudentInfo {
   degree: string;
   auditDate: string;
   degreeProgressPct?: number | null;
+  overallGpa?: number | null;
+  classification?: string | null;
+  catalogYear?: string | null;
+  concentration?: string | null;
+  creditsRequired?: number | null;
+  creditsApplied?: number | null;
+}
+
+export interface RequirementBlock {
+  blockName: string;
+  status: "complete" | "in_progress" | "incomplete";
+  creditsRequired: number | null;
+  creditsApplied: number | null;
+}
+
+export interface BlockRequirement {
+  blockName: string;
+  description: string;
+  isMet: boolean;
 }
 
 export interface DegreeWorksResult {
@@ -182,6 +273,8 @@ export interface DegreeWorksResult {
   completedCourses: Course[];
   inProgressCourses: Course[];
   allCourses: Course[];
+  requirementBlocks: RequirementBlock[];
+  blockRequirements: BlockRequirement[];
 }
 
 export interface PdfParsingRequest {

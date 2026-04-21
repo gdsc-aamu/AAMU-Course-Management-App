@@ -40,22 +40,30 @@ export async function upsertUserAcademicProfile(params: {
   userId: string
   programCode?: string | null
   bulletinYear?: string | null
-    classification?: string | null
+  classification?: string | null
 }): Promise<UserAcademicProfileRow> {
   const supabase = getSupabaseClient()
 
-  const row = {
+  // Only include fields that were explicitly provided — never null out a field
+  // the caller didn't mention (e.g. PDF upload sets bulletinYear but not programCode).
+  const row: Record<string, unknown> = {
     user_id: params.userId,
-    program_code: params.programCode?.trim().toUpperCase() ?? null,
-    bulletin_year: params.bulletinYear?.trim() ?? null,
-      classification: params.classification?.trim() ?? null,
     updated_at: new Date().toISOString(),
+  }
+  if (params.programCode !== undefined) {
+    row.program_code = params.programCode?.trim().toUpperCase() ?? null
+  }
+  if (params.bulletinYear !== undefined) {
+    row.bulletin_year = params.bulletinYear?.trim() ?? null
+  }
+  if (params.classification !== undefined) {
+    row.classification = params.classification?.trim() ?? null
   }
 
   const { data, error } = await supabase
     .from("user_academic_profiles")
     .upsert(row, { onConflict: "user_id" })
-      .select("user_id, program_code, bulletin_year, classification, updated_at")
+    .select("user_id, program_code, bulletin_year, classification, updated_at")
     .single()
 
   if (error || !data) {

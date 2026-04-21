@@ -23,10 +23,14 @@ interface UserCompletedCourseInsert {
   user_id: string
   course_id: string
   status: "completed" | "in_progress"
+  grade: string | null
+  term: string | null
 }
 
 interface UserCompletedCourseRow {
   status: "completed" | "in_progress"
+  grade: string | null
+  term: string | null
   course: {
     course_id: string
     title: string
@@ -47,6 +51,8 @@ export interface UserCompletedCourseView {
   code: string
   title: string
   creditHours: number
+  grade: string | null
+  term: string | null
 }
 
 export interface UserCourseStatusView {
@@ -54,6 +60,8 @@ export interface UserCourseStatusView {
   title: string
   creditHours: number
   status: "completed" | "in_progress"
+  grade: string | null
+  term: string | null
 }
 
 function getSupabaseClient() {
@@ -75,7 +83,7 @@ export async function upsertUserCompletedCourses(
   const supabase = getSupabaseClient()
   const courseMap = new Map<
     string,
-    { title: string; credits: number; status: "completed" | "in_progress" }
+    { title: string; credits: number; status: "completed" | "in_progress"; grade: string | null; term: string | null }
   >()
 
   for (const course of result.allCourses) {
@@ -88,6 +96,8 @@ export async function upsertUserCompletedCourses(
         title: course.title.trim() || normalizedCode,
         credits: Number.isFinite(course.credits) ? Math.round(course.credits) : 0,
         status: course.status,
+        grade: course.grade || null,
+        term: course.term || null,
       })
       continue
     }
@@ -95,6 +105,8 @@ export async function upsertUserCompletedCourses(
     // If either record indicates completion, keep completed as the authoritative state.
     if (course.status === "completed" && existing.status !== "completed") {
       existing.status = "completed"
+      existing.grade = course.grade || existing.grade
+      existing.term = course.term || existing.term
     }
   }
 
@@ -105,11 +117,11 @@ export async function upsertUserCompletedCourses(
   }
 
   const catalogRows: CourseCatalogUpsert[] = courseCodes.map((code) => {
-    const course = courseMap.get(code)
+    const c = courseMap.get(code)
     return {
       course_id: code,
-      title: course?.title ?? code,
-      credit_hours: course?.credits ?? 0,
+      title: c?.title ?? code,
+      credit_hours: c?.credits ?? 0,
       is_capstone: false,
     }
   })
@@ -149,6 +161,8 @@ export async function upsertUserCompletedCourses(
         user_id: userId,
         course_id: courseId,
         status: course.status,
+        grade: course.grade,
+        term: course.term,
       }
     })
     .filter((row): row is UserCompletedCourseInsert => Boolean(row))
@@ -159,7 +173,7 @@ export async function upsertUserCompletedCourses(
 
   const { error } = await supabase
     .from("user_completed_courses")
-    .upsert(rows, { onConflict: "user_id,course_id" })
+    .upsert(rows, { onConflict: "user_id,course_id", ignoreDuplicates: false })
 
   if (error) {
     throw new Error(`[data-access:upsertUserCompletedCourses] ${error.message}`)
@@ -178,10 +192,10 @@ export async function getUserCompletedCourses(userId: string): Promise<UserCompl
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from("user_completed_courses")
-    .select("status, course:courses(course_id, title, credit_hours)")
+    .select("status, grade, term, course:courses(course_id, title, credit_hours)")
     .eq("user_id", userId)
     .eq("status", "completed")
-    .order("course_id", { ascending: true })
+    .order("term", { ascending: true })
 
   if (error) {
     throw new Error(`[data-access:getUserCompletedCourses] ${error.message}`)
@@ -197,6 +211,8 @@ export async function getUserCompletedCourses(userId: string): Promise<UserCompl
         code: course.course_id,
         title: course.title,
         creditHours: course.credit_hours,
+        grade: row.grade,
+        term: row.term,
       }
     })
     .filter((row): row is UserCompletedCourseView => Boolean(row))
@@ -209,9 +225,9 @@ export async function getUserCourseStatuses(userId: string): Promise<UserCourseS
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from("user_completed_courses")
-    .select("status, course:courses(course_id, title, credit_hours)")
+    .select("status, grade, term, course:courses(course_id, title, credit_hours)")
     .eq("user_id", userId)
-    .order("course_id", { ascending: true })
+    .order("term", { ascending: true })
 
   if (error) {
     throw new Error(`[data-access:getUserCourseStatuses] ${error.message}`)
@@ -228,6 +244,8 @@ export async function getUserCourseStatuses(userId: string): Promise<UserCourseS
         title: course.title,
         creditHours: course.credit_hours,
         status: row.status,
+        grade: row.grade,
+        term: row.term,
       }
     })
     .filter((row): row is UserCourseStatusView => Boolean(row))

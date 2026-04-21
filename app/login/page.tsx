@@ -193,7 +193,6 @@ export default function LoginPage() {
     const e: { email?: string; password?: string; name?: string; confirmPw?: string } = {};
     if (!email) e.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Enter a valid email";
-    else if (!email.toLowerCase().endsWith("@bulldogs.aamu.edu")) e.email = "Only @bulldogs.aamu.edu emails are allowed";
     if (!password) e.password = "Password is required";
     if (page === "signup") {
       if (!name) e.name = "Full name is required";
@@ -279,7 +278,7 @@ export default function LoginPage() {
           <p style={{ color: COLORS.textMuted, fontSize: 14, margin: "0 0 28px" }}>
             {page === "login"
               ? "Sign in with your AAMU email to continue"
-              : "Use your @bulldogs.aamu.edu email to get started"}
+              : "Sign up with your email to get started"}
           </p>
 
           {/* Auth Error Banner */}
@@ -306,7 +305,7 @@ export default function LoginPage() {
           {page === "signup" && (
             <Input label="Full Name" type="text" placeholder="John Bulldog" value={name} onChange={setName} icon={<UserIcon />} error={errors.name} />
           )}
-          <Input label="Email Address" type="email" placeholder="you@bulldogs.aamu.edu" value={email} onChange={setEmail} icon={<MailIcon />} error={errors.email} />
+          <Input label="Email Address" type="email" placeholder="you@gmail.com" value={email} onChange={setEmail} icon={<MailIcon />} error={errors.email} />
           <Input label="Password" type="password" placeholder={page === "login" ? "Enter your password" : "Create a strong password"} value={password} onChange={setPassword} icon={<LockIcon />} error={errors.password} />
           {page === "signup" && <PasswordStrength password={password} />}
           {page === "signup" && (

@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { usePlans } from "@/hooks/use-plans"
+import { downloadPlanAsPdf } from "@/lib/download-plan-pdf"
 import { cn } from "@/lib/utils"
 
 type SortOption = "recent" | "title" | "created"
@@ -62,17 +63,7 @@ export default function PlansPage() {
   const handleDownload = (id: string) => {
     const plan = getPlan(id)
     if (!plan) return
-
-    const data = JSON.stringify(plan, null, 2)
-    const blob = new Blob([data], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `${plan.name.toLowerCase().replaceAll(" ", "-")}.json`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
+    downloadPlanAsPdf(plan).catch(() => {})
   }
 
   const skeletonKeys = new Array(6).fill(null).map((_, i) => i)
@@ -83,20 +74,30 @@ export default function PlansPage() {
       : "Create your first course plan to get started"
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col lg:flex-row min-h-screen">
       <Sidebar />
 
-      <main className="flex-1 px-4 py-6 md:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#f9f5f4]">
+        {/* Header */}
+        <div className="border-b bg-background px-3 py-4 sm:px-4 md:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <h1 className="text-2xl font-bold text-gray-900">My Plans</h1>
+          </div>
+        </div>
+
+        <main className="flex-1 px-3 py-6 sm:px-4 md:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl space-y-6">
+          {/* Filter Bar */}
+          <div>
             <PlanFilters
               activeFilters={activeFilters}
               onFilterChange={setActiveFilters}
             />
+          </div>
 
-            <div className="flex-1 space-y-4">
-              {/* Toolbar */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-4">
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center rounded-lg border bg-muted/50 p-1">
                     <Button
@@ -154,7 +155,7 @@ export default function PlansPage() {
               {isLoading ? (
                 <div className={cn(
                   viewMode === "grid"
-                    ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                    ? "grid gap-4 grid-cols-2 lg:grid-cols-3 max-w-full"
                     : "space-y-2"
                 )}>
                   {skeletonKeys.map((key) => (
@@ -178,7 +179,7 @@ export default function PlansPage() {
               ) : (
                 <div className={cn(
                   viewMode === "grid"
-                    ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                    ? "grid gap-4 grid-cols-2 lg:grid-cols-3 max-w-full"
                     : "space-y-2"
                 )}>
                   {filteredAndSortedPlans.map((plan) => (
@@ -196,8 +197,8 @@ export default function PlansPage() {
               )}
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

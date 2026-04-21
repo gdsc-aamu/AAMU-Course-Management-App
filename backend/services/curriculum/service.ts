@@ -15,13 +15,21 @@ import type {
   NextCourseOption,
   ProgramOverview,
   PrerequisiteResult,
+  GraduationGap,
+  SemesterRemaining,
+  ElectiveSlotOption,
+  ConcentrationRequirement,
+  ConcentrationRequirementsResult,
 } from "@/shared/contracts"
 import {
   getProgram,
   getCurriculumSlots,
   getCourseByCode,
   getCoursePrerequisites,
+  getElectiveSlotsWithEligible,
   listPrograms,
+  getConcentrations,
+  getConcentrationSlots,
 } from "@/backend/data-access/curriculum"
 import { getUserCourseStatuses } from "@/backend/data-access/pdf-parsing"
 
@@ -84,9 +92,30 @@ function toSlotCourseSummary(slot: {
   }
 }
 
+/**
+ * Normalize a course code by stripping honors suffix so ENG 101H matches ENG 101.
+ * Handles both "ENG 101H" and "ENG101H" formats.
+ */
+function normalizeHonorsCourseCode(code: string): string {
+  return code.trim().toUpperCase().replace(/([A-Z]{2,5}\s*\d{3})H$/, "$1")
+}
+
+// Grade ordering: higher index = better grade
+const GRADE_ORDER = ["F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"]
+
+function gradeAtLeast(earned: string | null | undefined, required: string | null | undefined): boolean {
+  if (!required) return true           // no min grade specified — any passing grade is fine
+  if (!earned || earned === "REG") return false  // no grade yet
+  const earnedIdx = GRADE_ORDER.indexOf(earned.trim().toUpperCase())
+  const requiredIdx = GRADE_ORDER.indexOf(required.trim().toUpperCase())
+  if (earnedIdx === -1 || requiredIdx === -1) return true  // unknown grade format — assume ok
+  return earnedIdx >= requiredIdx
+}
+
 function buildMissingGroups(
   prereq: PrerequisiteResult | null,
-  completedCourseCodes: Set<string>
+  completedCourseCodes: Set<string>,
+  courseGrades?: Map<string, string | null>   // code → grade earned
 ): string[] {
   if (!prereq || prereq.groups.length === 0) {
     return []
@@ -94,12 +123,25 @@ function buildMissingGroups(
 
   const missing: string[] = []
   for (const group of prereq.groups) {
-    const satisfied = group.options.some((option) =>
-      completedCourseCodes.has(option.courseId.trim().toUpperCase())
-    )
+    const satisfied = group.options.some((option) => {
+      const normalized = normalizeHonorsCourseCode(option.courseId)
+      const raw = option.courseId.trim().toUpperCase()
+      const found = completedCourseCodes.has(normalized) || completedCourseCodes.has(raw)
+      if (!found) return false
+
+      // Check minimum grade if specified
+      if (option.minGrade && courseGrades) {
+        const earned = courseGrades.get(normalized) ?? courseGrades.get(raw) ?? null
+        return gradeAtLeast(earned, option.minGrade)
+      }
+      return true
+    })
 
     if (!satisfied) {
-      missing.push(group.options.map((option) => option.courseId).join(" OR "))
+      const label = group.options
+        .map((o) => o.minGrade ? `${o.courseId} (min ${o.minGrade})` : o.courseId)
+        .join(" OR ")
+      missing.push(label)
     }
   }
 
@@ -115,6 +157,8 @@ export async function recommendNextCoursesForUser(params: {
   programCode: string
   bulletinYear?: string | null
   maxRecommendations?: number
+  hypotheticalCompleted?: string[] // simulate mode: treat these as completed
+  upcomingRegisteredCodes?: Set<string> // pre-registered future-term codes — treated as planned, not blocking
 }): Promise<NextCoursesRecommendation | null> {
   const userId = params.userId.trim()
   const programCode = params.programCode.trim().toUpperCase()
@@ -131,17 +175,50 @@ export async function recommendNextCoursesForUser(params: {
 
   if (slots.length === 0) return null
 
-  const completedCourseCodes = new Set(
-    userCourses
-      .filter((course) => course.status === "completed")
-      .map((course) => course.code.trim().toUpperCase())
-  )
+  const completedCourseCodes = new Set<string>()
+  const courseGrades = new Map<string, string | null>()
 
-  const inProgressCourseCodes = new Set(
-    userCourses
-      .filter((course) => course.status === "in_progress")
-      .map((course) => course.code.trim().toUpperCase())
-  )
+  for (const course of userCourses.filter((c) => c.status === "completed")) {
+    const raw = course.code.trim().toUpperCase()
+    const normalized = normalizeHonorsCourseCode(raw)
+    completedCourseCodes.add(raw)
+    completedCourseCodes.add(normalized)
+    courseGrades.set(normalized, course.grade ?? null)
+    if (raw !== normalized) courseGrades.set(raw, course.grade ?? null)
+  }
+
+  // Add hypothetical completions for simulate mode (no grade — treated as passing)
+  if (params.hypotheticalCompleted) {
+    for (const code of params.hypotheticalCompleted) {
+      const raw = code.trim().toUpperCase()
+      completedCourseCodes.add(raw)
+      completedCourseCodes.add(normalizeHonorsCourseCode(raw))
+    }
+  }
+
+  // Split in-progress into current-term and pre-registered (future-term)
+  // Caller passes upcomingRegisteredCodes (course codes for future terms already locked in)
+  const upcomingCodes = params.upcomingRegisteredCodes ?? new Set<string>()
+
+  const currentTermCourseCodes = new Set<string>()
+  const preRegisteredCourseCodes = new Set<string>()
+
+  for (const course of userCourses.filter((c) => c.status === "in_progress")) {
+    const raw = course.code.trim().toUpperCase()
+    const normalized = normalizeHonorsCourseCode(raw)
+    const codes = raw === normalized ? [raw] : [raw, normalized]
+    if (upcomingCodes.has(raw) || upcomingCodes.has(normalized)) {
+      codes.forEach((c) => preRegisteredCourseCodes.add(c))
+    } else {
+      codes.forEach((c) => currentTermCourseCodes.add(c))
+    }
+  }
+
+  // All in-progress (both current and upcoming) for prerequisite satisfaction checks
+  const inProgressCourseCodes = new Set([...currentTermCourseCodes, ...preRegisteredCourseCodes])
+
+  // Courses that are in_progress count toward prerequisite satisfaction
+  const takenCourseCodes = new Set([...completedCourseCodes, ...inProgressCourseCodes])
 
   const targetSlots = slots
     .filter((slot) => !slot.is_elective_slot)
@@ -160,11 +237,12 @@ export async function recommendNextCoursesForUser(params: {
 
   const eligibleNow: (EligibleNextCourseOption & { slotOrder: number })[] = []
   const blocked: (BlockedNextCourseOption & { slotOrder: number })[] = []
-  const alreadyInProgress: (NextCourseOption & { slotOrder: number })[] = []
+  const alreadyInProgress: (NextCourseOption & { slotOrder: number })[] = []  // current-term only
+  const alreadyPlanned: (NextCourseOption & { slotOrder: number })[] = []     // pre-registered future-term
   const seen = new Set<string>()
 
   for (const slot of targetSlots) {
-    const normalizedCourseId = slot.courseId.trim().toUpperCase()
+    const normalizedCourseId = normalizeHonorsCourseCode(slot.courseId)
     if (seen.has(normalizedCourseId)) continue
     seen.add(normalizedCourseId)
 
@@ -181,16 +259,22 @@ export async function recommendNextCoursesForUser(params: {
       slotOrder: slot.slotOrder,
     }
 
-    if (inProgressCourseCodes.has(normalizedCourseId)) {
+    if (currentTermCourseCodes.has(normalizedCourseId)) {
       alreadyInProgress.push(base)
       continue
     }
 
-    const missingGroups = buildMissingGroups(prereqByCourse.get(slot.courseId) ?? null, completedCourseCodes)
+    if (preRegisteredCourseCodes.has(normalizedCourseId)) {
+      alreadyPlanned.push(base)
+      continue
+    }
+
+    // Use takenCourseCodes (completed + in_progress) for prerequisite satisfaction; grades for min-grade checks
+    const missingGroups = buildMissingGroups(prereqByCourse.get(slot.courseId) ?? null, takenCourseCodes, courseGrades)
     if (missingGroups.length === 0) {
       eligibleNow.push({
         ...base,
-        reason: "All listed prerequisites are satisfied based on completed courses.",
+        reason: "All listed prerequisites are satisfied based on completed and in-progress courses.",
       })
       continue
     }
@@ -212,15 +296,32 @@ export async function recommendNextCoursesForUser(params: {
   eligibleNow.sort(sorter)
   blocked.sort(sorter)
   alreadyInProgress.sort(sorter)
+  alreadyPlanned.sort(sorter)
+
+  // Compute credit totals for current-term and pre-registered courses from raw user data
+  const currentTermCredits = userCourses
+    .filter((c) => c.status === "in_progress" && !upcomingCodes.has(c.code.trim().toUpperCase()))
+    .reduce((sum, c) => sum + (c.creditHours ?? 0), 0)
+
+  const preRegisteredCredits = userCourses
+    .filter((c) => c.status === "in_progress" && upcomingCodes.has(c.code.trim().toUpperCase()))
+    .reduce((sum, c) => sum + (c.creditHours ?? 0), 0)
 
   return {
     programCode: program.code,
     catalogYear: program.catalog_year ?? null,
     completedCount: completedCourseCodes.size,
-    inProgressCount: inProgressCourseCodes.size,
+    currentTermCount: currentTermCourseCodes.size,
+    preRegisteredCount: preRegisteredCourseCodes.size,
+    currentTermCredits,
+    preRegisteredCredits,
+    semesterCreditCap: 19,
     eligibleNow: eligibleNow.slice(0, maxRecommendations).map(({ slotOrder: _slotOrder, ...course }) => course),
     blocked: blocked.slice(0, maxRecommendations).map(({ slotOrder: _slotOrder, ...course }) => course),
     alreadyInProgress: alreadyInProgress
+      .slice(0, maxRecommendations)
+      .map(({ slotOrder: _slotOrder, ...course }) => course),
+    alreadyPlanned: alreadyPlanned
       .slice(0, maxRecommendations)
       .map(({ slotOrder: _slotOrder, ...course }) => course),
   }
@@ -451,17 +552,38 @@ export async function resolveProgramCodeFromQuestion(
     }
   }
 
+  // If we already know the student's program from their profile, don't override it
+  // unless the question explicitly names a different program by name or code.
+  // This prevents catalog-year boost from selecting a wrong program (e.g. URP instead of CS).
+  if (normalizedFallback) {
+    // Check if the question explicitly names a DIFFERENT program
+    const explicitProgramMatch = uniquePrograms.find((program) => {
+      if (program.code === normalizedFallback) return false // skip their own program
+      const name = program.name.toLowerCase().replace(/[^a-z0-9\s]/g, " ").trim()
+      // Only count as explicit if the full program name or a distinctive 2-word phrase appears
+      if (normalizedQuestion.includes(name)) return true
+      const tokens = name.split(" ").filter((t) => t.length >= 4)
+      for (let i = 0; i < tokens.length - 1; i++) {
+        const phrase = `${tokens[i]} ${tokens[i + 1]}`
+        if (phrase.length >= 8 && normalizedQuestion.includes(phrase)) return true
+      }
+      return false
+    })
+    if (explicitProgramMatch) return explicitProgramMatch.code
+    return normalizedFallback
+  }
+
   type Candidate = { code: string; score: number }
   const candidates: Candidate[] = []
 
-  // Rank by phrase + token overlap to avoid false positives (e.g., generic "science").
+  // No fallback — rank by phrase + token overlap only (no catalog-year boost to avoid false positives).
   for (const program of uniquePrograms) {
     const name = program.name.toLowerCase()
     const normalizedName = name.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim()
     const tokens = normalizedName
       .split(" ")
       .map((token) => token.trim())
-      .filter((token) => token.length >= 3)
+      .filter((token) => token.length >= 4) // require 4+ chars to reduce noise
 
     if (tokens.length === 0) continue
 
@@ -481,18 +603,8 @@ export async function resolveProgramCodeFromQuestion(
     // Reward common two-word phrase matches like "computer science".
     for (let i = 0; i < tokens.length - 1; i++) {
       const phrase = `${tokens[i]} ${tokens[i + 1]}`
-      if (normalizedQuestion.includes(phrase)) {
+      if (phrase.length >= 8 && normalizedQuestion.includes(phrase)) {
         score += 20
-      }
-    }
-
-    if (typeof catalogYear === "number") {
-      if (program.years.has(catalogYear)) {
-        score += 25
-      } else if (program.years.has(catalogYear - 1) || program.years.has(catalogYear + 1)) {
-        score += 10
-      } else {
-        score -= 5
       }
     }
 
@@ -502,9 +614,323 @@ export async function resolveProgramCodeFromQuestion(
   }
 
   if (candidates.length > 0) {
-    candidates.sort((a, b) => b.score - a.score)
+    // Sort by score DESC, then by most recent catalog year DESC to break ties
+    // (avoids returning old program codes like BSCS-BS when EECS-BSCS is the current one)
+    candidates.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score
+      const aMaxYear = Math.max(...(groupedPrograms.get(`${a.code}|${uniquePrograms.find(p => p.code === a.code)?.name ?? ""}`)?.years ?? [0]))
+      const bMaxYear = Math.max(...(groupedPrograms.get(`${b.code}|${uniquePrograms.find(p => p.code === b.code)?.name ?? ""}`)?.years ?? [0]))
+      return bMaxYear - aMaxYear
+    })
     return candidates[0].code
   }
 
-  return normalizedFallback
+  return null
+}
+
+/**
+ * Compute graduation gap — what's remaining by semester, mirroring DegreeWorks view.
+ * Compares completed/in-progress courses against all curriculum slots.
+ */
+export async function computeGraduationGap(params: {
+  userId: string
+  programCode: string
+  bulletinYear?: string | null
+}): Promise<GraduationGap | null> {
+  const programCode = params.programCode.trim().toUpperCase()
+  const catalogYear = parseCatalogYear(params.bulletinYear)
+
+  const program = await getProgram(programCode, catalogYear)
+  if (!program) return null
+
+  const [slots, userCourses, electiveSlots] = await Promise.all([
+    getCurriculumSlots(program.id),
+    getUserCourseStatuses(params.userId),
+    getElectiveSlotsWithEligible(program.id),
+  ])
+
+  if (slots.length === 0) return null
+
+  const completedCourseCodes = new Set(
+    userCourses
+      .filter((c) => c.status === "completed")
+      .flatMap((c) => {
+        const raw = c.code.trim().toUpperCase()
+        const norm = normalizeHonorsCourseCode(raw)
+        return raw === norm ? [raw] : [raw, norm]
+      })
+  )
+
+  // Determine current term vs pre-registered using the same calendar logic as splitInProgressByTerm
+  const now = new Date()
+  const nowYear = now.getFullYear()
+  const nowMonth = now.getMonth() + 1
+  const nowSeason = nowMonth <= 5 ? 0 : nowMonth <= 7 ? 1 : 2 // 0=Spring,1=Summer,2=Fall
+
+  function isUpcomingTerm(term: string | null): boolean {
+    if (!term) return false
+    const m = term.match(/^(Spring|Summer|Fall)\s+(\d{4})$/i)
+    if (!m) return false
+    const season = { spring: 0, summer: 1, fall: 2 }[m[1].toLowerCase()] ?? 0
+    const year = parseInt(m[2])
+    return year > nowYear || (year === nowYear && season > nowSeason)
+  }
+
+  const inProgressCourses = userCourses.filter((c) => c.status === "in_progress")
+  const currentTermCourses = inProgressCourses.filter((c) => !isUpcomingTerm(c.term ?? null))
+  const preRegisteredCourses = inProgressCourses.filter((c) => isUpcomingTerm(c.term ?? null))
+
+  const inProgressCourseCodes = new Set(
+    inProgressCourses.flatMap((c) => {
+      const raw = c.code.trim().toUpperCase()
+      const norm = normalizeHonorsCourseCode(raw)
+      return raw === norm ? [raw] : [raw, norm]
+    })
+  )
+
+  const creditsCompleted = userCourses
+    .filter((c) => c.status === "completed")
+    .reduce((sum, c) => sum + (c.creditHours ?? 0), 0)
+
+  const creditsCurrentTerm = currentTermCourses.reduce((sum, c) => sum + (c.creditHours ?? 0), 0)
+  const creditsPreRegistered = preRegisteredCourses.reduce((sum, c) => sum + (c.creditHours ?? 0), 0)
+  const creditsInProgress = creditsCurrentTerm + creditsPreRegistered
+
+  // Build elective slot eligible map: slot_id → eligible course ids
+  const electiveEligibleMap = new Map<string, string[]>()
+  for (const es of electiveSlots) {
+    const eligible = Array.isArray(es.courses)
+      ? es.courses.map((c: any) => `${c.course_id}: ${c.title}`)
+      : []
+    electiveEligibleMap.set(es.slot_id, eligible)
+  }
+
+  // Group remaining slots by semester
+  const bySemester = new Map<number, SemesterRemaining>()
+
+  for (const slot of slots) {
+    const sem = slot.semester_number as number
+    if (!bySemester.has(sem)) {
+      bySemester.set(sem, {
+        semesterNumber: sem,
+        semesterLabel: SEMESTER_LABELS[sem] ?? `Semester ${sem}`,
+        slots: [],
+      })
+    }
+
+    if (slot.is_elective_slot) {
+      // Elective slot — filter eligible courses to exclude already completed/in-progress ones
+      const allEligible = electiveEligibleMap.get(slot.id) ?? []
+      const eligible = allEligible.filter((entry) => {
+        // entry format: "CS 214: Data Structures"
+        const code = entry.split(":")[0].trim().toUpperCase()
+        return !completedCourseCodes.has(code) && !inProgressCourseCodes.has(code)
+      })
+      bySemester.get(sem)!.slots.push({
+        courseId: null,
+        title: slot.slot_label,
+        creditHours: slot.credit_hours,
+        isElective: true,
+        eligibleCourses: eligible.slice(0, 10),
+      })
+    } else {
+      const courseRelation = slot.courses as
+        | { course_id: string; title: string; credit_hours: number }
+        | Array<{ course_id: string; title: string; credit_hours: number }>
+        | null
+      const course = Array.isArray(courseRelation) ? courseRelation[0] : courseRelation
+      if (!course) continue
+
+      const normalizedId = normalizeHonorsCourseCode(course.course_id)
+      const isDone = completedCourseCodes.has(normalizedId) || inProgressCourseCodes.has(normalizedId)
+      if (isDone) continue
+
+      bySemester.get(sem)!.slots.push({
+        courseId: course.course_id,
+        title: course.title,
+        creditHours: course.credit_hours,
+        isElective: false,
+      })
+    }
+  }
+
+  // Remove semesters where all required courses are done (only show semesters with remaining work)
+  const remainingBySemester = Array.from(bySemester.values())
+    .filter((sem) => sem.slots.length > 0)
+    .sort((a, b) => a.semesterNumber - b.semesterNumber)
+
+  const electiveSlotsRemaining = remainingBySemester.reduce(
+    (sum, sem) => sum + sem.slots.filter((s) => s.isElective).length,
+    0
+  )
+
+  return {
+    programCode: program.code,
+    programName: program.name,
+    creditsRequired: program.total_credit_hours,
+    creditsCompleted,
+    creditsCurrentTerm,
+    creditsPreRegistered,
+    creditsInProgress,
+    creditsRemaining: Math.max(0, program.total_credit_hours - creditsCompleted - creditsInProgress),
+    remainingBySemester,
+    electiveSlotsRemaining,
+    isOnTrack: remainingBySemester.length <= 2,
+  }
+}
+
+/**
+ * Fetch elective slot options for a program, surfacing what courses can fill each slot.
+ */
+export async function fetchElectiveOptions(params: {
+  programCode: string
+  bulletinYear?: string | null
+}): Promise<ElectiveSlotOption[]> {
+  const programCode = params.programCode.trim().toUpperCase()
+  const catalogYear = parseCatalogYear(params.bulletinYear)
+
+  const program = await getProgram(programCode, catalogYear)
+  if (!program) return []
+
+  const electiveSlots = await getElectiveSlotsWithEligible(program.id)
+
+  return electiveSlots.map((slot) => {
+    const courses = Array.isArray(slot.courses) ? slot.courses : slot.courses ? [slot.courses] : []
+    return {
+      semesterNumber: slot.semester_number,
+      semesterLabel: SEMESTER_LABELS[slot.semester_number] ?? `Semester ${slot.semester_number}`,
+      slotLabel: slot.slot_label,
+      creditHours: slot.credit_hours,
+      eligibleCourses: courses.map((c: any) => ({ courseId: c.course_id, title: c.title })),
+    }
+  })
+}
+
+/**
+ * Format graduation gap for LLM — mirrors DegreeWorks semester-by-semester view.
+ */
+export function formatGraduationGapForLLM(gap: GraduationGap): string {
+  const header = `Program: ${gap.programName} (${gap.programCode})
+AAMU Semester Credit Cap: 19 credits per semester
+Credits Required to Graduate: ${gap.creditsRequired}
+Credits Completed: ${gap.creditsCompleted}
+Credits Currently Enrolled (this term): ${gap.creditsCurrentTerm}
+Credits Pre-Registered (future terms — NOT yet in progress): ${gap.creditsPreRegistered}
+Credits Still Needed After All In-Progress: ${gap.creditsRemaining}
+Elective Slots Remaining: ${gap.electiveSlotsRemaining}
+Status: ${gap.isOnTrack ? "On track to graduate" : "More than 2 semesters of work remaining"}`
+
+  if (gap.remainingBySemester.length === 0) {
+    return `${header}\n\nAll required courses are completed or in progress. Graduation requirements nearly met.`
+  }
+
+  const semesterBlocks = gap.remainingBySemester
+    .map((sem) => {
+      const lines = sem.slots.map((slot) => {
+        if (slot.isElective) {
+          const options = slot.eligibleCourses?.slice(0, 5).join(", ") ?? "see advisor"
+          return `  - [Elective] ${slot.title} (${slot.creditHours} cr) — options: ${options}`
+        }
+        return `  - ${slot.courseId}: ${slot.title} (${slot.creditHours} cr)`
+      })
+      return `${sem.semesterLabel}:\n${lines.join("\n")}`
+    })
+    .join("\n\n")
+
+  return `${header}\n\nRemaining courses by semester:\n${semesterBlocks}`
+}
+
+/**
+ * Format elective options for LLM.
+ */
+export function formatElectiveOptionsForLLM(options: ElectiveSlotOption[]): string {
+  if (options.length === 0) {
+    return "No elective slots found for this program."
+  }
+
+  const blocks = options.map((slot) => {
+    const courses = slot.eligibleCourses.length
+      ? slot.eligibleCourses.map((c) => `    • ${c.courseId}: ${c.title}`).join("\n")
+      : "    • Contact advisor for eligible courses"
+    return `${slot.semesterLabel} — ${slot.slotLabel} (${slot.creditHours} cr):\n${courses}`
+  })
+
+  return `Elective Slots:\n${blocks.join("\n\n")}`
+}
+
+/**
+ * Fetch concentration (and minor) requirements for a program.
+ */
+export async function fetchConcentrationRequirements(params: {
+  programCode: string
+  bulletinYear?: string | null
+}): Promise<ConcentrationRequirementsResult | null> {
+  const programCode = params.programCode.trim().toUpperCase()
+  const catalogYear = parseCatalogYear(params.bulletinYear)
+
+  const program = await getProgram(programCode, catalogYear)
+  if (!program) return null
+
+  const concentrations = await getConcentrations(program.id)
+  if (concentrations.length === 0) return { programCode: program.code, concentrations: [] }
+
+  const withSlots: ConcentrationRequirement[] = await Promise.all(
+    concentrations.map(async (c) => {
+      const slots = await getConcentrationSlots(c.id)
+      return {
+        code: c.code,
+        name: c.name,
+        type: c.type,
+        totalHours: c.total_hours,
+        slots: slots.map((s) => {
+          const courseRaw = s.courses
+          const course = Array.isArray(courseRaw) ? courseRaw[0] ?? null : courseRaw
+          return {
+            slotLabel: s.slot_label,
+            isElective: s.is_elective_slot,
+            levelRestriction: s.level_restriction,
+            creditHours: s.credit_hours,
+            courseId: course?.course_id ?? null,
+            courseTitle: course?.title ?? null,
+          }
+        }),
+      }
+    })
+  )
+
+  return { programCode: program.code, concentrations: withSlots }
+}
+
+/**
+ * Format concentration requirements for LLM.
+ */
+export function formatConcentrationForLLM(result: ConcentrationRequirementsResult): string {
+  if (result.concentrations.length === 0) {
+    return `Program ${result.programCode} has no concentrations or minors on record. Please check the bulletin or contact your advisor.`
+  }
+
+  const blocks = result.concentrations.map((c) => {
+    const header = `${c.type === "minor" ? "Minor" : "Concentration"}: ${c.name} (${c.code}) — ${c.totalHours} total hours`
+    const slotLines = c.slots.map((s) => {
+      if (s.isElective) {
+        const restriction = s.levelRestriction ? ` [${s.levelRestriction}]` : ""
+        return `  - [Elective${restriction}] ${s.slotLabel} (${s.creditHours} cr)`
+      }
+      return `  - ${s.courseId ?? s.slotLabel}: ${s.courseTitle ?? s.slotLabel} (${s.creditHours} cr)`
+    })
+    return `${header}\n${slotLines.join("\n")}`
+  })
+
+  return `Concentrations & Minors for ${result.programCode}:\n\n${blocks.join("\n\n")}`
+}
+
+/**
+ * Extract a requested course count from a question ("I want 5 classes", "take 3 courses").
+ */
+export function extractRequestedCourseCount(question: string): number | null {
+  const m1 = question.match(/\b([2-9]|1[0-2])\s*(class(?:es)?|course(?:s)?|subject(?:s)?)\b/i)
+  if (m1) { const n = parseInt(m1[1], 10); return isNaN(n) ? null : n }
+  const m2 = question.match(/\b(?:take|register for|enroll in)\s+([2-9]|1[0-2])\b/i)
+  if (m2) { const n = parseInt(m2[1], 10); return isNaN(n) ? null : n }
+  return null
 }

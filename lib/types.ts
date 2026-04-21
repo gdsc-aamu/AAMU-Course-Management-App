@@ -39,3 +39,21 @@ export interface Message {
   role: "assistant" | "user"
   content: string
 }
+
+// Chat persistence types
+export interface ChatThread {
+  id: string
+  user_id: string
+  plan_id: string
+  title: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ChatMessage {
+  id: string
+  thread_id: string
+  role: "user" | "assistant"
+  content: string
+  created_at: string
+}
