@@ -351,3 +351,38 @@ CREATE POLICY "Users can delete messages from their threads"
       SELECT id FROM chat_threads WHERE user_id = auth.uid()
     )
   );
+
+-- General Education Areas
+create table if not exists general_education_areas (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  name text not null,
+  min_hours int not null,
+  notes text,
+  bulletin_year text not null default '2025-2026',
+  created_at timestamptz default now()
+);
+
+-- General Education Courses
+create table if not exists general_education_courses (
+  id uuid primary key default gen_random_uuid(),
+  area_id uuid not null references general_education_areas(id) on delete cascade,
+  sub_area text,
+  course_code text not null,
+  course_title text not null,
+  credit_hours int not null,
+  notes text,
+  created_at timestamptz default now(),
+  unique (area_id, course_code)
+);
+
+create index if not exists idx_ge_courses_area on general_education_courses (area_id);
+create index if not exists idx_ge_courses_code on general_education_courses (course_code);
+
+-- Enrollment & scholarship flags on student profiles
+alter table user_academic_profiles
+  add column if not exists is_international boolean default false,
+  add column if not exists scholarship_type text,
+  add column if not exists scholarship_name text,
+  add column if not exists scholarship_min_gpa numeric,
+  add column if not exists scholarship_min_credits_per_year int;
