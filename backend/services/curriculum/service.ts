@@ -31,8 +31,21 @@ import {
   getConcentrations,
   getConcentrationSlots,
   searchConcentrationsByName,
+  getAvailableGECourses,
 } from "@/backend/data-access/curriculum"
+import type { GECourseRow } from "@/backend/data-access/curriculum"
 import { getUserCourseStatuses } from "@/backend/data-access/pdf-parsing"
+
+const AAMU_SCHOLARSHIP_RULES: Record<string, { minGpa: number; minCreditsPerYear: number }> = {
+  'AAMU Presidential Scholarship': { minGpa: 3.5, minCreditsPerYear: 30 },
+  'AAMU Academic Excellence Scholarship': { minGpa: 3.25, minCreditsPerYear: 30 },
+  'AAMU Achievers Scholarship': { minGpa: 3.0, minCreditsPerYear: 30 },
+  'AAMU Bulldog Scholarship': { minGpa: 2.5, minCreditsPerYear: 30 },
+  'AAMU Transfer Scholarship': { minGpa: 3.0, minCreditsPerYear: 30 },
+  'AAMU STEM Scholarship': { minGpa: 3.0, minCreditsPerYear: 30 },
+  'AAMU Need-Based Grant': { minGpa: 2.0, minCreditsPerYear: 30 },
+  'AAMU Athletic Scholarship': { minGpa: 2.0, minCreditsPerYear: 30 },
+}
 
 const SEMESTER_LABELS: Record<number, string> = {
   1: "Freshman Fall",
@@ -1008,4 +1021,99 @@ export function extractRequestedCourseCount(question: string): number | null {
   const m2 = question.match(/\b(?:take|register for|enroll in)\s+([2-9]|1[0-2])\b/i)
   if (m2) { const n = parseInt(m2[1], 10); return isNaN(n) ? null : n }
   return null
+}
+
+interface FreeElectiveContext {
+  availableCourses: GECourseRow[]
+  enrollmentRulesNote: string
+}
+
+/**
+ * Fetch available General Education courses not yet completed or in-progress,
+ * and build enrollment rules note based on international status and scholarship type.
+ */
+export async function fetchFreeElectiveOptions(params: {
+  studentId: string
+  isInternational?: boolean
+  scholarshipType?: string
+  scholarshipMinGpa?: number
+  scholarshipMinCreditsPerYear?: number
+}): Promise<FreeElectiveContext> {
+  const userCourses = await getUserCourseStatuses(params.studentId)
+
+  const completed = userCourses.filter((c) => c.status === "completed")
+  const inProgress = userCourses.filter((c) => c.status === "in_progress")
+
+  const takenCodes = new Set([
+    ...completed.map((c) => c.code),
+    ...inProgress.map((c) => c.code),
+  ])
+
+  const availableCourses = await getAvailableGECourses(takenCodes)
+
+  // Build enrollment rules note
+  const notes: string[] = []
+
+  if (params.isInternational) {
+    notes.push('International students: minimum 12 credits/semester (9 must be in-person). Summer minimum: 3 credits.')
+  }
+
+  if (params.scholarshipType) {
+    const rule = params.scholarshipType === 'External Scholarship'
+      ? params.scholarshipMinGpa || params.scholarshipMinCreditsPerYear
+        ? {
+            minGpa: params.scholarshipMinGpa,
+            minCreditsPerYear: params.scholarshipMinCreditsPerYear,
+          }
+        : null
+      : AAMU_SCHOLARSHIP_RULES[params.scholarshipType] ?? null
+
+    if (rule) {
+      const parts: string[] = [`${params.scholarshipType} requires:`]
+      if (rule.minGpa) parts.push(`minimum ${rule.minGpa} GPA`)
+      if (rule.minCreditsPerYear) parts.push(`${rule.minCreditsPerYear} credits per academic year`)
+      notes.push(parts.join(' '))
+    }
+  }
+
+  return {
+    availableCourses,
+    enrollmentRulesNote: notes.join(' | '),
+  }
+}
+
+/**
+ * Format free elective / GE course options for LLM processing.
+ * Groups available courses by area and sub-area.
+ */
+export function formatFreeElectivesForLLM(ctx: FreeElectiveContext): string {
+  if (ctx.availableCourses.length === 0) {
+    return 'The student has completed all General Education requirements.'
+  }
+
+  // Group by area then sub_area
+  const byArea: Record<string, Record<string, GECourseRow[]>> = {}
+  for (const course of ctx.availableCourses) {
+    if (!byArea[course.area_name]) byArea[course.area_name] = {}
+    const sub = course.sub_area ?? 'General'
+    if (!byArea[course.area_name][sub]) byArea[course.area_name][sub] = []
+    byArea[course.area_name][sub].push(course)
+  }
+
+  const lines: string[] = ['Available General Education courses (not yet completed):']
+  for (const [areaName, subs] of Object.entries(byArea)) {
+    lines.push(`\n${areaName}:`)
+    for (const [subName, courses] of Object.entries(subs)) {
+      lines.push(`  ${subName}:`)
+      for (const c of courses) {
+        lines.push(`    - ${c.course_code}: ${c.course_title} (${c.credit_hours} cr)`)
+      }
+    }
+  }
+
+  if (ctx.enrollmentRulesNote) {
+    lines.push(`\nEnrollment rules: ${ctx.enrollmentRulesNote}`)
+  }
+
+  return lines.join('\n')
 }
