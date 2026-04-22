@@ -30,6 +30,10 @@ export interface CachedSessionContext {
   programCode: string | undefined
   bulletinYear: string | undefined
   classification: string | undefined
+  isInternational?: boolean
+  scholarshipType?: string
+  scholarshipMinGpa?: number
+  scholarshipMinCreditsPerYear?: number
 }
 
 export interface CachedCourse {
