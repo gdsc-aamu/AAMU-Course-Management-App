@@ -217,9 +217,14 @@ export default function SettingsPage() {
     setEnrollmentSaveError('')
     setEnrollmentSaveSuccess(false)
     try {
+      const { data: sessData, error: sessErr } = await supabase.auth.getSession()
+      if (sessErr || !sessData.session?.access_token) throw new Error('You need to be signed in.')
       const res = await fetch('/api/user/academic-profile', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessData.session.access_token}`,
+        },
         body: JSON.stringify({
           isInternational,
           scholarshipType: scholarshipType || null,
