@@ -144,6 +144,10 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
     programCode?: string
     bulletinYear?: string
     classification?: string
+    isInternational?: boolean
+    scholarshipType?: string
+    scholarshipMinGpa?: number
+    scholarshipMinCreditsPerYear?: number
   }>({})
   const hasAutoNamedRef = useRef(false)
 
@@ -252,6 +256,10 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
                 programCode: profilePayload.profile.programCode ?? undefined,
                 bulletinYear: profilePayload.profile.bulletinYear ?? undefined,
                 classification: profilePayload.profile.classification ?? undefined,
+                isInternational: profilePayload.profile.is_international ?? false,
+                scholarshipType: profilePayload.profile.scholarship_type ?? undefined,
+                scholarshipMinGpa: profilePayload.profile.scholarship_min_gpa ?? undefined,
+                scholarshipMinCreditsPerYear: profilePayload.profile.scholarship_min_credits_per_year ?? undefined,
               }
               setSessionContext(ctx)
               sessionCache.write(uid, ctx)
@@ -310,6 +318,10 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
           bulletinYear: sessionContext.bulletinYear,
           classification: sessionContext.classification,
           studentName: studentName ?? undefined,
+          isInternational: sessionContext.isInternational,
+          scholarshipType: sessionContext.scholarshipType,
+          scholarshipMinGpa: sessionContext.scholarshipMinGpa,
+          scholarshipMinCreditsPerYear: sessionContext.scholarshipMinCreditsPerYear,
         },
         conversationHistory: historySnapshot,
       }
