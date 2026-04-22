@@ -53,6 +53,16 @@ export default function SettingsPage() {
   const [profileSaveError, setProfileSaveError] = useState<string | null>(null)
   const [profileSaveSuccess, setProfileSaveSuccess] = useState<string | null>(null)
 
+  // Enrollment & Financial Aid state
+  const [isInternational, setIsInternational] = useState(false)
+  const [scholarshipType, setScholarshipType] = useState('')
+  const [scholarshipName, setScholarshipName] = useState('')
+  const [scholarshipMinGpa, setScholarshipMinGpa] = useState('')
+  const [scholarshipMinCreditsPerYear, setScholarshipMinCreditsPerYear] = useState('')
+  const [isSavingEnrollment, setIsSavingEnrollment] = useState(false)
+  const [enrollmentSaveSuccess, setEnrollmentSaveSuccess] = useState(false)
+  const [enrollmentSaveError, setEnrollmentSaveError] = useState('')
+
   async function loadUserProfile() {
     setProfileError(null)
 
@@ -69,7 +79,7 @@ export default function SettingsPage() {
           method: "GET",
           headers: { Authorization: `Bearer ${data.session!.access_token}` },
         })
-        const payload = (await response.json()) as { success: boolean; error?: string; profile?: UserProfile }
+        const payload = (await response.json()) as { success: boolean; error?: string; profile?: any }
         if (!response.ok || !payload.success) throw new Error(payload.error ?? "Failed to fetch user profile.")
         const p = payload.profile ?? { classification: null, programCode: null, bulletinYear: null }
         const result = {
@@ -78,6 +88,12 @@ export default function SettingsPage() {
           programCode: p.programCode ?? null,
           bulletinYear: p.bulletinYear ?? null,
         }
+        // Set enrollment fields from response
+        setIsInternational(p.is_international ?? false)
+        setScholarshipType(p.scholarship_type ?? '')
+        setScholarshipName(p.scholarship_name ?? '')
+        setScholarshipMinGpa(p.scholarship_min_gpa?.toString() ?? '')
+        setScholarshipMinCreditsPerYear(p.scholarship_min_credits_per_year?.toString() ?? '')
         profileCache.write(uid, result)
         return result
       }
@@ -194,6 +210,32 @@ export default function SettingsPage() {
     setIsEditingProfile(false)
     setProfileSaveError(null)
     setProfileSaveSuccess(null)
+  }
+
+  const handleSaveEnrollment = async () => {
+    setIsSavingEnrollment(true)
+    setEnrollmentSaveError('')
+    setEnrollmentSaveSuccess(false)
+    try {
+      const res = await fetch('/api/user/academic-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          isInternational,
+          scholarshipType: scholarshipType || null,
+          scholarshipName: scholarshipName || null,
+          scholarshipMinGpa: scholarshipMinGpa ? parseFloat(scholarshipMinGpa) : null,
+          scholarshipMinCreditsPerYear: scholarshipMinCreditsPerYear ? parseInt(scholarshipMinCreditsPerYear) : null,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      setEnrollmentSaveSuccess(true)
+      setTimeout(() => setEnrollmentSaveSuccess(false), 3000)
+    } catch (e: any) {
+      setEnrollmentSaveError(e.message ?? 'Error saving enrollment info')
+    } finally {
+      setIsSavingEnrollment(false)
+    }
   }
 
   async function loadCompletedCourses() {
@@ -628,6 +670,126 @@ export default function SettingsPage() {
                   <button className="text-sm font-bold text-[#78103A] hover:underline cursor-pointer">
                     View full academic transcript
                   </button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Enrollment & Financial Aid Card */}
+            <Card className="shadow-sm border-gray-100">
+              <CardContent className="p-6">
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold text-gray-900">Enrollment &amp; Financial Aid</h2>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Used by your AI advisor to provide accurate credit and scholarship guidance.
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* International Student Checkbox */}
+                  <div>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isInternational}
+                        onChange={(e) => setIsInternational(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-[#78103A] accent-[#78103A] cursor-pointer"
+                      />
+                      <span className="text-sm font-medium text-gray-900">I am an international student</span>
+                    </label>
+                    {isInternational && (
+                      <p className="mt-2 ml-7 text-xs text-amber-700 bg-amber-50 rounded-md px-3 py-2">
+                        International students must maintain at least 12 credits/semester (9 in-person). Summer minimum: 3 credits.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Scholarship Type */}
+                  <div>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                      Scholarship Type
+                    </label>
+                    <select
+                      value={scholarshipType}
+                      onChange={(e) => setScholarshipType(e.target.value)}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
+                    >
+                      <option value="">None / Not applicable</option>
+                      <option value="AAMU Presidential Scholarship">AAMU Presidential Scholarship</option>
+                      <option value="AAMU Academic Excellence Scholarship">AAMU Academic Excellence Scholarship</option>
+                      <option value="AAMU Achievers Scholarship">AAMU Achievers Scholarship</option>
+                      <option value="AAMU Bulldog Scholarship">AAMU Bulldog Scholarship</option>
+                      <option value="AAMU Transfer Scholarship">AAMU Transfer Scholarship</option>
+                      <option value="AAMU STEM Scholarship">AAMU STEM Scholarship</option>
+                      <option value="AAMU Need-Based Grant">AAMU Need-Based Grant</option>
+                      <option value="AAMU Athletic Scholarship">AAMU Athletic Scholarship</option>
+                      <option value="External Scholarship">External Scholarship</option>
+                    </select>
+                  </div>
+
+                  {/* External Scholarship Fields */}
+                  {scholarshipType === 'External Scholarship' && (
+                    <div className="space-y-4 rounded-lg border border-gray-100 bg-gray-50/50 p-4">
+                      <div>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                          Scholarship Name
+                        </label>
+                        <input
+                          type="text"
+                          value={scholarshipName}
+                          onChange={(e) => setScholarshipName(e.target.value)}
+                          placeholder="e.g. Gates Scholarship"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                          Minimum GPA Required
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="4"
+                          value={scholarshipMinGpa}
+                          onChange={(e) => setScholarshipMinGpa(e.target.value)}
+                          placeholder="e.g. 3.50"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                          Minimum Credits Per Year
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={scholarshipMinCreditsPerYear}
+                          onChange={(e) => setScholarshipMinCreditsPerYear(e.target.value)}
+                          placeholder="e.g. 24"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Save Button & Feedback */}
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveEnrollment}
+                      disabled={isSavingEnrollment}
+                      className="self-start rounded-md bg-[#78103A] px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#600d2e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isSavingEnrollment && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Save Enrollment Info
+                    </button>
+                    {enrollmentSaveSuccess && (
+                      <p className="text-sm font-semibold text-emerald-700">Enrollment info saved successfully!</p>
+                    )}
+                    {enrollmentSaveError && (
+                      <p className="text-sm font-semibold text-red-700">{enrollmentSaveError}</p>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
