@@ -39,7 +39,7 @@ export async function downloadPlanAsPdf(plan: Plan, studentName?: string): Promi
   const pageW = 215.9
   const margin = 20
   const contentW = pageW - margin * 2
-  const primaryColor: [number, number, number] = [139, 0, 0]       // AAMU maroon
+  const primaryColor: [number, number, number] = [160, 21, 42]      // AAMU maroon
   const white: [number, number, number] = [255, 255, 255]
   const lightGray: [number, number, number] = [245, 245, 245]
   const darkText: [number, number, number] = [30, 30, 30]

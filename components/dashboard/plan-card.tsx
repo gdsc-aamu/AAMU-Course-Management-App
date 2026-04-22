@@ -31,13 +31,13 @@ export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: Readonly
   })()
 
   return (
-    <div className="group relative rounded-xl border-2 border-[#8B0000] bg-white overflow-hidden transition-all duration-200 hover:shadow-xl hover:shadow-[#8B0000]/15 hover:-translate-y-0.5">
+    <div className="group relative rounded-xl border-2 border-[#A0152A] bg-white overflow-hidden transition-all duration-200 hover:shadow-xl hover:shadow-[#A0152A]/15 hover:-translate-y-0.5">
       <Link href={`/plans/${plan.id}`} className="absolute inset-0 z-10">
         <span className="sr-only">Open {plan.name}</span>
       </Link>
 
       {/* Maroon header band */}
-      <div className="bg-[#8B0000] px-4 py-3 flex items-center justify-between">
+      <div className="bg-[#A0152A] px-4 py-3 flex items-center justify-between">
         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-white/15">
           <BookOpen className="h-3.5 w-3.5 text-white" />
         </div>
@@ -62,10 +62,10 @@ export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: Readonly
 
       {/* Centered body */}
       <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
-        <h3 className="font-bold text-[15px] text-gray-900 leading-snug line-clamp-2 group-hover:text-[#8B0000] transition-colors mb-2">
+        <h3 className="font-bold text-[15px] text-gray-900 leading-snug line-clamp-2 group-hover:text-[#A0152A] transition-colors mb-2">
           {plan.name}
         </h3>
-        <span className="inline-flex items-center rounded-full border border-[#8B0000]/30 bg-[#8B0000]/6 px-3 py-0.5 text-[11px] font-semibold text-[#8B0000] uppercase tracking-wider">
+        <span className="inline-flex items-center rounded-full border border-[#A0152A]/30 bg-[#A0152A]/6 px-3 py-0.5 text-[11px] font-semibold text-[#A0152A] uppercase tracking-wider">
           {plan.semester}
         </span>
         <div className="flex items-center gap-3 mt-3 text-[11px] text-gray-400">
@@ -76,13 +76,13 @@ export function PlanCard({ plan, onToggleStar, onDelete, onDuplicate }: Readonly
       </div>
 
       {/* Footer */}
-      <div className="border-t border-[#8B0000]/15 px-4 py-2 flex items-center justify-center relative z-20">
+      <div className="border-t border-[#A0152A]/15 px-4 py-2 flex items-center justify-center relative z-20">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 gap-1.5 text-xs text-gray-400 hover:text-[#8B0000] hover:bg-[#8B0000]/6"
+              className="h-7 gap-1.5 text-xs text-gray-400 hover:text-[#A0152A] hover:bg-[#A0152A]/6"
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()

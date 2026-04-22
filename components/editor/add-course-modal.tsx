@@ -128,7 +128,7 @@ export function AddCourseModal({ open, onClose, onAdd, existingCourses }: AddCou
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="e.g. CS 301 or Algorithms..."
-                className="pl-9 border-gray-200 bg-gray-50 focus:bg-white focus:border-[#8B0000] focus:ring-[#8B0000]/20"
+                className="pl-9 border-gray-200 bg-gray-50 focus:bg-white focus:border-[#A0152A] focus:ring-[#A0152A]/20"
               />
             </div>
           </div>
@@ -166,7 +166,7 @@ export function AddCourseModal({ open, onClose, onAdd, existingCourses }: AddCou
                       <div className="min-w-0 flex-1">
                         <p className={cn(
                           "text-sm font-semibold",
-                          alreadyInPlan || justAdded ? "text-gray-400" : "text-[#8B0000]"
+                          alreadyInPlan || justAdded ? "text-gray-400" : "text-[#A0152A]"
                         )}>
                           {course.course_id}
                         </p>
@@ -185,7 +185,7 @@ export function AddCourseModal({ open, onClose, onAdd, existingCourses }: AddCou
                         ) : (
                           <Button
                             size="sm"
-                            className="h-7 px-3 text-xs bg-[#8B0000] hover:bg-[#6B0000] text-white"
+                            className="h-7 px-3 text-xs bg-[#A0152A] hover:bg-[#6B0000] text-white"
                             onClick={() => handleAdd(course.course_id)}
                             disabled={!!addingId}
                           >

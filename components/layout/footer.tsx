@@ -17,7 +17,7 @@ export function Footer() {
             href="https://gdg.community.dev/gdg-on-campus-alabama-agricultural-and-mechanical-university-normal-united-states/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#8B0000] font-medium transition-colors"
+            className="hover:text-[#A0152A] font-medium transition-colors"
           >
             Join GDG on Campus AAMU →
           </a>

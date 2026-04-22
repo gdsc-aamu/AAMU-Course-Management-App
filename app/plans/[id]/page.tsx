@@ -299,7 +299,7 @@ export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ 
           <Button
             size="sm"
             onClick={() => setShowAddCourse(true)}
-            className="gap-2 bg-[#8B0000] hover:bg-[#6B0000] text-white"
+            className="gap-2 bg-[#A0152A] hover:bg-[#6B0000] text-white"
           >
             <Plus className="h-4 w-4" />
             Add Course

@@ -137,8 +137,8 @@ export default function DashboardPage() {
           {/* Stats row — no icons, full width 4 columns */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat) => (
-              <div key={stat.label} className="rounded-xl border-2 border-[#8B0000] bg-white shadow-sm px-6 py-7 flex flex-col items-center justify-center min-h-[130px] text-center">
-                <p className="text-[11px] font-semibold text-[#8B0000] uppercase tracking-widest mb-2">
+              <div key={stat.label} className="rounded-xl border-2 border-[#A0152A] bg-white shadow-sm px-6 py-7 flex flex-col items-center justify-center min-h-[130px] text-center">
+                <p className="text-[11px] font-semibold text-[#A0152A] uppercase tracking-widest mb-2">
                   {stat.label}
                 </p>
                 <p className="text-3xl font-bold tracking-tight text-gray-900">{stat.value}</p>

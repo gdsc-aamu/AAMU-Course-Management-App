@@ -44,7 +44,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                 active
-                  ? "bg-[#8B0000] text-white shadow-sm"
+                  ? "bg-[#A0152A] text-white shadow-sm"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
@@ -71,7 +71,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 function Brand() {
   return (
     <div className="flex items-center gap-2.5 px-4 py-4 border-b">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#8B0000] text-white font-bold text-xs shrink-0">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#A0152A] text-white font-bold text-xs shrink-0">
         OT
       </div>
       <div>
@@ -107,7 +107,7 @@ export function Sidebar() {
           <NavContent />
         </div>
         <div className="flex items-center gap-2.5 px-4 py-3 border-t bg-muted/30">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#8B0000] text-white text-xs font-semibold shrink-0">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#A0152A] text-white text-xs font-semibold shrink-0">
             {initials}
           </div>
           <p className="text-xs font-medium truncate text-foreground">{name || "Student"}</p>
@@ -132,7 +132,7 @@ export function Sidebar() {
                 <NavContent onNavigate={() => setOpen(false)} />
               </div>
               <div className="flex items-center gap-2.5 px-4 py-3 border-t bg-muted/30">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#8B0000] text-white text-xs font-semibold shrink-0">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#A0152A] text-white text-xs font-semibold shrink-0">
                   {initials}
                 </div>
                 <p className="text-xs font-medium truncate text-foreground">{name || "Student"}</p>
@@ -143,7 +143,7 @@ export function Sidebar() {
 
         {/* Center — brand (flex-1 on both sides keeps it centered) */}
         <div className="flex-1 flex items-center justify-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#8B0000] text-white font-bold text-xs shrink-0">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#A0152A] text-white font-bold text-xs shrink-0">
             OT
           </div>
           <span className="text-sm font-bold tracking-tight whitespace-nowrap">ON TRACK</span>
@@ -151,7 +151,7 @@ export function Sidebar() {
 
         {/* Right — avatar */}
         <div className="flex items-center pr-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8B0000] text-white text-xs font-semibold">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#A0152A] text-white text-xs font-semibold">
             {initials}
           </div>
         </div>
