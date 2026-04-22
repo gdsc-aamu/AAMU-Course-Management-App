@@ -10,7 +10,12 @@ export interface UserAcademicProfileRow {
   user_id: string
   program_code: string | null
   bulletin_year: string | null
-    classification: string | null
+  classification: string | null
+  is_international: boolean | null
+  scholarship_type: string | null
+  scholarship_name: string | null
+  scholarship_min_gpa: number | null
+  scholarship_min_credits_per_year: number | null
   updated_at: string
 }
 
@@ -25,7 +30,7 @@ export async function getUserAcademicProfile(userId: string): Promise<UserAcadem
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from("user_academic_profiles")
-      .select("user_id, program_code, bulletin_year, classification, updated_at")
+      .select("user_id, program_code, bulletin_year, classification, is_international, scholarship_type, scholarship_name, scholarship_min_gpa, scholarship_min_credits_per_year, updated_at")
     .eq("user_id", userId)
     .maybeSingle()
 
@@ -41,6 +46,11 @@ export async function upsertUserAcademicProfile(params: {
   programCode?: string | null
   bulletinYear?: string | null
   classification?: string | null
+  isInternational?: boolean | null
+  scholarshipType?: string | null
+  scholarshipName?: string | null
+  scholarshipMinGpa?: number | null
+  scholarshipMinCreditsPerYear?: number | null
 }): Promise<UserAcademicProfileRow> {
   const supabase = getSupabaseClient()
 
@@ -59,11 +69,26 @@ export async function upsertUserAcademicProfile(params: {
   if (params.classification !== undefined) {
     row.classification = params.classification?.trim() ?? null
   }
+  if (params.isInternational !== undefined) {
+    row.is_international = params.isInternational
+  }
+  if (params.scholarshipType !== undefined) {
+    row.scholarship_type = params.scholarshipType?.trim() ?? null
+  }
+  if (params.scholarshipName !== undefined) {
+    row.scholarship_name = params.scholarshipName?.trim() ?? null
+  }
+  if (params.scholarshipMinGpa !== undefined) {
+    row.scholarship_min_gpa = params.scholarshipMinGpa
+  }
+  if (params.scholarshipMinCreditsPerYear !== undefined) {
+    row.scholarship_min_credits_per_year = params.scholarshipMinCreditsPerYear
+  }
 
   const { data, error } = await supabase
     .from("user_academic_profiles")
     .upsert(row, { onConflict: "user_id" })
-    .select("user_id, program_code, bulletin_year, classification, updated_at")
+    .select("user_id, program_code, bulletin_year, classification, is_international, scholarship_type, scholarship_name, scholarship_min_gpa, scholarship_min_credits_per_year, updated_at")
     .single()
 
   if (error || !data) {
