@@ -320,3 +320,68 @@ export async function getCoursePrerequisites(courseId: string): Promise<CoursePr
   if (error || !prereqs) return []
   return prereqs
 }
+
+// ── General Education Courses ─────────────────────────────────────────────────
+
+export interface GEAreaRow {
+  id: string
+  code: string
+  name: string
+  min_hours: number
+  notes: string | null
+  bulletin_year: string
+}
+
+export interface GECourseRow {
+  id: string
+  area_id: string
+  sub_area: string | null
+  course_code: string
+  course_title: string
+  credit_hours: number
+  notes: string | null
+  area_code: string
+  area_name: string
+}
+
+/**
+ * Fetch available General Education courses, excluding those already taken.
+ */
+export async function getAvailableGECourses(
+  takenCourseCodes: Set<string>
+): Promise<GECourseRow[]> {
+  const supabase = getSupabaseClient()
+
+  const { data, error } = await supabase
+    .from("general_education_courses")
+    .select(`
+      id,
+      area_id,
+      sub_area,
+      course_code,
+      course_title,
+      credit_hours,
+      notes,
+      general_education_areas!inner (
+        code,
+        name
+      )
+    `)
+    .order("course_code")
+
+  if (error) throw new Error(`getAvailableGECourses: ${error.message}`)
+
+  return (data ?? [])
+    .map((row: any) => ({
+      id: row.id,
+      area_id: row.area_id,
+      sub_area: row.sub_area,
+      course_code: row.course_code,
+      course_title: row.course_title,
+      credit_hours: row.credit_hours,
+      notes: row.notes,
+      area_code: row.general_education_areas.code,
+      area_name: row.general_education_areas.name,
+    }))
+    .filter((c: GECourseRow) => !takenCourseCodes.has(c.course_code))
+}
