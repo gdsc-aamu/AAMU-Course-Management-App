@@ -27,6 +27,8 @@ import {
   extractRequestedCourseCount,
   fetchConcentrationRequirements,
   formatConcentrationForLLM,
+  fetchFreeElectiveOptions,
+  formatFreeElectivesForLLM,
 } from "@/backend/services/curriculum/service"
 import {
   fetchUserCompletedCourses,
@@ -62,6 +64,10 @@ function asksGraduationGapQuestion(question: string): boolean {
   return /(what('s|\s+is)\s+(left|remaining)|what\s+do\s+i\s+(still\s+)?(need|have\s+left)|how\s+(many|much)\s+(credits?|courses?|classes?)\s+(do\s+i\s+)?(need|have\s+left|remain)|will\s+i\s+graduate|graduation\s+(progress|gap|requirements?|status)|degree\s+(progress|completion|status)|how\s+close\s+(am\s+i|to\s+graduating)|remaining\s+(requirements?|courses?|credits?)|left\s+to\s+graduate|\bcourses?\s+(left|remaining|still\s+needed)\b|\bcredits?\s+(left|remaining|still\s+needed)\b)/i.test(
     question
   )
+}
+
+function asksFreeElectiveQuestion(question: string): boolean {
+  return /\b(free elective|elective|GE course|general education|PE course|physical education|recreational|golf|swimming|tennis|bowling|badminton|what (should|can) I take|need.*credits?|credits? (left|remaining|needed))\b/i.test(question)
 }
 
 function asksElectiveQuestion(question: string): boolean {
@@ -177,6 +183,8 @@ function buildStudentContextBlock(profile: {
   bulletinYear?: string | null
   classification?: string | null
   studentName?: string | null
+  isInternational?: boolean | null
+  scholarshipType?: string | null
 } | null): string {
   if (!profile) return ""
   const parts: string[] = []
@@ -184,6 +192,8 @@ function buildStudentContextBlock(profile: {
   if (profile.classification) parts.push(`Classification: ${profile.classification}`)
   if (profile.programCode) parts.push(`Program: ${profile.programCode}`)
   if (profile.bulletinYear) parts.push(`Catalog Year: ${profile.bulletinYear}`)
+  if (profile.isInternational) parts.push("International student: must maintain 12+ credits/semester (9 in-person)")
+  if (profile.scholarshipType) parts.push(`Scholarship: ${profile.scholarshipType}`)
   if (parts.length === 0) return ""
   return `Student Profile:\n${parts.join("\n")}\n\n`
 }
@@ -317,6 +327,8 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
     bulletinYear: fallbackBulletinYear,
     classification,
     studentName,
+    isInternational: payload.session?.isInternational,
+    scholarshipType: payload.session?.scholarshipType,
   })
   const catalogYear = resolveCatalogYearFromQuestion(question, fallbackBulletinYear)
   const programCode = await resolveProgramCodeFromQuestion(
@@ -331,7 +343,8 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   const isNextCoursesQuery  = intent === "NEXT_COURSES"       || asksNextCoursesQuestion(question)
   const isCompletedCoursesQuery = intent === "COMPLETED_COURSES" || asksCompletedCoursesQuestion(question)
   const isGraduationGapQuery = intent === "GRADUATION_GAP"   || asksGraduationGapQuestion(question)
-  const isElectiveQuery     = intent === "ELECTIVES"          || asksElectiveQuestion(question)
+  const isFreeElectiveQuery = intent === "FREE_ELECTIVE"       || (asksFreeElectiveQuestion(question) && intent !== "ELECTIVES")
+  const isElectiveQuery     = intent === "ELECTIVES"          || (asksElectiveQuestion(question) && intent !== "FREE_ELECTIVE")
   const isConcentrationQuery = intent === "CONCENTRATION"     || asksConcentrationQuestion(question)
   const isSimulateQuery     = intent === "SIMULATE"           || asksSimulateQuestion(question)
   const isSavePlanQuery     = intent === "SAVE_PLAN"          || asksSavePlanQuestion(question)
@@ -505,6 +518,28 @@ ${upcomingLines}`
       history
     )
     return { mode: "DB_ONLY", answer, data: gap }
+  }
+
+  if (isFreeElectiveQuery) {
+    if (!payload.studentId) {
+      return { mode: "DB_ONLY", answer: SETUP_NEEDED_MESSAGE, data: null }
+    }
+
+    const ctx = await fetchFreeElectiveOptions({
+      studentId: payload.studentId,
+      isInternational: payload.session?.isInternational,
+      scholarshipType: payload.session?.scholarshipType,
+      scholarshipMinGpa: payload.session?.scholarshipMinGpa,
+      scholarshipMinCreditsPerYear: payload.session?.scholarshipMinCreditsPerYear,
+    })
+    const electivesText = formatFreeElectivesForLLM(ctx)
+    const instructionNote = '\n\nInstruction: Suggest appropriate free elective or GE courses based on the student\'s situation. Group by area. If they are international or have a scholarship, remind them of the credit requirements. Be specific and helpful.'
+    const answer = await generateDbResponse(
+      question,
+      `${studentContextBlock}\n\n${electivesText}${instructionNote}`,
+      history
+    )
+    return { mode: "DB_ONLY", answer, data: null }
   }
 
   if (isElectiveQuery) {

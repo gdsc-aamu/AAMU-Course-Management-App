@@ -15,6 +15,7 @@ type IntentLabel =
   | "BULLETIN_POLICY"     // GPA requirements, academic standing, policies
   | "ADVISOR_ESCALATE"    // transfer credits, appeals, waivers, exceptions
   | "GENERAL_CURRICULUM"  // what is CS 214, program overview, course info
+  | "FREE_ELECTIVE"       // free elective options, GE courses, recreational courses, what to take for fun/credits
   | "CHITCHAT"            // greetings, thanks, small talk — no academic query
 
 const INTENT_TO_ROUTE: Record<IntentLabel, ChatRoute> = {
@@ -23,6 +24,7 @@ const INTENT_TO_ROUTE: Record<IntentLabel, ChatRoute> = {
   GRADUATION_GAP:     "DB_ONLY",
   PREREQUISITES:      "DB_ONLY",
   ELECTIVES:          "DB_ONLY",
+  FREE_ELECTIVE:      "DB_ONLY",
   CONCENTRATION:      "DB_ONLY",
   SIMULATE:           "DB_ONLY",
   SAVE_PLAN:          "DB_ONLY",
@@ -34,7 +36,7 @@ const INTENT_TO_ROUTE: Record<IntentLabel, ChatRoute> = {
 
 const VALID_INTENTS = new Set<string>([
   "COMPLETED_COURSES", "NEXT_COURSES", "GRADUATION_GAP", "PREREQUISITES",
-  "ELECTIVES", "CONCENTRATION", "SIMULATE", "SAVE_PLAN",
+  "ELECTIVES", "FREE_ELECTIVE", "CONCENTRATION", "SIMULATE", "SAVE_PLAN",
   "BULLETIN_POLICY", "ADVISOR_ESCALATE", "GENERAL_CURRICULUM", "CHITCHAT",
 ])
 
@@ -47,6 +49,7 @@ NEXT_COURSES — what to take next semester, what classes to register for, what'
 GRADUATION_GAP — what's left to graduate, how many credits remaining, am I on track, when will I finish
 PREREQUISITES — what are the prereqs for a course, what do I need before taking X
 ELECTIVES — elective options, what electives count, which electives can I pick
+FREE_ELECTIVE — student asks about free elective options, what electives to take, recreational courses, GE courses, general education requirements, what courses count as free electives, or wants suggestions for easy/fun courses. Also: PE courses, physical education, specific activities like golf/swimming/tennis/bowling/badminton
 CONCENTRATION — concentration requirements, minor requirements, double major
 SIMULATE — hypothetical "if I take X what opens up", what-if questions about completing courses
 SAVE_PLAN — save this schedule/plan, create a plan from these courses
@@ -69,7 +72,14 @@ Examples:
 "minimum gpa to graduate" → BULLETIN_POLICY
 "if i take CS 101 what opens up" → SIMULATE
 "what is CS 214" → GENERAL_CURRICULUM
-"transfer my credits from community college" → ADVISOR_ESCALATE`
+"transfer my credits from community college" → ADVISOR_ESCALATE
+"what electives should I take?" → FREE_ELECTIVE
+"I need a free elective" → FREE_ELECTIVE
+"what PE courses are available?" → FREE_ELECTIVE
+"can I take golf?" → FREE_ELECTIVE
+"I need 3 more credits what should I take?" → FREE_ELECTIVE
+"any fun courses I can add?" → FREE_ELECTIVE
+"what general education courses haven't I taken?" → FREE_ELECTIVE`
 
 function getOpenAIClient(): OpenAI {
   const apiKey = process.env.OPENAI_API_KEY
