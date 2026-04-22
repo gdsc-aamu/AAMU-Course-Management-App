@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Search, Upload, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { invalidateDashboardCache } from "@/lib/dashboard-cache"
 
 const supabase = createClient()
 
@@ -163,6 +164,7 @@ export default function SettingsPage() {
             bulletinYear: payload.profile.bulletinYear ?? null,
           })
         }
+      invalidateDashboardCache() // classification/program changed — force dashboard refresh
       setProfileSaveSuccess("Profile updated successfully!")
       setIsEditingProfile(false)
       setTimeout(() => setProfileSaveSuccess(null), 3000)
@@ -278,6 +280,7 @@ export default function SettingsPage() {
       setUploadSuccess(
         `Upload successful. Synced ${payload.mappedCompletedCount ?? 0} completed courses.`
       )
+      invalidateDashboardCache() // force dashboard to re-fetch fresh stats
       await loadCompletedCourses()
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unexpected upload error"

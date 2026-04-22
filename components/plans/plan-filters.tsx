@@ -25,22 +25,6 @@ const filters: { category: string; options: FilterOption[] }[] = [
       { id: "starred", label: "Starred" },
     ],
   },
-  {
-    category: "Year",
-    options: [
-      { id: "2025", label: "2025" },
-      { id: "2026", label: "2026" },
-    ],
-  },
-  {
-    category: "Academic Level",
-    options: [
-      { id: "freshman", label: "Freshman" },
-      { id: "sophomore", label: "Sophomore" },
-      { id: "junior", label: "Junior" },
-      { id: "senior", label: "Senior" },
-    ],
-  },
 ]
 
 interface PlanFiltersProps {

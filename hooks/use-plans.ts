@@ -30,24 +30,30 @@ export function usePlans() {
 
         if (plansError) throw plansError
 
-        // For each plan, fetch its courses
-        const plansWithCourses: Plan[] = []
-        for (const plan of plansData || []) {
-          const { data: coursesData } = await supabase
-            .from("plan_courses")
-            .select("course_id")
-            .eq("plan_id", plan.id)
+        const plans = plansData || []
+        const planIds = plans.map((p) => p.id)
 
-          plansWithCourses.push({
-            id: plan.id,
-            name: plan.name,
-            semester: plan.semester,
-            courses: (coursesData || []).map((c) => c.course_id),
-            starred: plan.starred,
-            createdAt: plan.created_at,
-            updatedAt: plan.updated_at,
-          })
+        // Fetch all courses for all plans in one query
+        const { data: allCoursesData } = planIds.length > 0
+          ? await supabase.from("plan_courses").select("plan_id, course_id").in("plan_id", planIds)
+          : { data: [] }
+
+        const coursesByPlanId = new Map<string, string[]>()
+        for (const row of allCoursesData || []) {
+          const list = coursesByPlanId.get(row.plan_id) ?? []
+          list.push(row.course_id)
+          coursesByPlanId.set(row.plan_id, list)
         }
+
+        const plansWithCourses: Plan[] = plans.map((plan) => ({
+          id: plan.id,
+          name: plan.name,
+          semester: plan.semester,
+          courses: coursesByPlanId.get(plan.id) ?? [],
+          starred: plan.starred,
+          createdAt: plan.created_at,
+          updatedAt: plan.updated_at,
+        }))
 
         setPlans(plansWithCourses)
       } catch (error) {

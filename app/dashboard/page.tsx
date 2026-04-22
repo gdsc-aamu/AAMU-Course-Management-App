@@ -2,69 +2,77 @@
 
 import { useState, useEffect } from "react"
 import { Sidebar } from "@/components/layout/sidebar"
+import { Footer } from "@/components/layout/footer"
 import { RecentPlans } from "@/components/dashboard/recent-plans"
 import { usePlans } from "@/hooks/use-plans"
 import { createClient } from "@/lib/supabase/client"
+import { readDashboardCache, writeDashboardCache } from "@/lib/dashboard-cache"
 
 const supabase = createClient()
 
+function deriveNextSemester() {
+  const month = new Date().getMonth() + 1
+  const year = new Date().getFullYear()
+  return month <= 5 ? `Fall ${year}` : `Spring ${year + 1}`
+}
+
 export default function DashboardPage() {
   const { plans, isLoading, toggleStarred, deletePlan, duplicatePlan } = usePlans()
-  const [userName, setUserName] = useState("Student")
-  const [userInitials, setUserInitials] = useState("ST")
   const [classification, setClassification] = useState("—")
   const [gpa, setGpa] = useState("—")
   const [creditsEarned, setCreditsEarned] = useState("—")
   const [degreeProgress, setDegreeProgress] = useState("—")
-  const [nextSemester, setNextSemester] = useState("—")
+  const [nextSemester, setNextSemester] = useState(deriveNextSemester())
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
 
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
-        // Get authenticated user
         const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          // Get user's display name from auth metadata
-          const name = user.user_metadata?.full_name || user.email || "Student"
-          setUserName(name)
-          
-          // Generate initials from name
-          const initials = name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
-          setUserInitials(initials)
+        if (!user) return
 
-          // Get user's profile + degree summary in parallel
-          const [{ data: profile }, { data: summary }] = await Promise.all([
-            supabase
-              .from("user_academic_profiles")
-              .select("classification")
-              .eq("user_id", user.id)
-              .single(),
-            supabase
-              .from("student_degree_summary")
-              .select("overall_gpa, credits_applied, degree_progress_pct, catalog_year")
-              .eq("user_id", user.id)
-              .single(),
-          ])
-
-          if (profile) {
-            setClassification(profile.classification || "—")
-          }
-
-          if (summary) {
-            setGpa(summary.overall_gpa != null ? summary.overall_gpa.toFixed(2) : "—")
-            setCreditsEarned(summary.credits_applied != null ? String(summary.credits_applied) : "—")
-            setDegreeProgress(summary.degree_progress_pct != null ? `${Math.round(summary.degree_progress_pct)}%` : "—")
-          }
-
-          // Derive next semester from current date
-          const now = new Date()
-          const month = now.getMonth() + 1
-          const year = now.getFullYear()
-          // If Jan–May → next semester is Fall same year; if Jun–Dec → next is Spring next year
-          const next = month <= 5 ? `Fall ${year}` : `Spring ${year + 1}`
-          setNextSemester(next)
+        // Serve from cache immediately — no loading flash on revisit
+        const cached = readDashboardCache(user.id)
+        if (cached) {
+          setClassification(cached.classification)
+          setGpa(cached.gpa)
+          setCreditsEarned(cached.creditsEarned)
+          setDegreeProgress(cached.degreeProgress)
+          setNextSemester(cached.nextSemester)
+          setIsLoadingProfile(false)
+          return // cache is fresh, skip network fetch
         }
+
+        // Cache miss — fetch from Supabase
+        const [{ data: profile }, { data: summary }] = await Promise.all([
+          supabase
+            .from("user_academic_profiles")
+            .select("classification")
+            .eq("user_id", user.id)
+            .single(),
+          supabase
+            .from("student_degree_summary")
+            .select("overall_gpa, credits_applied, degree_progress_pct, catalog_year")
+            .eq("user_id", user.id)
+            .single(),
+        ])
+
+        const next = deriveNextSemester()
+        const fresh = {
+          classification: profile?.classification || "—",
+          gpa: summary?.overall_gpa != null ? summary.overall_gpa.toFixed(2) : "—",
+          creditsEarned: summary?.credits_applied != null ? String(summary.credits_applied) : "—",
+          degreeProgress: summary?.degree_progress_pct != null ? `${Math.round(summary.degree_progress_pct)}%` : "—",
+          nextSemester: next,
+        }
+
+        setClassification(fresh.classification)
+        setGpa(fresh.gpa)
+        setCreditsEarned(fresh.creditsEarned)
+        setDegreeProgress(fresh.degreeProgress)
+        setNextSemester(fresh.nextSemester)
+
+        writeDashboardCache(user.id, fresh)
       } catch (error) {
         console.error("Error loading user profile:", error)
       } finally {
@@ -91,25 +99,15 @@ export default function DashboardPage() {
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 bg-muted/40">
-        {/* User info bar */}
-        <div className="flex items-center justify-end gap-3 px-8 py-4 border-b bg-background">
-          <div className="text-right">
-            <p className="text-sm font-semibold">{userName}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">{classification}</p>
-          </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold shrink-0">
-            {userInitials}
-          </div>
-        </div>
         <main className="flex-1 px-8 py-8 space-y-8">
           {/* Stats row — no icons, full width 4 columns */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat) => (
-              <div key={stat.label} className="rounded-xl bg-card shadow-sm px-6 py-8 flex flex-col justify-center min-h-[120px]">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-3">
+              <div key={stat.label} className="rounded-xl border-2 border-[#8B0000] bg-white shadow-sm px-6 py-7 flex flex-col items-center justify-center min-h-[130px] text-center">
+                <p className="text-[11px] font-semibold text-[#8B0000] uppercase tracking-widest mb-2">
                   {stat.label}
                 </p>
-                <p className="text-3xl font-bold tracking-tight">{stat.value}</p>
+                <p className="text-3xl font-bold tracking-tight text-gray-900">{stat.value}</p>
               </div>
             ))}
           </div>
@@ -133,6 +131,7 @@ export default function DashboardPage() {
             />
           )}
          </main>
+        <Footer />
       </div>
     </div>
   )

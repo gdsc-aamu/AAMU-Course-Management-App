@@ -39,8 +39,8 @@ export async function downloadPlanAsPdf(plan: Plan, studentName?: string): Promi
   const pageW = 215.9
   const margin = 20
   const contentW = pageW - margin * 2
-  const primaryColor: [number, number, number] = [139, 0, 0]      // AAMU maroon
-  const goldColor: [number, number, number] = [212, 175, 55]       // AAMU gold
+  const primaryColor: [number, number, number] = [139, 0, 0]       // AAMU maroon
+  const white: [number, number, number] = [255, 255, 255]
   const lightGray: [number, number, number] = [245, 245, 245]
   const darkText: [number, number, number] = [30, 30, 30]
   const mutedText: [number, number, number] = [100, 100, 100]
@@ -51,8 +51,8 @@ export async function downloadPlanAsPdf(plan: Plan, studentName?: string): Promi
   doc.setFillColor(...primaryColor)
   doc.rect(0, 0, pageW, 38, "F")
 
-  // Gold accent stripe
-  doc.setFillColor(...goldColor)
+  // White accent stripe
+  doc.setFillColor(...white)
   doc.rect(0, 38, pageW, 2, "F")
 
   doc.setTextColor(255, 255, 255)
@@ -65,7 +65,7 @@ export async function downloadPlanAsPdf(plan: Plan, studentName?: string): Promi
   doc.text("Academic Course Plan", margin, 22)
 
   doc.setFontSize(9)
-  doc.setTextColor(212, 175, 55)
+  doc.setTextColor(220, 220, 220)
   doc.text(`Generated ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, margin, 30)
 
   y = 50
@@ -150,18 +150,18 @@ export async function downloadPlanAsPdf(plan: Plan, studentName?: string): Promi
 
   // ── Totals row ─────────────────────────────────────────────────────────────
   y += 2
-  doc.setFillColor(...goldColor)
+  doc.setFillColor(...primaryColor)
   doc.rect(margin, y, contentW, 9, "F")
 
   doc.setFont("helvetica", "bold")
   doc.setFontSize(9)
-  doc.setTextColor(...darkText)
+  doc.setTextColor(...white)
   doc.text("Total Credit Hours", margin + 14, y + 6)
   doc.text(String(totalCredits), margin + contentW - 14, y + 6)
 
   // ── Footer ─────────────────────────────────────────────────────────────────
   const footerY = 270
-  doc.setDrawColor(...goldColor)
+  doc.setDrawColor(...primaryColor)
   doc.setLineWidth(0.5)
   doc.line(margin, footerY, margin + contentW, footerY)
 

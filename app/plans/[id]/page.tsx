@@ -3,7 +3,7 @@
 import { useState, useEffect, use, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, PanelLeftClose, PanelLeft, FileDown } from "lucide-react"
+import { ArrowLeft, PanelLeftClose, PanelLeft, FileDown, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -21,12 +21,13 @@ import {
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { ChatHistorySidebar } from "@/components/editor/chat-history-sidebar"
 import { AISuggestions } from "@/components/editor/ai-suggestions"
+import { AddCourseModal } from "@/components/editor/add-course-modal"
 import { usePlans } from "@/hooks/use-plans"
 import { createClient } from "@/lib/supabase/client"
 import { authenticatedFetch } from "@/lib/api-client"
 import { useToast } from "@/hooks/use-toast"
 import { downloadPlanAsPdf } from "@/lib/download-plan-pdf"
-import type { Plan } from "@/lib/types"
+import type { Plan, ChatThread } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 const SEMESTERS = [
@@ -41,7 +42,7 @@ const supabase = createClient()
 export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ id: string }> }>) {
   const resolvedParams = use(params)
   const router = useRouter()
-  const { plans, createPlan, updatePlan, getPlan } = usePlans()
+  const { plans, createPlan, updatePlan, getPlan, addCourseToPlan } = usePlans()
   const { toast } = useToast()
   
   const [plan, setPlan] = useState<Plan | null>(null)
@@ -52,7 +53,9 @@ export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ 
   const [isMounted, setIsMounted] = useState(false)
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
   const [isCreatingThread, setIsCreatingThread] = useState(false)
+  const [lastCreatedThread, setLastCreatedThread] = useState<ChatThread | null>(null)
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
+  const [showAddCourse, setShowAddCourse] = useState(false)
   const [studentName, setStudentName] = useState<string | undefined>(undefined)
 
   const isNewPlan = resolvedParams.id === "new"
@@ -168,6 +171,7 @@ export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ 
 
       const data = await response.json()
       setSelectedThreadId(data.thread.id)
+      setLastCreatedThread(data.thread)
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "Failed to create chat"
       toast({
@@ -263,6 +267,7 @@ export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ 
                 selectedThreadId={selectedThreadId}
                 onSelectThread={handleSelectThread}
                 onCreateThread={handleCreateThread}
+                newThread={lastCreatedThread}
               />
             </SheetContent>
           </Sheet>
@@ -292,6 +297,14 @@ export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ 
 
         <div className="flex items-center gap-2">
           <Button
+            size="sm"
+            onClick={() => setShowAddCourse(true)}
+            className="gap-2 bg-[#8B0000] hover:bg-[#6B0000] text-white"
+          >
+            <Plus className="h-4 w-4" />
+            Add Course
+          </Button>
+          <Button
             variant="outline"
             size="sm"
             onClick={handleDownloadPdf}
@@ -303,6 +316,19 @@ export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ 
           </Button>
         </div>
       </header>
+
+      <AddCourseModal
+        open={showAddCourse}
+        onClose={() => setShowAddCourse(false)}
+        existingCourses={plan.courses}
+        onAdd={async (courseId) => {
+          await addCourseToPlan(plan.id, courseId)
+          setPlan((prev) => prev && !prev.courses.includes(courseId)
+            ? { ...prev, courses: [...prev.courses, courseId] }
+            : prev
+          )
+        }}
+      />
 
       {/* Main content */}
       <div className="flex-1 overflow-hidden">
@@ -319,6 +345,7 @@ export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ 
               selectedThreadId={selectedThreadId}
               onSelectThread={handleSelectThread}
               onCreateThread={handleCreateThread}
+              newThread={lastCreatedThread}
             />
           </ResizablePanel>
 

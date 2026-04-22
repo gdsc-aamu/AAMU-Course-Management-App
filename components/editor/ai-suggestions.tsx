@@ -105,6 +105,27 @@ function formatServerAnswer(response: RoutedResponse): string {
   return `${answer}\n\nSources:\n${citations}`
 }
 
+const STOP_WORDS = new Set([
+  "a","an","the","is","are","was","were","be","been","being",
+  "have","has","had","do","does","did","will","would","could","should","may","might",
+  "i","my","me","we","our","you","your","it","its","this","that","these","those",
+  "what","which","who","whom","how","when","where","why",
+  "can","need","to","for","of","in","on","at","by","with","about","from","into",
+  "and","or","but","if","so","as","not","no","am","get","take","make","let","tell",
+  "show","give","find","know","think","want","like","just","also","up","out","all",
+  "more","some","any","much","many","then","than","their","there","they","them",
+])
+
+function deriveThreadTitle(question: string): string {
+  const words = question
+    .replace(/[^\w\s]/g, " ")   // strip punctuation
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !STOP_WORDS.has(w.toLowerCase()))
+
+  const keywords = words.slice(0, 4).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+  return keywords.length > 0 ? keywords.join(" ") : question.trim().slice(0, 40)
+}
+
 interface SavePlanAction {
   suggestedName: string | null
   suggestedCourses: string[]
@@ -123,6 +144,8 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
     bulletinYear?: string
     classification?: string
   }>({})
+  const hasAutoNamedRef = useRef(false)
+
   const [savePlanDialog, setSavePlanDialog] = useState<{
     open: boolean
     action: SavePlanAction | null
@@ -132,6 +155,11 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
   const bottomRef = useRef<HTMLDivElement>(null)
   const messageCounterRef = useRef(1)
   const { toast } = useToast()
+
+  // Reset auto-name flag when switching threads
+  useEffect(() => {
+    hasAutoNamedRef.current = false
+  }, [threadId])
 
   // Load thread messages on mount
   useEffect(() => {
@@ -315,6 +343,17 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
         content: assistantContent,
       }
       setMessages((prev) => [...prev, assistantMessage])
+
+      // Auto-name thread from first user message (fire-and-forget)
+      if (!hasAutoNamedRef.current) {
+        hasAutoNamedRef.current = true
+        const autoTitle = deriveThreadTitle(content)
+        authenticatedFetch(`/api/chat/threads/${threadId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: autoTitle }),
+        }).catch(() => {})
+      }
     } catch (error) {
       const errorContent = buildFallbackResponse(content, currentCourses)
       const assistantMessage: Message = {

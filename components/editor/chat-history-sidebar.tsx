@@ -31,6 +31,7 @@ interface ChatHistorySidebarProps {
   selectedThreadId: string
   onSelectThread: (id: string) => void
   onCreateThread: () => void
+  newThread?: ChatThread | null
 }
 
 export function ChatHistorySidebar({
@@ -38,6 +39,7 @@ export function ChatHistorySidebar({
   selectedThreadId,
   onSelectThread,
   onCreateThread,
+  newThread,
 }: ChatHistorySidebarProps) {
   const [threads, setThreads] = useState<ChatThread[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -50,6 +52,15 @@ export function ChatHistorySidebar({
   useEffect(() => {
     loadThreads()
   }, [planId])
+
+  // Prepend newly created thread from parent without refetching
+  useEffect(() => {
+    if (!newThread) return
+    setThreads((prev) => {
+      if (prev.some((t) => t.id === newThread.id)) return prev
+      return [newThread, ...prev]
+    })
+  }, [newThread])
 
   const loadThreads = async () => {
     try {

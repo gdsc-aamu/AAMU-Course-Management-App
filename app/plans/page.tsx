@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
 import { LayoutGrid, List } from "lucide-react"
 import { Sidebar } from "@/components/layout/sidebar"
@@ -14,7 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { usePlans } from "@/hooks/use-plans"
+import { Footer } from "@/components/layout/footer"
 import { downloadPlanAsPdf } from "@/lib/download-plan-pdf"
+import { createClient } from "@/lib/supabase/client"
+
+const supabase = createClient()
 import { cn } from "@/lib/utils"
 
 type SortOption = "recent" | "title" | "created"
@@ -29,6 +33,14 @@ const SORT_LABELS: Record<SortOption, string> = {
 export default function PlansPage() {
   const { plans, isLoading, toggleStarred, deletePlan, duplicatePlan, getPlan } = usePlans()
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
+  const [studentName, setStudentName] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const name = data.session?.user.user_metadata?.full_name ?? data.session?.user.email
+      if (name) setStudentName(name)
+    })
+  }, [])
   const [sortBy, setSortBy] = useState<SortOption>("recent")
   const [activeFilters, setActiveFilters] = useState<string[]>([])
 
@@ -37,12 +49,6 @@ export default function PlansPage() {
 
     if (activeFilters.includes("starred")) {
       filtered = filtered.filter((p) => p.starred)
-    }
-    if (activeFilters.includes("2025")) {
-      filtered = filtered.filter((p) => p.semester.includes("2025"))
-    }
-    if (activeFilters.includes("2026")) {
-      filtered = filtered.filter((p) => p.semester.includes("2026"))
     }
 
     switch (sortBy) {
@@ -63,7 +69,7 @@ export default function PlansPage() {
   const handleDownload = (id: string) => {
     const plan = getPlan(id)
     if (!plan) return
-    downloadPlanAsPdf(plan).catch(() => {})
+    downloadPlanAsPdf(plan, studentName).catch(() => {})
   }
 
   const skeletonKeys = new Array(6).fill(null).map((_, i) => i)
@@ -198,6 +204,7 @@ export default function PlansPage() {
             </div>
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   )
