@@ -30,6 +30,10 @@ export interface ChatQueryRequest {
     bulletinYear?: string;
     classification?: string;
     studentName?: string;
+    isInternational?: boolean;
+    scholarshipType?: string;
+    scholarshipMinGpa?: number;
+    scholarshipMinCreditsPerYear?: number;
   };
   conversationHistory?: ConversationMessage[];
 }
