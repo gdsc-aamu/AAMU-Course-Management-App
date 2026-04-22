@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/footer"
 import { RecentPlans } from "@/components/dashboard/recent-plans"
 import { usePlans } from "@/hooks/use-plans"
 import { createClient } from "@/lib/supabase/client"
-import { readDashboardCache, writeDashboardCache } from "@/lib/dashboard-cache"
+import { statsCache, onCrossTabInvalidation, type CachedStats } from "@/lib/app-cache"
 
 const supabase = createClient()
 
@@ -26,53 +26,53 @@ export default function DashboardPage() {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
 
   useEffect(() => {
-    const loadUserProfile = async () => {
+    let uid: string | null = null
+
+    const applyStats = (s: CachedStats) => {
+      setClassification(s.classification)
+      setGpa(s.gpa)
+      setCreditsEarned(s.creditsEarned)
+      setDegreeProgress(s.degreeProgress)
+      setNextSemester(s.nextSemester)
+    }
+
+    const fetchStats = async (userId: string): Promise<CachedStats> => {
+      const [{ data: profile }, { data: summary }] = await Promise.all([
+        supabase.from("user_academic_profiles").select("classification").eq("user_id", userId).single(),
+        supabase.from("student_degree_summary").select("overall_gpa, credits_applied, degree_progress_pct").eq("user_id", userId).single(),
+      ])
+      return {
+        classification: profile?.classification || "—",
+        gpa: summary?.overall_gpa != null ? summary.overall_gpa.toFixed(2) : "—",
+        creditsEarned: summary?.credits_applied != null ? String(summary.credits_applied) : "—",
+        degreeProgress: summary?.degree_progress_pct != null ? `${Math.round(summary.degree_progress_pct)}%` : "—",
+        nextSemester: deriveNextSemester(),
+      }
+    }
+
+    const load = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
+        uid = user.id
 
-        // Serve from cache immediately — no loading flash on revisit
-        const cached = readDashboardCache(user.id)
+        const cached = statsCache.read(user.id)
         if (cached) {
-          setClassification(cached.classification)
-          setGpa(cached.gpa)
-          setCreditsEarned(cached.creditsEarned)
-          setDegreeProgress(cached.degreeProgress)
-          setNextSemester(cached.nextSemester)
+          // Serve cache instantly
+          applyStats(cached)
           setIsLoadingProfile(false)
-          return // cache is fresh, skip network fetch
+          // Revalidate in background
+          fetchStats(user.id).then(fresh => {
+            applyStats(fresh)
+            statsCache.write(user.id, fresh)
+          }).catch(() => {})
+          return
         }
 
-        // Cache miss — fetch from Supabase
-        const [{ data: profile }, { data: summary }] = await Promise.all([
-          supabase
-            .from("user_academic_profiles")
-            .select("classification")
-            .eq("user_id", user.id)
-            .single(),
-          supabase
-            .from("student_degree_summary")
-            .select("overall_gpa, credits_applied, degree_progress_pct, catalog_year")
-            .eq("user_id", user.id)
-            .single(),
-        ])
-
-        const next = deriveNextSemester()
-        const fresh = {
-          classification: profile?.classification || "—",
-          gpa: summary?.overall_gpa != null ? summary.overall_gpa.toFixed(2) : "—",
-          creditsEarned: summary?.credits_applied != null ? String(summary.credits_applied) : "—",
-          degreeProgress: summary?.degree_progress_pct != null ? `${Math.round(summary.degree_progress_pct)}%` : "—",
-          nextSemester: next,
-        }
-
-        setClassification(fresh.classification)
-        setGpa(fresh.gpa)
-        setCreditsEarned(fresh.creditsEarned)
-        setDegreeProgress(fresh.degreeProgress)
-        setNextSemester(fresh.nextSemester)
-
-        writeDashboardCache(user.id, fresh)
+        // Cache miss — fetch, render, cache
+        const fresh = await fetchStats(user.id)
+        applyStats(fresh)
+        statsCache.write(user.id, fresh)
       } catch (error) {
         console.error("Error loading user profile:", error)
       } finally {
@@ -80,7 +80,41 @@ export default function DashboardPage() {
       }
     }
 
-    loadUserProfile()
+    load()
+  }, [])
+
+  // Cross-tab: if another tab uploads DegreeWorks, refresh this tab too
+  useEffect(() => {
+    const getUid = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      return onCrossTabInvalidation(user.id, {
+        onStatsInvalidated: () => {
+          supabase.auth.getUser().then(({ data: { user } }) => {
+            if (!user) return
+            Promise.all([
+              supabase.from("user_academic_profiles").select("classification").eq("user_id", user.id).single(),
+              supabase.from("student_degree_summary").select("overall_gpa, credits_applied, degree_progress_pct").eq("user_id", user.id).single(),
+            ]).then(([{ data: profile }, { data: summary }]) => {
+              const fresh = {
+                classification: profile?.classification || "—",
+                gpa: summary?.overall_gpa != null ? summary.overall_gpa.toFixed(2) : "—",
+                creditsEarned: summary?.credits_applied != null ? String(summary.credits_applied) : "—",
+                degreeProgress: summary?.degree_progress_pct != null ? `${Math.round(summary.degree_progress_pct)}%` : "—",
+                nextSemester: deriveNextSemester(),
+              }
+              setClassification(fresh.classification)
+              setGpa(fresh.gpa)
+              setCreditsEarned(fresh.creditsEarned)
+              setDegreeProgress(fresh.degreeProgress)
+              statsCache.write(user.id, fresh)
+            })
+          })
+        }
+      })
+    }
+    const cleanup = getUid()
+    return () => { cleanup.then(fn => fn?.()) }
   }, [])
 
   const stats = [

@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label"
 import { mockCourses } from "@/lib/data"
 import { createClient } from "@/lib/supabase/client"
 import { authenticatedFetch } from "@/lib/api-client"
+import { sessionCache } from "@/lib/app-cache"
 import { useToast } from "@/hooks/use-toast"
 import type { Message } from "@/lib/types"
 import type { ChatQueryRequest, RoutedResponse, ConversationMessage } from "@/shared/contracts"
@@ -234,6 +235,12 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
       if (name) setStudentName(name)
 
       if (uid && data.session?.access_token) {
+        // Serve cached static context immediately, revalidate in background
+        const cachedCtx = sessionCache.read(uid)
+        if (cachedCtx && isActive) {
+          setSessionContext(cachedCtx)
+        }
+
         try {
           const profileRes = await fetch("/api/user/academic-profile", {
             headers: { Authorization: `Bearer ${data.session.access_token}` },
@@ -241,11 +248,13 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
           if (profileRes.ok) {
             const profilePayload = await profileRes.json()
             if (isActive && profilePayload.profile) {
-              setSessionContext({
+              const ctx = {
                 programCode: profilePayload.profile.programCode ?? undefined,
                 bulletinYear: profilePayload.profile.bulletinYear ?? undefined,
                 classification: profilePayload.profile.classification ?? undefined,
-              })
+              }
+              setSessionContext(ctx)
+              sessionCache.write(uid, ctx)
             }
           }
         } catch {

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Search, Upload, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { invalidateDashboardCache } from "@/lib/dashboard-cache"
+import { profileCache, coursesCache, invalidateAfterUpload, invalidateAfterProfileSave } from "@/lib/app-cache"
 
 const supabase = createClient()
 
@@ -55,42 +55,45 @@ export default function SettingsPage() {
 
   async function loadUserProfile() {
     setProfileError(null)
-    setIsLoadingProfile(true)
 
     try {
       const { data, error } = await supabase.auth.getSession()
-      if (error || !data.session?.access_token) {
-        throw new Error("You need to be signed in to view your profile.")
-      }
+      if (error || !data.session?.access_token) throw new Error("You need to be signed in to view your profile.")
+      const uid = data.session.user.id
 
-      // Get user's display name from auth
       const { data: authData } = await supabase.auth.getUser()
       const fullName = authData.user?.user_metadata?.full_name || authData.user?.email || "Student"
 
-      const response = await fetch("/api/user/academic-profile", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${data.session.access_token}`,
-        },
-      })
-
-      const payload = (await response.json()) as {
-        success: boolean
-        error?: string
-        profile?: UserProfile
+      const fetchFresh = async () => {
+        const response = await fetch("/api/user/academic-profile", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${data.session!.access_token}` },
+        })
+        const payload = (await response.json()) as { success: boolean; error?: string; profile?: UserProfile }
+        if (!response.ok || !payload.success) throw new Error(payload.error ?? "Failed to fetch user profile.")
+        const p = payload.profile ?? { classification: null, programCode: null, bulletinYear: null }
+        const result = {
+          fullName,
+          classification: p.classification ?? null,
+          programCode: p.programCode ?? null,
+          bulletinYear: p.bulletinYear ?? null,
+        }
+        profileCache.write(uid, result)
+        return result
       }
 
-      if (!response.ok || !payload.success) {
-        throw new Error(payload.error ?? "Failed to fetch user profile.")
+      const cached = profileCache.read(uid)
+      if (cached) {
+        // Serve cache instantly, revalidate in background
+        setProfile({ ...cached, fullName })
+        setIsLoadingProfile(false)
+        fetchFresh().then(fresh => setProfile(fresh)).catch(() => {})
+        return
       }
 
-      const p = payload.profile ?? { classification: null, programCode: null, bulletinYear: null }
-      setProfile({
-        fullName,
-        classification: p.classification ?? null,
-        programCode: p.programCode ?? null,
-        bulletinYear: p.bulletinYear ?? null,
-      })
+      setIsLoadingProfile(true)
+      const fresh = await fetchFresh()
+      setProfile(fresh)
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unexpected profile load error"
       setProfileError(message)
@@ -164,7 +167,7 @@ export default function SettingsPage() {
             bulletinYear: payload.profile.bulletinYear ?? null,
           })
         }
-      invalidateDashboardCache() // classification/program changed — force dashboard refresh
+      invalidateAfterProfileSave(data.session.user.id)
       setProfileSaveSuccess("Profile updated successfully!")
       setIsEditingProfile(false)
       setTimeout(() => setProfileSaveSuccess(null), 3000)
@@ -195,32 +198,39 @@ export default function SettingsPage() {
 
   async function loadCompletedCourses() {
     setCoursesError(null)
-    setIsLoadingCourses(true)
 
     try {
       const { data, error } = await supabase.auth.getSession()
-      if (error || !data.session?.access_token) {
-        throw new Error("You need to be signed in to view completed courses.")
+      if (error || !data.session?.access_token) throw new Error("You need to be signed in to view completed courses.")
+      const uid = data.session.user.id
+
+      const fetchFresh = async () => {
+        const response = await fetch("/api/degreeworks/completed-courses", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${data.session!.access_token}` },
+        })
+        const payload = (await response.json()) as { success: boolean; error?: string; courses?: CompletedCourseRow[] }
+        if (!response.ok || !payload.success) throw new Error(payload.error ?? "Failed to fetch completed courses.")
+        const result = payload.courses ?? []
+        coursesCache.write(uid, result.map(c => ({
+          courseId: c.code, title: c.title, grade: "", credits: c.creditHours,
+          term: "", status: "", section: "",
+        })))
+        return result
       }
 
-      const response = await fetch("/api/degreeworks/completed-courses", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${data.session.access_token}`,
-        },
-      })
-
-      const payload = (await response.json()) as {
-        success: boolean
-        error?: string
-        courses?: CompletedCourseRow[]
+      const cached = coursesCache.read(uid)
+      if (cached) {
+        // Reconstruct CompletedCourseRow from cache
+        setCourses(cached.map(c => ({ code: c.courseId, title: c.title, creditHours: c.credits })))
+        setIsLoadingCourses(false)
+        fetchFresh().then(fresh => setCourses(fresh)).catch(() => {})
+        return
       }
 
-      if (!response.ok || !payload.success) {
-        throw new Error(payload.error ?? "Failed to fetch completed courses.")
-      }
-
-      setCourses(payload.courses ?? [])
+      setIsLoadingCourses(true)
+      const fresh = await fetchFresh()
+      setCourses(fresh)
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unexpected load error"
       setCoursesError(message)
@@ -280,7 +290,8 @@ export default function SettingsPage() {
       setUploadSuccess(
         `Upload successful. Synced ${payload.mappedCompletedCount ?? 0} completed courses.`
       )
-      invalidateDashboardCache() // force dashboard to re-fetch fresh stats
+      const { data: sess } = await supabase.auth.getSession()
+      if (sess.session?.user.id) invalidateAfterUpload(sess.session.user.id)
       await loadCompletedCourses()
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unexpected upload error"
