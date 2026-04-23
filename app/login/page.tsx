@@ -295,10 +295,7 @@ export default function LoginPage() {
           )}
 
           {/* Social Buttons — Supabase OAuth */}
-          <div style={{ display: "flex", gap: 12, marginBottom: 4 }}>
-            <SocialButton onClick={() => handleOAuth("google")}><GoogleIcon /> Google</SocialButton>
-            <SocialButton onClick={() => handleOAuth("azure")}><MicrosoftIcon /> Microsoft</SocialButton>
-          </div>
+        
           <Divider />
 
           {/* Form */}
