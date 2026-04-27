@@ -551,8 +551,8 @@ ${upcomingLines}`
     })
     const electivesText = formatFreeElectivesForLLM(ctx)
     const instructionNote = requestedCourseCount
-      ? `\n\nInstruction: The student asked for ${requestedCourseCount} course suggestions. Provide exactly ${requestedCourseCount} specific course recommendations grouped by GE area. Use a numbered list. Include course codes and credit hours. If international or scholarship rules apply, mention them briefly at the end.`
-      : '\n\nInstruction: Suggest appropriate free elective or GE courses based on the student\'s situation. Group by area (Humanities, History, Fine Arts, Social Sciences, etc.). Be specific with course codes and credit hours. If they are international or have a scholarship, include the credit requirements. Always add: "Verify availability with the AAMU Registrar before registering."'
+      ? `\n\nInstruction: The student asked for ${requestedCourseCount} specific course suggestions. Choose exactly ${requestedCourseCount} from the available courses above — pick the best fit for this student's year and major. Do NOT list every available course. For each recommendation give one sentence explaining why it is a good choice. Use a numbered list. Include course code and credit hours. If scholarship or international rules apply, add a one-line note at the end.`
+      : `\n\nInstruction: From the available courses above, recommend exactly 3–4 that are the best fit for this student's situation. Do NOT list every course or group by area — just pick the top options. For each, write one sentence explaining why it is a good pick (e.g. counts toward graduation, high-interest, manageable workload). Include course code and credit hours. If scholarship or international credit rules apply, add a brief note. End with: "Verify availability with the AAMU Registrar before registering."`
     const answer = await generateDbResponse(
       question,
       `${studentContextBlock}\n\n${electivesText}${instructionNote}`,
@@ -734,7 +734,7 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
         scholarshipMinCreditsPerYear: payload.session?.scholarshipMinCreditsPerYear,
       }).catch(() => null)
       if (geCtx && geCtx.availableCourses.length > 0) {
-        geContext = "\n\n" + formatFreeElectivesForLLM(geCtx)
+        geContext = "\n\nAvailable GE courses (student has not yet taken — listed for reference, do NOT dump all of them in the response; mention 1–2 relevant GE options if the student's schedule has room):\n" + formatFreeElectivesForLLM(geCtx)
       }
     }
 

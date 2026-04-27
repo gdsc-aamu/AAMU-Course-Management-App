@@ -31,10 +31,10 @@ import type { Plan, ChatThread } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 const SEMESTERS = [
-  "Fall 2025",
-  "Spring 2026",
   "Fall 2026",
   "Spring 2027",
+  "Fall 2027",
+  "Spring 2028",
 ]
 
 const supabase = createClient()
@@ -60,6 +60,7 @@ export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ 
 
   const isNewPlan = resolvedParams.id === "new"
   const planCreatedRef = useRef(false)
+  const threadInitedForPlanRef = useRef<string | null>(null)
 
   // Handle SSR
   useEffect(() => {
@@ -190,29 +191,28 @@ export default function PlanEditorPage({ params }: Readonly<{ params: Promise<{ 
 
   // Initialize with first thread or create one
   useEffect(() => {
-    if (plan && !selectedThreadId) {
-      // Try to get first thread for this plan
-      const loadFirstThread = async () => {
-        try {
-          const response = await authenticatedFetch(`/api/chat/threads?planId=${encodeURIComponent(plan.id)}`)
-          if (response.ok) {
-            const data = await response.json()
-            if (data.threads && data.threads.length > 0) {
-              setSelectedThreadId(data.threads[0].id)
-            } else {
-              // No threads, create one
-              await handleCreateThread()
-            }
-          }
-        } catch (error) {
-          console.error("Failed to load threads:", error)
-          // Create a new thread on error
-          await handleCreateThread()
-        }
-      }
+    if (!plan || selectedThreadId) return
+    if (threadInitedForPlanRef.current === plan.id) return
+    threadInitedForPlanRef.current = plan.id  // mark synchronously to block re-entry
 
-      loadFirstThread()
+    const loadFirstThread = async () => {
+      try {
+        const response = await authenticatedFetch(`/api/chat/threads?planId=${encodeURIComponent(plan.id)}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.threads && data.threads.length > 0) {
+            setSelectedThreadId(data.threads[0].id)
+          } else {
+            await handleCreateThread()
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load threads:", error)
+        await handleCreateThread()
+      }
     }
+
+    loadFirstThread()
   }, [plan?.id])
 
   if (isLoading || !isMounted) {

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import ReactMarkdown from "react-markdown"
 import { Send, Bot, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -498,13 +499,29 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
               )}
               <div
                 className={cn(
-                  "rounded-lg px-3 py-2 text-sm max-w-[85%] whitespace-pre-line",
+                  "rounded-lg px-3 py-2 text-sm max-w-[85%]",
                   message.role === "user"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted"
                 )}
               >
-                {message.content}
+                {message.role === "assistant" ? (
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      ul: ({ children }) => <ul className="my-1 ml-3 list-disc space-y-0.5">{children}</ul>,
+                      ol: ({ children }) => <ol className="my-1 ml-3 list-decimal space-y-0.5">{children}</ol>,
+                      li: ({ children }) => <li className="text-sm">{children}</li>,
+                      h3: ({ children }) => <h3 className="font-semibold mt-2 mb-0.5">{children}</h3>,
+                      h4: ({ children }) => <h4 className="font-medium mt-1.5 mb-0.5">{children}</h4>,
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  message.content
+                )}
               </div>
             </div>
           ))}
