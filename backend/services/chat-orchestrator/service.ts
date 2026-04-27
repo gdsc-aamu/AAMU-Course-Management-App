@@ -550,7 +550,9 @@ ${upcomingLines}`
       scholarshipMinCreditsPerYear: payload.session?.scholarshipMinCreditsPerYear,
     })
     const electivesText = formatFreeElectivesForLLM(ctx)
-    const instructionNote = '\n\nInstruction: Suggest appropriate free elective or GE courses based on the student\'s situation. Group by area. If they are international or have a scholarship, remind them of the credit requirements. Be specific and helpful.'
+    const instructionNote = requestedCourseCount
+      ? `\n\nInstruction: The student asked for ${requestedCourseCount} course suggestions. Provide exactly ${requestedCourseCount} specific course recommendations grouped by GE area. Use a numbered list. Include course codes and credit hours. If international or scholarship rules apply, mention them briefly at the end.`
+      : '\n\nInstruction: Suggest appropriate free elective or GE courses based on the student\'s situation. Group by area (Humanities, History, Fine Arts, Social Sciences, etc.). Be specific with course codes and credit hours. If they are international or have a scholarship, include the credit requirements. Always add: "Verify availability with the AAMU Registrar before registering."'
     const answer = await generateDbResponse(
       question,
       `${studentContextBlock}\n\n${electivesText}${instructionNote}`,
@@ -579,7 +581,10 @@ ${upcomingLines}`
     }
 
     const electiveContext = formatElectiveOptionsForLLM(options)
-    const answer = await generateDbResponse(question, `${studentContextBlock}${electiveContext}`, history)
+    const electiveCountNote = requestedCourseCount
+      ? `\n\nInstruction: The student asked for ${requestedCourseCount} elective suggestions. List exactly ${requestedCourseCount} specific courses from the eligible options below, prioritizing courses for the student's current semester. Include course codes and credit hours.`
+      : ""
+    const answer = await generateDbResponse(question, `${studentContextBlock}${electiveContext}${electiveCountNote}`, history)
     return { mode: "DB_ONLY", answer, data: options }
   }
 
