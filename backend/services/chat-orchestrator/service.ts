@@ -394,6 +394,39 @@ Once those are done, I can tell you exactly what courses to register for next, w
     // Identity questions fall through to generateDbResponse with student context
   }
 
+  // ── Setup gate — fire before any academic query that needs student data ───
+  // Queries that require profile + DegreeWorks to give a useful answer
+  const requiresStudentData =
+    isCompletedCoursesQuery || isNextCoursesQuery || isGraduationGapQuery ||
+    isFreeElectiveQuery || isElectiveQuery || isConcentrationQuery ||
+    isSimulateQuery || isSavePlanQuery
+
+  if (requiresStudentData) {
+    const profileIncomplete = !programCode || !fallbackBulletinYear
+    const degreeworksMissing = !degreeSummaryData?.summary
+
+    if (profileIncomplete || degreeworksMissing) {
+      const firstName = studentName ? ` ${studentName.split(" ")[0]}` : ""
+      const steps: string[] = []
+
+      if (degreeworksMissing)
+        steps.push(
+          "**Upload your DegreeWorks PDF** — Go to **Settings → Degree Works Integration** and upload your audit PDF. This syncs your completed courses, GPA, and degree progress automatically."
+        )
+      if (profileIncomplete)
+        steps.push(
+          "**Complete your Academic Profile** — Go to **Settings → Academic Profile → Edit Profile** and set your major, catalog year, and classification."
+        )
+
+      const numbered = steps.map((s, i) => `${i + 1}. ${s}`).join("\n\n")
+      return {
+        mode: "DB_ONLY",
+        answer: `Hey${firstName}! Before I can answer that, I need a couple of things set up:\n\n${numbered}\n\nOnce those are done, I can tell you exactly what courses to take next, your graduation progress, what you've completed, and more.`,
+        data: null,
+      }
+    }
+  }
+
   // Advisor escalation — questions requiring human judgment
   if (isLowConfidence) {
     return {
