@@ -207,7 +207,7 @@ function buildNextCoursesContext(rec: {
   currentTermCredits: number
   preRegisteredCredits: number
   semesterCreditCap: 19
-  eligibleNow: Array<{ courseId: string; title: string; creditHours: number; semesterLabel: string }>
+  eligibleNow: Array<{ courseId: string; title: string; creditHours: number; semesterLabel: string; semesterNumber?: number }>
   blocked: Array<{ courseId: string; title: string; missingPrerequisiteGroups: string[]; semesterLabel: string }>
   alreadyInProgress: Array<{ courseId: string; title: string; semesterLabel: string }>
   alreadyPlanned: Array<{ courseId: string; title: string; semesterLabel: string }>
@@ -286,15 +286,7 @@ ${upcomingLines}${capNote}`
     const classKey = classification.toLowerCase()
     const maxSem = CLASSIFICATION_MAX_SEMESTER[classKey]
     if (maxSem) {
-      const beyondClass = rec.eligibleNow.filter((c) => {
-        // Extract semester number from semesterLabel (e.g., "Junior Spring" -> 6, "Senior Fall" -> 8)
-        const semLower = c.semesterLabel.toLowerCase()
-        if (semLower.includes("junior")) return 6 > maxSem
-        if (semLower.includes("senior")) return 8 > maxSem
-        if (semLower.includes("sophomore")) return 4 > maxSem
-        if (semLower.includes("freshman")) return 2 > maxSem
-        return false
-      })
+      const beyondClass = rec.eligibleNow.filter((c) => (c.semesterNumber ?? 0) > maxSem)
       if (beyondClass.length > 0) {
         const beyondList = beyondClass.map((c) => `${c.courseId} (${c.semesterLabel})`).join(", ")
         classificationAdvisory = `\n\n⚠️ Classification Advisory: The student is a ${classification}. The following courses are in the eligible list but designated for a later semester than their current classification: ${beyondList}. Prerequisites are met, but do NOT recommend these as standard next-semester options. Instead, note that they are technically eligible but typically taken later, and suggest the student confirm with their advisor. Always prioritize GE courses and elective options before these.`
