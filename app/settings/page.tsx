@@ -64,6 +64,14 @@ export default function SettingsPage() {
   const [enrollmentSaveError, setEnrollmentSaveError] = useState('')
   const [isEditingEnrollment, setIsEditingEnrollment] = useState(false)
 
+  const savedEnrollmentRef = useRef({
+    isInternational: false,
+    scholarshipType: '',
+    scholarshipName: '',
+    scholarshipMinGpa: '',
+    scholarshipMinCreditsPerYear: '',
+  })
+
   async function loadUserProfile() {
     setProfileError(null)
 
@@ -90,11 +98,19 @@ export default function SettingsPage() {
           bulletinYear: p.bulletinYear ?? null,
         }
         // Set enrollment fields from response
-        setIsInternational(p.is_international ?? false)
-        setScholarshipType(p.scholarship_type ?? '')
-        setScholarshipName(p.scholarship_name ?? '')
-        setScholarshipMinGpa(p.scholarship_min_gpa?.toString() ?? '')
-        setScholarshipMinCreditsPerYear(p.scholarship_min_credits_per_year?.toString() ?? '')
+        const enrollSnap = {
+          isInternational: p.is_international ?? false,
+          scholarshipType: p.scholarship_type ?? '',
+          scholarshipName: p.scholarship_name ?? '',
+          scholarshipMinGpa: p.scholarship_min_gpa?.toString() ?? '',
+          scholarshipMinCreditsPerYear: p.scholarship_min_credits_per_year?.toString() ?? '',
+        }
+        setIsInternational(enrollSnap.isInternational)
+        setScholarshipType(enrollSnap.scholarshipType)
+        setScholarshipName(enrollSnap.scholarshipName)
+        setScholarshipMinGpa(enrollSnap.scholarshipMinGpa)
+        setScholarshipMinCreditsPerYear(enrollSnap.scholarshipMinCreditsPerYear)
+        savedEnrollmentRef.current = enrollSnap
         profileCache.write(uid, result)
         return result
       }
@@ -235,6 +251,13 @@ export default function SettingsPage() {
         }),
       })
       if (!res.ok) throw new Error('Failed to save')
+      savedEnrollmentRef.current = {
+        isInternational,
+        scholarshipType,
+        scholarshipName,
+        scholarshipMinGpa,
+        scholarshipMinCreditsPerYear,
+      }
       setEnrollmentSaveSuccess(true)
       setIsEditingEnrollment(false)
       setTimeout(() => setEnrollmentSaveSuccess(false), 3000)
@@ -248,7 +271,12 @@ export default function SettingsPage() {
   function handleCancelEnrollment() {
     setIsEditingEnrollment(false)
     setEnrollmentSaveError('')
-    void loadUserProfile()
+    const snap = savedEnrollmentRef.current
+    setIsInternational(snap.isInternational)
+    setScholarshipType(snap.scholarshipType)
+    setScholarshipName(snap.scholarshipName)
+    setScholarshipMinGpa(snap.scholarshipMinGpa)
+    setScholarshipMinCreditsPerYear(snap.scholarshipMinCreditsPerYear)
   }
 
   async function loadCompletedCourses() {
