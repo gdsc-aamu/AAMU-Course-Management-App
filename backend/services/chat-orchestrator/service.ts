@@ -223,7 +223,12 @@ function buildNextCoursesContext(rec: {
   const eligibleLines = rec.eligibleNow.length
     ? rec.eligibleNow
         .slice(0, 8)
-        .map((course) => `- ${course.courseId}: ${course.title} (${course.creditHours} cr) [${course.semesterLabel}]`)
+        .map((course) => {
+          const termOffered = course.semesterNumber != null
+            ? ` | offered ${course.semesterNumber % 2 === 1 ? "Fall" : "Spring"}`
+            : ""
+          return `- ${course.courseId}: ${course.title} (${course.creditHours} cr) [${course.semesterLabel}${termOffered}]`
+        })
         .join("\n")
     : "- None"
 
@@ -529,9 +534,12 @@ ${upcomingLines}`
     }
 
     const gapContext = formatGraduationGapForLLM(gap)
+    const degreeworksNote = degreeSummaryBlock
+      ? "\n\nInstruction: The Degree Progress Summary above is taken directly from the student's DegreeWorks audit. Lead with the degree_progress_pct percentage and credits_remaining figures when answering. Then list what courses are still needed by semester."
+      : "\n\nInstruction: List what courses are still needed by semester, grouping by Fall vs Spring based on the [offered X] label on each course. Include credit totals."
     const answer = await generateDbResponse(
       question,
-      `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${gapContext}`,
+      `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${gapContext}${degreeworksNote}`,
       history
     )
     return { mode: "DB_ONLY", answer, data: gap }

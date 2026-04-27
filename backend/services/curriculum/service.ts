@@ -855,6 +855,7 @@ Status: ${gap.isOnTrack ? "On track to graduate" : "More than 2 semesters of wor
 
   const semesterBlocks = gap.remainingBySemester
     .map((sem) => {
+      const termOffered = sem.semesterNumber % 2 === 1 ? "Fall" : "Spring"
       const lines = sem.slots.map((slot) => {
         if (slot.isElective) {
           const options = slot.eligibleCourses?.slice(0, 5).join(", ") ?? "see advisor"
@@ -862,7 +863,7 @@ Status: ${gap.isOnTrack ? "On track to graduate" : "More than 2 semesters of wor
         }
         return `  - ${slot.courseId}: ${slot.title} (${slot.creditHours} cr)`
       })
-      return `${sem.semesterLabel}:\n${lines.join("\n")}`
+      return `${sem.semesterLabel} [offered ${termOffered} semesters]:\n${lines.join("\n")}`
     })
     .join("\n\n")
 
