@@ -700,9 +700,25 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       : ""
 
     const planningContext = buildNextCoursesContext(filteredRecommendation, classification, termSplit)
+
+    // Fetch GE courses the student hasn't taken — always included alongside required courses
+    let geContext = ""
+    if (payload.studentId) {
+      const geCtx = await fetchFreeElectiveOptions({
+        studentId: payload.studentId,
+        isInternational: payload.session?.isInternational,
+        scholarshipType: payload.session?.scholarshipType,
+        scholarshipMinGpa: payload.session?.scholarshipMinGpa,
+        scholarshipMinCreditsPerYear: payload.session?.scholarshipMinCreditsPerYear,
+      }).catch(() => null)
+      if (geCtx && geCtx.availableCourses.length > 0) {
+        geContext = "\n\n" + formatFreeElectivesForLLM(geCtx)
+      }
+    }
+
     const answer = await generateDbResponse(
       question,
-      `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${planningContext}${countNote}`,
+      `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${planningContext}${geContext}${countNote}`,
       history
     )
 
