@@ -113,6 +113,10 @@ function extractSimulateCourses(question: string): string[] {
 // Term ordering: Spring < Summer < Fall within the same year
 const TERM_ORDER: Record<string, number> = { Spring: 0, Summer: 1, Fall: 2 }
 
+const CLASSIFICATION_MAX_SEMESTER: Record<string, number> = {
+  freshman: 2, sophomore: 4, junior: 6, senior: 8,
+}
+
 function parseTerm(term: string | null): { year: number; season: number } {
   if (!term) return { year: 0, season: 0 }
   const m = term.match(/^(Spring|Summer|Fall)\s+(\d{4})$/i)
@@ -275,10 +279,6 @@ ${upcomingLines}${capNote}`
       ? rec.alreadyInProgress.slice(0, 6).map((c) => `- ${c.courseId}: ${c.title} [${c.semesterLabel}]`).join("\n")
       : "- None"
     enrolledSection = `Currently Enrolled:\n${inProgressLines}`
-  }
-
-  const CLASSIFICATION_MAX_SEMESTER: Record<string, number> = {
-    freshman: 2, sophomore: 4, junior: 6, senior: 8,
   }
 
   let classificationAdvisory = ""

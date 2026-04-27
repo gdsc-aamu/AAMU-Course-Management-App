@@ -108,7 +108,7 @@ function fastPrescreen(question: string): IntentLabel | null {
     return "ADVISOR_ESCALATE"
   if (/\b(save (this|my|the)?\s*(plan|schedule)|create a plan)\b/.test(q))
     return "SAVE_PLAN"
-  if (/\b(humanities|fine\s+arts?|social\s+science|natural\s+science|GED\s+course|general\s+ed(?:ucation)?(?:\s+requirement)?|history\s+(?:class|course)|literature\s+(?:class|course)|behavioral\s+science)\b/i.test(q))
+  if (/\b(humanities|fine\s+arts?|social\s+sciences?|natural\s+sciences?|GED\s+courses?|gen\s+ed|general\s+ed(?:ucation)?(?:\s+requirements?)?|history\s+(?:classes?|courses?)|literature\s+(?:classes?|courses?)|behavioral\s+sciences?)\b/i.test(q))
     return "FREE_ELECTIVE"
 
   return null
