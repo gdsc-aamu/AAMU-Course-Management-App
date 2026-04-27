@@ -799,6 +799,7 @@ export async function computeGraduationGap(params: {
 export async function fetchElectiveOptions(params: {
   programCode: string
   bulletinYear?: string | null
+  studentId?: string
 }): Promise<ElectiveSlotOption[]> {
   const programCode = params.programCode.trim().toUpperCase()
   const catalogYear = parseCatalogYear(params.bulletinYear)
@@ -808,14 +809,28 @@ export async function fetchElectiveOptions(params: {
 
   const electiveSlots = await getElectiveSlotsWithEligible(program.id)
 
+  // Build taken course codes set if studentId provided
+  const takenCodes = new Set<string>()
+  if (params.studentId) {
+    const userCourses = await getUserCourseStatuses(params.studentId).catch(() => [])
+    for (const c of userCourses) {
+      const raw = c.code.trim().toUpperCase()
+      takenCodes.add(raw)
+      takenCodes.add(normalizeHonorsCourseCode(raw))
+    }
+  }
+
   return electiveSlots.map((slot) => {
     const courses = Array.isArray(slot.courses) ? slot.courses : slot.courses ? [slot.courses] : []
+    const eligible = courses
+      .filter((c: any) => !takenCodes.has(c.course_id.trim().toUpperCase()))
+      .map((c: any) => ({ courseId: c.course_id, title: c.title }))
     return {
       semesterNumber: slot.semester_number,
       semesterLabel: SEMESTER_LABELS[slot.semester_number] ?? `Semester ${slot.semester_number}`,
       slotLabel: slot.slot_label,
       creditHours: slot.credit_hours,
-      eligibleCourses: courses.map((c: any) => ({ courseId: c.course_id, title: c.title })),
+      eligibleCourses: eligible,
     }
   })
 }

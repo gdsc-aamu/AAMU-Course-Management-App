@@ -14,7 +14,7 @@ export function Footer() {
             Contact
           </a>
           <a
-            href="https://gdg.community.dev/gdg-on-campus-alabama-agricultural-and-mechanical-university-normal-united-states/"
+            href="https://gdg.community.dev/gdg-on-campus-alabama-am-university-huntsville-united-states/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-[#A0152A] font-medium transition-colors"

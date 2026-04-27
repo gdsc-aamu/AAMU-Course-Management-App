@@ -547,7 +547,11 @@ ${upcomingLines}`
       return { mode: "DB_ONLY", answer: SETUP_NEEDED_MESSAGE, data: null }
     }
 
-    const options = await fetchElectiveOptions({ programCode, bulletinYear: fallbackBulletinYear })
+    const options = await fetchElectiveOptions({
+      programCode,
+      bulletinYear: fallbackBulletinYear,
+      studentId: payload.studentId ?? undefined,
+    })
 
     if (options.length === 0) {
       return {
