@@ -49,7 +49,7 @@ NEXT_COURSES — what to take next semester, what classes to register for, what'
 GRADUATION_GAP — what's left to graduate, how many credits remaining, am I on track, when will I finish
 PREREQUISITES — what are the prereqs for a course, what do I need before taking X
 ELECTIVES — elective options, what electives count, which electives can I pick
-FREE_ELECTIVE — student asks about free elective options, what electives to take, recreational courses, GE courses, general education requirements, what courses count as free electives, or wants suggestions for easy/fun courses. Also: PE courses, physical education, specific activities like golf/swimming/tennis/bowling/badminton
+FREE_ELECTIVE — student asks about free elective options, what electives to take, recreational courses, GE courses, general education requirements (including any GE sub-area: humanities, fine arts, history, literature, social sciences, behavioral sciences, natural sciences, physical education), what courses count as free electives, or wants suggestions for easy/fun courses. Also: PE courses, physical education, specific activities like golf/swimming/tennis/bowling/badminton. NOTE: "GED" in an advising context means General Education requirements (not high school GED equivalency).
 CONCENTRATION — concentration requirements, minor requirements, double major
 SIMULATE — hypothetical "if I take X what opens up", what-if questions about completing courses
 SAVE_PLAN — save this schedule/plan, create a plan from these courses
@@ -79,7 +79,16 @@ Examples:
 "can I take golf?" → FREE_ELECTIVE
 "I need 3 more credits what should I take?" → FREE_ELECTIVE
 "any fun courses I can add?" → FREE_ELECTIVE
-"what general education courses haven't I taken?" → FREE_ELECTIVE`
+"what general education courses haven't I taken?" → FREE_ELECTIVE
+"what humanities courses can I take next semester?" → FREE_ELECTIVE
+"what GED courses are available?" → FREE_ELECTIVE
+"what history courses can I take?" → FREE_ELECTIVE
+"what fine arts courses count for my degree?" → FREE_ELECTIVE
+"what literature classes haven't I taken?" → FREE_ELECTIVE
+"what social science courses do I still need?" → FREE_ELECTIVE
+"what are the humanities courses I can take next semester?" → FREE_ELECTIVE
+"What General education requirement courses can I take?" → FREE_ELECTIVE
+"Give me some options for general education" → FREE_ELECTIVE`
 
 function getOpenAIClient(): OpenAI {
   const apiKey = process.env.OPENAI_API_KEY
@@ -99,6 +108,8 @@ function fastPrescreen(question: string): IntentLabel | null {
     return "ADVISOR_ESCALATE"
   if (/\b(save (this|my|the)?\s*(plan|schedule)|create a plan)\b/.test(q))
     return "SAVE_PLAN"
+  if (/\b(humanities|fine\s+arts?|social\s+science|natural\s+science|GED\s+course|general\s+ed(?:ucation)?(?:\s+requirement)?|history\s+(?:class|course)|literature\s+(?:class|course)|behavioral\s+science)\b/i.test(q))
+    return "FREE_ELECTIVE"
 
   return null
 }
