@@ -186,6 +186,22 @@ export async function upsertUserCompletedCourses(
 }
 
 /**
+ * Quick check — has this user ever uploaded a DegreeWorks PDF?
+ * Uses a count(1) query with limit 1 to avoid fetching all rows.
+ */
+export async function hasUserUploadedCourses(userId: string): Promise<boolean> {
+  const supabase = getSupabaseClient()
+  const { count, error } = await supabase
+    .from("user_completed_courses")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .limit(1)
+
+  if (error) return false
+  return (count ?? 0) > 0
+}
+
+/**
  * Get all completed courses for a user from the user-course mapping.
  */
 export async function getUserCompletedCourses(userId: string): Promise<UserCompletedCourseView[]> {

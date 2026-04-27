@@ -33,6 +33,7 @@ import {
 import {
   fetchUserCompletedCourses,
   fetchUserInProgressCourses,
+  checkUserHasUploadedDegreeWorks,
 } from "@/backend/services/pdf-parsing/service"
 import { fetchUserAcademicProfile } from "@/backend/services/user-profile/service"
 import {
@@ -327,14 +328,17 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   const history = payload.conversationHistory ?? []
   const question = payload.question.trim()
 
-  // Fetch user profile and degree summary in parallel
-  const [userProfile, degreeSummaryData] = await Promise.all([
+  // Fetch user profile, degree summary, and upload status in parallel
+  const [userProfile, degreeSummaryData, hasUploadedDegreeWorks] = await Promise.all([
     payload.studentId
       ? fetchUserAcademicProfile(payload.studentId).catch(() => null)
       : Promise.resolve(null),
     payload.studentId
       ? fetchFullDegreeSummary(payload.studentId).catch(() => null)
       : Promise.resolve(null),
+    payload.studentId
+      ? checkUserHasUploadedDegreeWorks(payload.studentId).catch(() => false)
+      : Promise.resolve(false),
   ])
 
   const degreeSummaryBlock = degreeSummaryData
@@ -403,7 +407,7 @@ Once those are done, I can tell you exactly what courses to register for next, w
 
   if (requiresStudentData) {
     const profileIncomplete = !programCode || !fallbackBulletinYear
-    const degreeworksMissing = !degreeSummaryData?.summary
+    const degreeworksMissing = !hasUploadedDegreeWorks
 
     if (profileIncomplete || degreeworksMissing) {
       const firstName = studentName ? ` ${studentName.split(" ")[0]}` : ""

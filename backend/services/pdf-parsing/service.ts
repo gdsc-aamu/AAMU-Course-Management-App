@@ -14,6 +14,7 @@ import {
   getUserCourseStatuses,
   getUserCompletedCourses,
   upsertUserCompletedCourses,
+  hasUserUploadedCourses,
   type UserCompletedCourseView,
 } from "@/backend/data-access/pdf-parsing"
 import { upsertUserAcademicProfile } from "@/backend/data-access/user-profile"
@@ -244,6 +245,15 @@ export async function parseDegreeWorksPdf(
   ])
 
   return payload
+}
+
+/**
+ * Returns true if the student has uploaded at least one DegreeWorks PDF
+ * (i.e. user_completed_courses has at least one row for this user).
+ */
+export async function checkUserHasUploadedDegreeWorks(userId: string): Promise<boolean> {
+  if (!userId.trim()) return false
+  return hasUserUploadedCourses(userId)
 }
 
 /**
