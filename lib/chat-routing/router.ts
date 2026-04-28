@@ -46,14 +46,14 @@ Classify the student's question into EXACTLY ONE of these intent labels. Reply w
 
 COMPLETED_COURSES — student asking what courses they have already taken, completed, passed, finished, knocked out, done, hit (includes typos like "couses", slang like "knocked out", AAVE like "what I done finished")
 NEXT_COURSES — what to take next semester, what classes to register for, what's available to take
-GRADUATION_GAP — what's left to graduate, how many credits remaining, am I on track, when will I finish
+GRADUATION_GAP — what's left to graduate, how many credits remaining, am I on track, when will I finish, what is MY current GPA (personal academic record questions)
 PREREQUISITES — what are the prereqs for a course, what do I need before taking X
 ELECTIVES — elective options, what electives count, which electives can I pick
 FREE_ELECTIVE — student asks about free elective options, what electives to take, recreational courses, GE courses, general education requirements (including any GE sub-area: humanities, fine arts, history, literature, social sciences, behavioral sciences, natural sciences, physical education), what courses count as free electives, or wants suggestions for easy/fun courses. Also: PE courses, physical education, specific activities like golf/swimming/tennis/bowling/badminton. NOTE: "GED" in an advising context means General Education requirements (not high school GED equivalency).
 CONCENTRATION — concentration requirements, minor requirements, double major
 SIMULATE — hypothetical "if I take X what opens up", what-if questions about completing courses
 SAVE_PLAN — save this schedule/plan, create a plan from these courses
-BULLETIN_POLICY — GPA requirements, academic probation, graduation policies, financial aid, deadlines, academic standing rules (anything in the student handbook/bulletin)
+BULLETIN_POLICY — minimum GPA requirements, academic probation rules, graduation policies, financial aid, deadlines, academic standing rules (anything about policy, not about the student's own records)
 ADVISOR_ESCALATE — transfer credits, grade appeals, course waivers, exceptions, petitions, special permissions
 GENERAL_CURRICULUM — what is a specific course, program overview, course descriptions, general questions about the CS program
 CHITCHAT — greetings, thanks, small talk, anything that is not an academic question ("hi", "hello", "thanks", "ok", "cool", "got it", "bye")
@@ -68,11 +68,21 @@ Examples:
 "tryna see what i done finished" → COMPLETED_COURSES
 "what i need to graduate" → GRADUATION_GAP
 "can i still graduate on time" → GRADUATION_GAP
-"what gpa do i need" → BULLETIN_POLICY
+"what is my current GPA" → GRADUATION_GAP
+"what is my GPA" → GRADUATION_GAP
+"show me my GPA" → GRADUATION_GAP
+"how are my grades" → GRADUATION_GAP
+"what gpa do i need to stay enrolled" → BULLETIN_POLICY
 "minimum gpa to graduate" → BULLETIN_POLICY
+"what is the minimum GPA required" → BULLETIN_POLICY
 "if i take CS 101 what opens up" → SIMULATE
 "what is CS 214" → GENERAL_CURRICULUM
 "transfer my credits from community college" → ADVISOR_ESCALATE
+"I need 12 credits" → NEXT_COURSES
+"I need 3 more credits" → NEXT_COURSES
+"give me 15 credits worth of courses" → NEXT_COURSES
+"I need 5 courses that are 3 credits each" → NEXT_COURSES
+"make it 15 credits" → NEXT_COURSES
 "what electives should I take?" → FREE_ELECTIVE
 "I need a free elective" → FREE_ELECTIVE
 "what PE courses are available?" → FREE_ELECTIVE
@@ -88,7 +98,18 @@ Examples:
 "what social science courses do I still need?" → FREE_ELECTIVE
 "what are the humanities courses I can take next semester?" → FREE_ELECTIVE
 "What General education requirement courses can I take?" → FREE_ELECTIVE
-"Give me some options for general education" → FREE_ELECTIVE`
+"Give me some options for general education" → FREE_ELECTIVE
+"courses" → CHITCHAT
+"classes" → CHITCHAT
+"ok" → CHITCHAT
+"yes" → CHITCHAT
+"got it" → CHITCHAT
+"sounds good" → CHITCHAT
+"show my transcript" → COMPLETED_COURSES
+"build my schedule" → SAVE_PLAN
+"can you make me a schedule" → SAVE_PLAN
+"create a schedule for me" → SAVE_PLAN
+"make a schedule" → SAVE_PLAN`
 
 function getOpenAIClient(): OpenAI {
   const apiKey = process.env.OPENAI_API_KEY
@@ -102,14 +123,31 @@ function getOpenAIClient(): OpenAI {
 function fastPrescreen(question: string): IntentLabel | null {
   const q = question.toLowerCase()
 
+  // Short single-word or common-phrase queries → CHITCHAT
+  // Catches bare: "courses", "classes", "ok", "yes", "got it", "cool", etc.
+  if (/^(courses?|classes?|ok|okay|yes|yeah|yep|no|nope|got\s+it|sure|sounds\s+good|cool|great|thanks?|thank\s+you|bye|hello|hi|hey|alright|noted)\.?$/i.test(question.trim()))
+    return "CHITCHAT"
+
+  // Personal GPA/grade record questions → use student's own data, not bulletin policy
+  if (/\b(my\s+(current\s+)?gpa|current\s+gpa|show\s+(my\s+)?gpa|(what|what's)\s+(is\s+)?(my\s+)?(current\s+)?gpa|how\s+(is|are)\s+my\s+(grades?|gpa)|grade\s+point\s+average|how\s+am\s+i\s+doing\s+academically|am\s+i\s+doing\s+well)\b/i.test(q))
+    return "GRADUATION_GAP"
   if (/\b(bulletin|handbook|catalog|academic policy|registration deadline|financial aid|scholarship|housing)\b/.test(q))
     return "BULLETIN_POLICY"
   if (/\b(transfer credit|appeal|waiver|petition|special permission|department head|dean approval)\b/.test(q))
     return "ADVISOR_ESCALATE"
-  if (/\b(save (this|my|the)?\s*(plan|schedule)|create a plan)\b/.test(q))
+  if (/\b(save\s+(this|my|the|these)?\s*(plan|schedule|courses?|list)|save\s+it|can\s+you\s+save|go\s+ahead\s+and\s+save|save\s+as|name\s+(it|this|the\s+plan)|create\s+a\s+plan|build\s+(my|a|me\s+a)\s+schedule|make\s+(me\s+a|a|my)\s+schedule|create\s+a\s+schedule(\s+for\s+me)?|put\s+(together|this)\s+(a|my)?\s*schedule)\b/i.test(q))
     return "SAVE_PLAN"
   if (/\b(humanities|fine\s+arts?|social\s+sciences?|natural\s+sciences?|GED\s+courses?|gen\s+ed|general\s+ed(?:ucation)?(?:\s+requirements?)?|history\s+(?:classes?|courses?)|literature\s+(?:classes?|courses?)|behavioral\s+sciences?)\b/i.test(q))
     return "FREE_ELECTIVE"
+  // Credit-target schedule building → NEXT_COURSES (must come after FREE_ELECTIVE so GE area names win)
+  if (/\b(i\s+need|give\s+me|i\s+want|make\s+it|add|get\s+me)\s+\d+\s+(more\s+)?credits?\b/i.test(q))
+    return "NEXT_COURSES"
+  if (/\b\d+\s+more\s+credits?\b/i.test(q))
+    return "NEXT_COURSES"
+  if (/\b\d+\s+courses?\s+(that\s+are|each|worth)\s+\d+\s+credits?\s*(each)?\b/i.test(q))
+    return "NEXT_COURSES"
+  if (/\b(need|want)\s+\d+\s+credits?\b/i.test(q))
+    return "NEXT_COURSES"
 
   return null
 }

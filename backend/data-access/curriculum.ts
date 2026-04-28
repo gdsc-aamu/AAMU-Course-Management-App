@@ -15,6 +15,8 @@ export interface ProgramRow {
   name: string
   catalog_year: number
   total_credit_hours: number
+  graduation_requirements: string[]
+  capstone_rule: string | null
 }
 
 export interface ProgramIdentityRow {
@@ -58,6 +60,12 @@ export interface CoursePrerequisiteRow {
   prerequisite: PrerequisiteRelationRow | PrerequisiteRelationRow[] | null
 }
 
+// Maps display catalog years with no program data to the backend year that does have data.
+// Add entries here when a new academic year should alias to an existing year.
+const CATALOG_YEAR_ALIASES: Record<number, number> = {
+  2024: 2025, // 2024-2025 students use 2025-2026 curriculum data
+}
+
 function getSupabaseClient() {
   const url = process.env.SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_KEY
@@ -71,13 +79,19 @@ function getSupabaseClient() {
 export async function getProgram(code: string, catalogYear?: number | null): Promise<ProgramRow | null> {
   const supabase = getSupabaseClient()
   const normalizedCode = code.trim().toUpperCase()
-  if (typeof catalogYear === "number") {
+
+  // Resolve alias before querying — e.g. 2024 → 2025
+  const resolvedYear = (typeof catalogYear === "number" && CATALOG_YEAR_ALIASES[catalogYear] != null)
+    ? CATALOG_YEAR_ALIASES[catalogYear]
+    : catalogYear
+
+  if (typeof resolvedYear === "number") {
     // Exact year first.
     const { data: exactData, error: exactError } = await supabase
       .from("programs")
-      .select("id, code, name, catalog_year, total_credit_hours")
+      .select("id, code, name, catalog_year, total_credit_hours, graduation_requirements, capstone_rule")
       .eq("code", normalizedCode)
-      .eq("catalog_year", catalogYear)
+      .eq("catalog_year", resolvedYear)
       .limit(1)
 
     if (!exactError && exactData && exactData.length > 0) {
@@ -85,10 +99,10 @@ export async function getProgram(code: string, catalogYear?: number | null): Pro
     }
 
     // Fallback for academic-year ambiguity (e.g., 2023-2024 stored as 2024).
-    const nearYears = [catalogYear - 1, catalogYear + 1]
+    const nearYears = [resolvedYear - 1, resolvedYear + 1]
     const { data: nearData, error: nearError } = await supabase
       .from("programs")
-      .select("id, code, name, catalog_year, total_credit_hours")
+      .select("id, code, name, catalog_year, total_credit_hours, graduation_requirements, capstone_rule")
       .eq("code", normalizedCode)
       .in("catalog_year", nearYears)
       .order("catalog_year", { ascending: false })
@@ -103,7 +117,7 @@ export async function getProgram(code: string, catalogYear?: number | null): Pro
 
   const { data, error } = await supabase
     .from("programs")
-    .select("id, code, name, catalog_year, total_credit_hours")
+    .select("id, code, name, catalog_year, total_credit_hours, graduation_requirements, capstone_rule")
     .eq("code", normalizedCode)
     .order("catalog_year", { ascending: false })
     .limit(1)

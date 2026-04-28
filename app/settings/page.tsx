@@ -21,12 +21,20 @@ interface UserProfile {
   classification: string | null
   programCode: string | null
   bulletinYear: string | null
+  concentrationCode: string | null
 }
 
 interface ProgramOption {
   code: string
   name: string
   catalogYear: number
+}
+
+interface ConcentrationOption {
+  code: string
+  name: string
+  type: "concentration" | "minor"
+  totalHours: number
 }
 
 export default function SettingsPage() {
@@ -48,10 +56,12 @@ export default function SettingsPage() {
   
   // Edit modal state
   const [isEditingProfile, setIsEditingProfile] = useState(false)
-  const [editFormData, setEditFormData] = useState({ programCode: "", bulletinYear: "", classification: "" })
+  const [editFormData, setEditFormData] = useState({ programCode: "", bulletinYear: "", classification: "", concentrationCode: "" })
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [profileSaveError, setProfileSaveError] = useState<string | null>(null)
   const [profileSaveSuccess, setProfileSaveSuccess] = useState<string | null>(null)
+  const [concentrations, setConcentrations] = useState<ConcentrationOption[]>([])
+  const [isLoadingConcentrations, setIsLoadingConcentrations] = useState(false)
 
   // Enrollment & Financial Aid state
   const [isInternational, setIsInternational] = useState(false)
@@ -90,12 +100,13 @@ export default function SettingsPage() {
         })
         const payload = (await response.json()) as { success: boolean; error?: string; profile?: any }
         if (!response.ok || !payload.success) throw new Error(payload.error ?? "Failed to fetch user profile.")
-        const p = payload.profile ?? { classification: null, programCode: null, bulletinYear: null }
+        const p = payload.profile ?? { classification: null, programCode: null, bulletinYear: null, concentrationCode: null }
         const result = {
           fullName,
           classification: p.classification ?? null,
           programCode: p.programCode ?? null,
           bulletinYear: p.bulletinYear ?? null,
+          concentrationCode: p.concentrationCode ?? null,
         }
         // Set enrollment fields from response
         const enrollSnap = {
@@ -118,7 +129,7 @@ export default function SettingsPage() {
       const cached = profileCache.read(uid)
       if (cached) {
         // Serve cache instantly, revalidate in background
-        setProfile({ ...cached, fullName })
+        setProfile({ ...cached, fullName, concentrationCode: (cached as any).concentrationCode ?? null })
         setIsLoadingProfile(false)
         fetchFresh().then(fresh => setProfile(fresh)).catch(() => {})
         return
@@ -158,6 +169,27 @@ export default function SettingsPage() {
     }
   }
 
+  async function loadConcentrations(programCode: string) {
+    if (!programCode) {
+      setConcentrations([])
+      return
+    }
+    setIsLoadingConcentrations(true)
+    try {
+      const response = await fetch(`/api/curriculum/concentrations?programCode=${encodeURIComponent(programCode)}`)
+      const payload = (await response.json()) as {
+        success: boolean
+        concentrations?: ConcentrationOption[]
+        error?: string
+      }
+      setConcentrations(payload.concentrations ?? [])
+    } catch {
+      setConcentrations([])
+    } finally {
+      setIsLoadingConcentrations(false)
+    }
+  }
+
   async function handleSaveProfile() {
     setProfileSaveError(null)
     setProfileSaveSuccess(null)
@@ -179,27 +211,29 @@ export default function SettingsPage() {
           programCode: editFormData.programCode || null,
           bulletinYear: editFormData.bulletinYear || null,
           classification: editFormData.classification || null,
-          }),
+          concentrationCode: editFormData.concentrationCode || null,
+        }),
       })
 
       const payload = (await response.json()) as {
         success: boolean
         error?: string
-        profile?: UserProfile
+        profile?: UserProfile & { concentrationCode?: string | null }
       }
 
       if (!response.ok || !payload.success) {
         throw new Error(payload.error ?? "Failed to save profile.")
       }
 
-        if (payload.profile) {
-          setProfile({
-            fullName: profile?.fullName ?? null,
-            classification: payload.profile.classification ?? null,
-            programCode: payload.profile.programCode ?? null,
-            bulletinYear: payload.profile.bulletinYear ?? null,
-          })
-        }
+      if (payload.profile) {
+        setProfile({
+          fullName: profile?.fullName ?? null,
+          classification: payload.profile.classification ?? null,
+          programCode: payload.profile.programCode ?? null,
+          bulletinYear: payload.profile.bulletinYear ?? null,
+          concentrationCode: payload.profile.concentrationCode ?? null,
+        })
+      }
       invalidateAfterProfileSave(data.session.user.id)
       setProfileSaveSuccess("Profile updated successfully!")
       setIsEditingProfile(false)
@@ -213,14 +247,17 @@ export default function SettingsPage() {
   }
 
   function handleEditClick() {
+    const programCode = profile?.programCode || ""
     setEditFormData({
-      programCode: profile?.programCode || "",
+      programCode,
       bulletinYear: profile?.bulletinYear || "",
-       classification: profile?.classification || "",
+      classification: profile?.classification || "",
+      concentrationCode: profile?.concentrationCode || "",
     })
     setProfileSaveError(null)
     setProfileSaveSuccess(null)
     setIsEditingProfile(true)
+    void loadConcentrations(programCode)
   }
 
   function handleCancelEdit() {
@@ -466,18 +503,18 @@ export default function SettingsPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
                     <div>
-                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</div>
-                        <div className="text-base font-medium text-gray-900">
-                          {profile?.fullName || "Not set"}
-                        </div>
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</div>
+                      <div className="text-base font-medium text-gray-900">
+                        {profile?.fullName || "Not set"}
                       </div>
-                      <div>
-                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Classification</div>
-                        <div className="text-base font-medium text-gray-900">
-                          {profile?.classification || "Not set"}
-                        </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Classification</div>
+                      <div className="text-base font-medium text-gray-900">
+                        {profile?.classification || "Not set"}
                       </div>
-                      <div>
+                    </div>
+                    <div>
                       <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Primary Major</div>
                       <div className="text-base font-medium text-gray-900">
                         {programs.find((p) => p.code === profile?.programCode)?.name || profile?.programCode || "Not set"}
@@ -487,6 +524,12 @@ export default function SettingsPage() {
                       <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Catalog Year</div>
                       <div className="text-base font-medium text-gray-900">
                         {profile?.bulletinYear || "Not set"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Concentration / Minor</div>
+                      <div className="text-base font-medium text-gray-900">
+                        {profile?.concentrationCode || "None declared"}
                       </div>
                     </div>
                   </div>
@@ -701,7 +744,11 @@ export default function SettingsPage() {
                         </label>
                         <select
                           value={editFormData.programCode}
-                          onChange={(e) => setEditFormData({ ...editFormData, programCode: e.target.value })}
+                          onChange={(e) => {
+                            const code = e.target.value
+                            setEditFormData({ ...editFormData, programCode: code, concentrationCode: "" })
+                            void loadConcentrations(code)
+                          }}
                           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
                         >
                           <option value="">Select a major...</option>
@@ -728,6 +775,8 @@ export default function SettingsPage() {
                           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
                         >
                           <option value="">Select a catalog year...</option>
+                          {/* Alias years — resolved to next year at backend; no direct DB entry */}
+                          <option value="2024-2025">2024-2025</option>
                           {programs
                             .filter((p) => !editFormData.programCode || p.code === editFormData.programCode)
                             .reduce((acc, p) => {
@@ -765,6 +814,60 @@ export default function SettingsPage() {
                             <option value="junior">Junior</option>
                             <option value="senior">Senior</option>
                           </select>
+                        </div>
+
+                        {/* Concentration / Minor Selector */}
+                        <div>
+                          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                            Concentration / Minor
+                          </label>
+                          <select
+                            value={editFormData.concentrationCode}
+                            onChange={(e) => setEditFormData({ ...editFormData, concentrationCode: e.target.value })}
+                            disabled={isLoadingConcentrations || !editFormData.programCode}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                          >
+                            <option value="">
+                              {!editFormData.programCode
+                                ? "Select a major first..."
+                                : isLoadingConcentrations
+                                ? "Loading..."
+                                : concentrations.length === 0
+                                ? "None available"
+                                : "None / Not declared"}
+                            </option>
+                            {concentrations
+                              .filter((c) => c.type === "concentration")
+                              .length > 0 && (
+                              <optgroup label="Concentrations">
+                                {concentrations
+                                  .filter((c) => c.type === "concentration")
+                                  .map((c) => (
+                                    <option key={c.code} value={c.code}>
+                                      {c.name} ({c.code})
+                                    </option>
+                                  ))}
+                              </optgroup>
+                            )}
+                            {concentrations
+                              .filter((c) => c.type === "minor")
+                              .length > 0 && (
+                              <optgroup label="Minors">
+                                {concentrations
+                                  .filter((c) => c.type === "minor")
+                                  .map((c) => (
+                                    <option key={c.code} value={c.code}>
+                                      {c.name} ({c.code})
+                                    </option>
+                                  ))}
+                              </optgroup>
+                            )}
+                          </select>
+                          {!editFormData.programCode && (
+                            <p className="mt-1 text-xs text-gray-400">
+                              Select your major to see available concentrations and minors.
+                            </p>
+                          )}
                         </div>
                     </div>
 

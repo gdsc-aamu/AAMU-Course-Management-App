@@ -16,6 +16,7 @@ import type {
   ProgramOverview,
   PrerequisiteResult,
   GraduationGap,
+  NeedsRetakeSlot,
   SemesterRemaining,
   ElectiveSlotOption,
   ConcentrationRequirement,
@@ -69,10 +70,12 @@ export function resolveCatalogYearFromQuestion(
   question: string,
   fallbackBulletinYear?: string | null
 ): number | null {
-  // Prefer explicit year mention in the user's question, e.g. "2021" or "2023-2024".
-  const questionMatch = question.match(/\b(20\d{2})(?:\s*[-/]\s*20\d{2})?\b/)
-  if (questionMatch) {
-    return Number(questionMatch[1])
+  // Only treat an explicit year-range as a catalog year (e.g., "2024-2025" or "2023/2024").
+  // A bare four-digit year like "fall 2026" or "spring 2025" is a semester reference, not a catalog year,
+  // and must not override the session's bulletinYear.
+  const rangeMatch = question.match(/\b(20\d{2})\s*[-/]\s*20\d{2}\b/)
+  if (rangeMatch) {
+    return Number(rangeMatch[1])
   }
 
   return parseCatalogYear(fallbackBulletinYear)
@@ -114,15 +117,14 @@ function normalizeHonorsCourseCode(code: string): string {
   return code.trim().toUpperCase().replace(/([A-Z]{2,5}\s*\d{3})H$/, "$1")
 }
 
-// Grade ordering: higher index = better grade
-const GRADE_ORDER = ["F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"]
+const GRADE_ARRAY = ["F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"]
 
 function gradeAtLeast(earned: string | null | undefined, required: string | null | undefined): boolean {
-  if (!required) return true           // no min grade specified — any passing grade is fine
-  if (!earned || earned === "REG") return false  // no grade yet
-  const earnedIdx = GRADE_ORDER.indexOf(earned.trim().toUpperCase())
-  const requiredIdx = GRADE_ORDER.indexOf(required.trim().toUpperCase())
-  if (earnedIdx === -1 || requiredIdx === -1) return true  // unknown grade format — assume ok
+  if (!required) return true
+  if (!earned || earned === "REG") return false
+  const earnedIdx = GRADE_ARRAY.indexOf(earned.trim().toUpperCase())
+  const requiredIdx = GRADE_ARRAY.indexOf(required.trim().toUpperCase())
+  if (earnedIdx === -1 || requiredIdx === -1) return true
   return earnedIdx >= requiredIdx
 }
 
@@ -646,6 +648,26 @@ export async function resolveProgramCodeFromQuestion(
  * Compute graduation gap — what's remaining by semester, mirroring DegreeWorks view.
  * Compares completed/in-progress courses against all curriculum slots.
  */
+// Grade ordering for min_grade comparison: higher index = higher grade
+const GRADE_ORDER: Record<string, number> = {
+  "F": 0, "D-": 1, "D": 2, "D+": 3,
+  "C-": 4, "C": 5, "C+": 6,
+  "B-": 7, "B": 8, "B+": 9,
+  "A-": 10, "A": 11, "A+": 12,
+}
+
+function gradeValue(grade: string): number {
+  return GRADE_ORDER[grade.trim().toUpperCase()] ?? -1
+}
+
+function meetsMinGrade(earned: string | null, required: string | null): boolean {
+  if (!required || !earned) return true  // no requirement or no grade recorded → assume OK
+  const earnedVal = gradeValue(earned)
+  const requiredVal = gradeValue(required)
+  if (earnedVal < 0 || requiredVal < 0) return true  // unrecognized grade format → assume OK
+  return earnedVal >= requiredVal
+}
+
 export async function computeGraduationGap(params: {
   userId: string
   programCode: string
@@ -719,6 +741,9 @@ export async function computeGraduationGap(params: {
     electiveEligibleMap.set(es.slot_id, eligible)
   }
 
+  // Courses where student's grade didn't meet the min_grade requirement
+  const needsRetake: NeedsRetakeSlot[] = []
+
   // Group remaining slots by semester
   const bySemester = new Map<number, SemesterRemaining>()
 
@@ -756,8 +781,35 @@ export async function computeGraduationGap(params: {
       if (!course) continue
 
       const normalizedId = normalizeHonorsCourseCode(course.course_id)
-      const isDone = completedCourseCodes.has(normalizedId) || inProgressCourseCodes.has(normalizedId)
-      if (isDone) continue
+      const isCompleted = completedCourseCodes.has(normalizedId)
+      const isInProgress = inProgressCourseCodes.has(normalizedId)
+
+      // Grade-aware completion: if the slot has a min_grade, verify the student's grade qualifies
+      if (isCompleted && slot.min_grade) {
+        const userCourse = userCourses.find(
+          (c) => normalizeHonorsCourseCode(c.code.trim().toUpperCase()) === normalizedId && c.status === "completed"
+        )
+        if (userCourse && !meetsMinGrade(userCourse.grade, slot.min_grade)) {
+          // Student completed the course but grade doesn't meet requirement — needs retake
+          needsRetake.push({
+            courseId: course.course_id,
+            title: course.title,
+            gradeEarned: userCourse.grade ?? "?",
+            minGradeRequired: slot.min_grade,
+            semesterLabel: SEMESTER_LABELS[sem] ?? `Semester ${sem}`,
+          })
+          // Still needs to be taken again — add to remaining
+          bySemester.get(sem)!.slots.push({
+            courseId: course.course_id,
+            title: course.title,
+            creditHours: course.credit_hours,
+            isElective: false,
+          })
+          continue
+        }
+      }
+
+      if (isCompleted || isInProgress) continue
 
       bySemester.get(sem)!.slots.push({
         courseId: course.course_id,
@@ -790,6 +842,9 @@ export async function computeGraduationGap(params: {
     remainingBySemester,
     electiveSlotsRemaining,
     isOnTrack: remainingBySemester.length <= 2,
+    needsRetake,
+    graduationRequirements: program.graduation_requirements ?? [],
+    capstoneRule: program.capstone_rule ?? null,
   }
 }
 
@@ -849,8 +904,22 @@ Credits Still Needed After All In-Progress: ${gap.creditsRemaining}
 Elective Slots Remaining: ${gap.electiveSlotsRemaining}
 Status: ${gap.isOnTrack ? "On track to graduate" : "More than 2 semesters of work remaining"}`
 
-  if (gap.remainingBySemester.length === 0) {
-    return `${header}\n\nAll required courses are completed or in progress. Graduation requirements nearly met.`
+  // Graduation requirements (program-level rules)
+  const gradReqBlock = gap.graduationRequirements.length > 0
+    ? `\nProgram Graduation Rules:\n${gap.graduationRequirements.map((r) => `  - ${r}`).join("\n")}` +
+      (gap.capstoneRule ? `\n  - Capstone: ${gap.capstoneRule}` : "")
+    : ""
+
+  // Grade warnings — courses that need to be retaken
+  const retakeBlock = gap.needsRetake.length > 0
+    ? `\n⚠ Courses Needing Retake (grade below minimum requirement):\n` +
+      gap.needsRetake.map((r) =>
+        `  - ${r.courseId}: ${r.title} — earned ${r.gradeEarned}, need ${r.minGradeRequired} (${r.semesterLabel} slot)`
+      ).join("\n")
+    : ""
+
+  if (gap.remainingBySemester.length === 0 && gap.needsRetake.length === 0) {
+    return `${header}${gradReqBlock}\n\nAll required courses are completed or in progress. Graduation requirements nearly met.`
   }
 
   const semesterBlocks = gap.remainingBySemester
@@ -867,7 +936,7 @@ Status: ${gap.isOnTrack ? "On track to graduate" : "More than 2 semesters of wor
     })
     .join("\n\n")
 
-  return `${header}\n\nRemaining courses by semester:\n${semesterBlocks}`
+  return `${header}${gradReqBlock}${retakeBlock}\n\nRemaining courses by semester:\n${semesterBlocks}`
 }
 
 /**
@@ -1036,6 +1105,10 @@ export function extractRequestedCourseCount(question: string): number | null {
   if (m1) { const n = parseInt(m1[1], 10); return isNaN(n) ? null : n }
   const m2 = question.match(/\b(?:take|register for|enroll in)\s+([2-9]|1[0-2])\b/i)
   if (m2) { const n = parseInt(m2[1], 10); return isNaN(n) ? null : n }
+  // "one more course", "add a course", "another course", "get me one more"
+  if (/\b(?:one|a|an)\s+more\s+(?:course|class)\b/i.test(question)) return 1
+  if (/\badd\s+(?:one|a|an)\s+(?:more\s+)?(?:course|class)\b/i.test(question)) return 1
+  if (/\bone\s+more\b/i.test(question) && /\bcourse|class\b/i.test(question)) return 1
   return null
 }
 
