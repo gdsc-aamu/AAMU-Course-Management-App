@@ -37,15 +37,17 @@ import {
 import type { GECourseRow } from "@/backend/data-access/curriculum"
 import { getUserCourseStatuses } from "@/backend/data-access/pdf-parsing"
 
-const AAMU_SCHOLARSHIP_RULES: Record<string, { minGpa: number; minCreditsPerYear: number }> = {
-  'AAMU Presidential Scholarship': { minGpa: 3.5, minCreditsPerYear: 30 },
-  'AAMU Academic Excellence Scholarship': { minGpa: 3.25, minCreditsPerYear: 30 },
-  'AAMU Achievers Scholarship': { minGpa: 3.0, minCreditsPerYear: 30 },
-  'AAMU Bulldog Scholarship': { minGpa: 2.5, minCreditsPerYear: 30 },
-  'AAMU Transfer Scholarship': { minGpa: 3.0, minCreditsPerYear: 30 },
-  'AAMU STEM Scholarship': { minGpa: 3.0, minCreditsPerYear: 30 },
-  'AAMU Need-Based Grant': { minGpa: 2.0, minCreditsPerYear: 30 },
-  'AAMU Athletic Scholarship': { minGpa: 2.0, minCreditsPerYear: 30 },
+// Names and GPA requirements verified from aamu.edu, April 2026.
+// All AAMU scholarships require 30 credit hours per academic year to renew.
+export const AAMU_SCHOLARSHIP_RULES: Record<string, { minGpa: number; minCreditsPerYear: number }> = {
+  'AAMU Presidential Scholarship':         { minGpa: 3.50, minCreditsPerYear: 30 },
+  'AAMU Merit Scholarship':                { minGpa: 3.10, minCreditsPerYear: 30 },
+  'AAMU Transfer Merit Scholarship':       { minGpa: 3.10, minCreditsPerYear: 30 },
+  'AAMU Academic Recognition Scholarship': { minGpa: 2.80, minCreditsPerYear: 30 },
+  'AAMU Heritage Gold Scholarship':        { minGpa: 2.80, minCreditsPerYear: 30 },
+  'AAMU Heritage Silver Scholarship':      { minGpa: 2.80, minCreditsPerYear: 30 },
+  'AAMU Heritage Bronze Scholarship':      { minGpa: 2.50, minCreditsPerYear: 30 },
+  'AAMU Normalite Scholarship':            { minGpa: 2.80, minCreditsPerYear: 30 },
 }
 
 const SEMESTER_LABELS: Record<number, string> = {

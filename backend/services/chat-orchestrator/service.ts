@@ -29,6 +29,7 @@ import {
   formatConcentrationForLLM,
   fetchFreeElectiveOptions,
   formatFreeElectivesForLLM,
+  AAMU_SCHOLARSHIP_RULES,
 } from "@/backend/services/curriculum/service"
 import {
   fetchUserCompletedCourses,
@@ -105,6 +106,23 @@ function asksSavePlanQuestion(question: string): boolean {
   return /(save\s+(this|my|the|these)?\s*(plan|schedule|courses?|list)|save\s+it|can\s+you\s+save|go\s+ahead\s+and\s+save|save\s+as|name\s+(it|this|the\s+plan)|create\s+a\s+plan)/i.test(
     question
   )
+}
+
+function asksInternationalCreditMinimum(question: string): boolean {
+  return /\b(international|f-?1|visa|foreign\s+student)\b/i.test(question)
+    && /\b(minimum|min|how\s+many|least|required|credits?\s+per\s+semester|full[\s-]time)\b/i.test(question)
+}
+
+function asksScholarshipQuestion(question: string): boolean {
+  return /\b(scholarship|financial\s+aid\s+gpa|renewal\s+gpa|scholarship\s+gpa|gpa\s+(for|to\s+keep|to\s+maintain)\s+(my\s+)?scholarship|scholarship\s+requirement|keep\s+my\s+scholarship|lose\s+my\s+scholarship|scholarship\s+credits?)\b/i.test(question)
+}
+
+function extractClassificationFromQuestion(question: string): string | null {
+  if (/\bas\s+a\s+(freshman|first[- ]year)\b/i.test(question)) return "Freshman"
+  if (/\bas\s+a\s+(sophomore|second[- ]year)\b/i.test(question)) return "Sophomore"
+  if (/\bas\s+a\s+(junior|third[- ]year)\b/i.test(question)) return "Junior"
+  if (/\bas\s+a\s+(senior|fourth[- ]year|final\s+year)\b/i.test(question)) return "Senior"
+  return null
 }
 
 function extractCourseCodesFromText(text: string): Set<string> {
@@ -238,7 +256,7 @@ function buildStudentContextBlock(profile: {
   if (profile.programCode) parts.push(`Program: ${profile.programCode}`)
   if (profile.bulletinYear) parts.push(`Catalog Year: ${profile.bulletinYear}`)
   if (profile.concentrationCode) parts.push(`Declared Concentration/Minor: ${profile.concentrationCode}`)
-  if (profile.isInternational) parts.push("International student: must maintain 12+ credits/semester (9 in-person)")
+  if (profile.isInternational) parts.push("International student (F-1 visa): MUST maintain minimum 12 credits/semester (9 in-person min, max 3 online). Do not recommend a schedule under 12 credits for this student.")
   if (profile.scholarshipType) parts.push(`Scholarship: ${profile.scholarshipType}`)
   if (parts.length === 0) return ""
   return `Student Profile:\n${parts.join("\n")}\n\n`
@@ -481,6 +499,31 @@ Once those are done, I can tell you exactly what courses to register for next, w
     }
   }
 
+  // Scholarship fast-path — answer deterministically from verified AAMU rules instead of RAG
+  if (asksScholarshipQuestion(question)) {
+    const scholarshipType = payload.session?.scholarshipType ?? userProfile?.scholarshipType ?? null
+    const rule = scholarshipType ? AAMU_SCHOLARSHIP_RULES[scholarshipType] ?? null : null
+
+    let scholarshipContext = "AAMU Scholarship Renewal Requirements (verified from aamu.edu):\nALL AAMU scholarships require 30 credit hours per academic year (15 per semester) to renew.\n\nGPA requirements by scholarship:\n"
+    for (const [name, req] of Object.entries(AAMU_SCHOLARSHIP_RULES)) {
+      scholarshipContext += `- ${name}: ${req.minGpa} GPA minimum, ${req.minCreditsPerYear} credits/year\n`
+    }
+
+    if (rule && scholarshipType) {
+      scholarshipContext += `\nThis student's scholarship: ${scholarshipType}\nRenewal requirements: ${rule.minGpa} GPA minimum and ${rule.minCreditsPerYear} credit hours per academic year (at least 15 per semester).`
+    } else if (scholarshipType) {
+      scholarshipContext += `\nThis student has: ${scholarshipType}\nNo specific rule found — advise the student to confirm requirements with the Financial Aid office.`
+    } else {
+      scholarshipContext += `\nThis student has not declared a scholarship type in their profile. Remind them to set it in Settings so the advisor can give personalized guidance.`
+    }
+
+    return {
+      mode: "DB_ONLY",
+      answer: await generateDbResponse(question, `${studentContextBlock}${scholarshipContext}`, history),
+      data: null,
+    }
+  }
+
   // Advisor escalation — questions requiring human judgment
   if (isLowConfidence) {
     return {
@@ -602,6 +645,22 @@ ${upcomingLines}`
   }
 
   if (isGraduationGapQuery) {
+    // Fast-path: F-1 visa minimum credit question — answer deterministically, don't dig into degree gap data
+    if (asksInternationalCreditMinimum(question)) {
+      const intlContext = payload.session?.isInternational
+        ? "The student is confirmed as an international student in their profile."
+        : "Note: the student did not indicate international status in their profile — answer applies generally."
+      return {
+        mode: "DB_ONLY",
+        answer: await generateDbResponse(
+          question,
+          `F-1 Visa Full-Time Enrollment Requirements (USCIS/DHS verified):\n${intlContext}\n- Minimum credits per semester: 12\n- Minimum in-person credits: 9 (maximum 3 online credits count toward full-time)\n- Summer minimum: 6 credits\n- Falling below 12 credits requires prior authorization from your Designated School Official (DSO)\n- Violating the full-time requirement is a status violation — contact International Student Services immediately if at risk`,
+          history
+        ),
+        data: null,
+      }
+    }
+
     if (!payload.studentId || !programCode) {
       return { mode: "DB_ONLY", answer: SETUP_NEEDED_MESSAGE, data: null }
     }
@@ -840,6 +899,28 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
         answer: `I found your program (${programCode}) but don't have your completed courses on file yet.\n\n${SETUP_NEEDED_MESSAGE}`,
         data: null,
       }
+    }
+
+    // Classification-aware schedule sorting:
+    // Allow "as a sophomore/junior" in the question to override profile classification.
+    // Then sort eligibleNow so courses from the student's classification range come first.
+    const questionClassification = extractClassificationFromQuestion(question)
+    const effectiveClassification = questionClassification ?? classification
+    const CLASSIFICATION_SEMESTER_RANGE: Record<string, [number, number]> = {
+      Freshman:  [1, 2],
+      Sophomore: [3, 4],
+      Junior:    [5, 6],
+      Senior:    [7, 8],
+    }
+    if (effectiveClassification && CLASSIFICATION_SEMESTER_RANGE[effectiveClassification]) {
+      const [semMin, semMax] = CLASSIFICATION_SEMESTER_RANGE[effectiveClassification]
+      recommendation.eligibleNow.sort((a, b) => {
+        const aInRange = a.semesterNumber != null && a.semesterNumber >= semMin && a.semesterNumber <= semMax
+        const bInRange = b.semesterNumber != null && b.semesterNumber >= semMin && b.semesterNumber <= semMax
+        if (aInRange && !bInRange) return -1
+        if (!aInRange && bInRange) return 1
+        return (a.semesterNumber ?? 99) - (b.semesterNumber ?? 99)
+      })
     }
 
     // Fetch GE courses early so we can use them to fill the schedule

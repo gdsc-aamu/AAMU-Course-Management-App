@@ -588,15 +588,15 @@ export default function SettingsPage() {
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
                       >
                         <option value="">None / Not applicable</option>
-                        <option value="AAMU Presidential Scholarship">AAMU Presidential Scholarship</option>
-                        <option value="AAMU Academic Excellence Scholarship">AAMU Academic Excellence Scholarship</option>
-                        <option value="AAMU Achievers Scholarship">AAMU Achievers Scholarship</option>
-                        <option value="AAMU Bulldog Scholarship">AAMU Bulldog Scholarship</option>
-                        <option value="AAMU Transfer Scholarship">AAMU Transfer Scholarship</option>
-                        <option value="AAMU STEM Scholarship">AAMU STEM Scholarship</option>
-                        <option value="AAMU Need-Based Grant">AAMU Need-Based Grant</option>
-                        <option value="AAMU Athletic Scholarship">AAMU Athletic Scholarship</option>
-                        <option value="External Scholarship">External Scholarship</option>
+                        <option value="AAMU Presidential Scholarship">AAMU Presidential Scholarship (3.50 GPA)</option>
+                        <option value="AAMU Merit Scholarship">AAMU Merit Scholarship (3.10 GPA)</option>
+                        <option value="AAMU Transfer Merit Scholarship">AAMU Transfer Merit Scholarship (3.10 GPA)</option>
+                        <option value="AAMU Academic Recognition Scholarship">AAMU Academic Recognition Scholarship (2.80 GPA)</option>
+                        <option value="AAMU Heritage Gold Scholarship">AAMU Heritage Gold Scholarship (2.80 GPA)</option>
+                        <option value="AAMU Heritage Silver Scholarship">AAMU Heritage Silver Scholarship (2.80 GPA)</option>
+                        <option value="AAMU Heritage Bronze Scholarship">AAMU Heritage Bronze Scholarship (2.50 GPA)</option>
+                        <option value="AAMU Normalite Scholarship">AAMU Normalite Scholarship (2.80 GPA)</option>
+                        <option value="External Scholarship">External Scholarship (enter requirements below)</option>
                       </select>
                     </div>
 
