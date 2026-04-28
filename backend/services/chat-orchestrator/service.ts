@@ -384,6 +384,23 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   const history = payload.conversationHistory ?? []
   const question = payload.question.trim()
 
+  // Guard: single-word affirmatives with no conversation history should not trigger a full schedule.
+  // The router may still send CHITCHAT here when intent is CHITCHAT; handle gracefully.
+  if (intent === "CHITCHAT" || /^(ok|okay|yes|yeah|yep|sure|alright|got\s+it|sounds\s+good|cool|great|thanks?|thank\s+you|bye|hello|hi|hey|noted)\.?$/i.test(question)) {
+    if (history.length === 0) {
+      return {
+        mode: "DB_ONLY",
+        answer: "Hi! I'm your AAMU academic advisor. I can help you with:\n- What courses to take next semester\n- Your graduation progress and remaining requirements\n- Course prerequisites\n- GE and free elective options\n- Scholarship and international credit requirements\n\nWhat would you like to know?",
+        data: null,
+      }
+    }
+    return {
+      mode: "DB_ONLY",
+      answer: "Got it! Is there anything else about your courses or academic progress I can help with?",
+      data: null,
+    }
+  }
+
   // Fetch user profile, degree summary, and upload status in parallel
   const [userProfile, degreeSummaryData, hasUploadedDegreeWorks] = await Promise.all([
     payload.studentId
@@ -771,6 +788,22 @@ ${upcomingLines}`
   if (isConcentrationQuery) {
     if (!programCode) {
       return { mode: "DB_ONLY", answer: SETUP_NEEDED_MESSAGE, data: null }
+    }
+
+    // When no concentration is declared and no specific name is mentioned,
+    // list available options and prompt the student to declare one.
+    const minorNameForCheck = extractMinorNameFromQuestion(question)
+    if (!concentrationCode && !minorNameForCheck) {
+      const overview = await fetchProgramOverview(programCode, catalogYear ?? undefined).catch(() => null)
+      const concList = (overview as any)?.concentrations?.map((c: any) => `- ${c.name}${c.code ? ` (${c.code})` : ""}`).join("\n")
+      const concContext = concList
+        ? `Available Concentrations/Minors for ${programCode}:\n${concList}\n\nInstruction: List the available concentrations/minors. Ask the student which one they are interested in. Tell them they can declare it in Settings → Academic Profile.`
+        : `The student asked about concentration/minor requirements but has not declared one.\n\nInstruction: Acknowledge no concentration is declared. Ask which concentration or minor they are interested in. Tell them to set it in Settings → Academic Profile so the advisor can give personalized requirements.`
+      return {
+        mode: "DB_ONLY",
+        answer: await generateDbResponse(question, `${studentContextBlock}${concContext}`, history),
+        data: null,
+      }
     }
 
     // Build completed course codes for cross-referencing minor requirements

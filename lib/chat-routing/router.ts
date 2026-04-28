@@ -128,6 +128,10 @@ function fastPrescreen(question: string): IntentLabel | null {
   if (/^(courses?|classes?|ok|okay|yes|yeah|yep|no|nope|got\s+it|sure|sounds\s+good|cool|great|thanks?|thank\s+you|bye|hello|hi|hey|alright|noted)\.?$/i.test(question.trim()))
     return "CHITCHAT"
 
+  // Transcript / course history → completed courses
+  if (/\b(show|see|view|pull\s+up|display)\s+(my\s+)?(transcript|grades?|academic\s+record|course\s+history)\b/i.test(q))
+    return "COMPLETED_COURSES"
+
   // Personal GPA/grade record questions → use student's own data, not bulletin policy
   if (/\b(my\s+(current\s+)?gpa|current\s+gpa|show\s+(my\s+)?gpa|(what|what's)\s+(is\s+)?(my\s+)?(current\s+)?gpa|how\s+(is|are)\s+my\s+(grades?|gpa)|grade\s+point\s+average|how\s+am\s+i\s+doing\s+academically|am\s+i\s+doing\s+well)\b/i.test(q))
     return "GRADUATION_GAP"
