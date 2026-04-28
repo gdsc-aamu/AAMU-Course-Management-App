@@ -43,6 +43,8 @@ import {
   computeAcademicStanding,
   computeSapStatus,
   computeExpectedGraduation,
+  computeGpaProjection,        // ADD THIS
+  computeNeededSemesterGpa,    // ADD THIS
   formatDegreeWorksNeeds,
   GRADE_POINTS,
   type FullDegreeSummary,
@@ -121,6 +123,10 @@ function asksInternationalCreditMinimum(question: string): boolean {
 
 function asksScholarshipQuestion(question: string): boolean {
   return /\b(scholarship|financial\s+aid\s+gpa|renewal\s+gpa|scholarship\s+gpa|gpa\s+(for|to\s+keep|to\s+maintain)\s+(my\s+)?scholarship|scholarship\s+requirement|keep\s+my\s+scholarship|lose\s+my\s+scholarship|scholarship\s+credits?)\b/i.test(question)
+}
+
+function asksGpaSimulation(question: string): boolean {
+  return /\b(if\s+i\s+get\s+(an?\s+)?[abcdf]|what\s+(gpa|grade)\s+(will|would)\s+i\s+(have|get|end\s+up\s+with)|what\s+gpa\s+do\s+i\s+need\s+to\s+(reach|get\s+to|bring|raise|hit)|raise\s+my\s+gpa|boost\s+my\s+gpa|gpa\s+(simulation|calculator|projection)|project(ed)?\s+gpa)\b/i.test(question)
 }
 
 function extractClassificationFromQuestion(question: string): string | null {
@@ -465,6 +471,7 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   const isNextCoursesQuery  = intent === "NEXT_COURSES"       || asksNextCoursesQuestion(question)
   const isCompletedCoursesQuery = intent === "COMPLETED_COURSES" || asksCompletedCoursesQuestion(question)
   const isGraduationGapQuery = intent === "GRADUATION_GAP"   || asksGraduationGapQuestion(question) || asksGpaQuestion(question)
+  const isGpaSimulationQuery = intent === "GPA_SIMULATION" || asksGpaSimulation(question)
   const isFreeElectiveQuery = intent === "FREE_ELECTIVE"       || (asksFreeElectiveQuestion(question) && intent !== "ELECTIVES")
   const isElectiveQuery     = intent === "ELECTIVES"          || (asksElectiveQuestion(question) && intent !== "FREE_ELECTIVE")
   const isConcentrationQuery = intent === "CONCENTRATION"     || asksConcentrationQuestion(question)
@@ -679,6 +686,57 @@ ${upcomingLines}`
       mode: "DB_ONLY",
       answer,
       data: { completed, inProgress },
+    }
+  }
+
+  if (isGpaSimulationQuery) {
+    if (!degreeSummaryData?.summary) {
+      return { mode: "DB_ONLY", answer: `To project your GPA, I need your DegreeWorks data on file.\n\n${SETUP_NEEDED_MESSAGE}`, data: null }
+    }
+
+    const summary = degreeSummaryData.summary
+    const currentGpa = summary.overall_gpa
+    const currentCredits = summary.credits_applied
+
+    const gradeMatch = question.match(/\b(a\+?|a-|b\+?|b-|c\+?|c-|d\+?|d-|f)\b/i)
+    const creditMatch = question.match(/\b(\d+)\s*cr(?:edit\s*hours?|s?)?\b/i)
+    const targetGpaMatch = question.match(/\b(?:to\s+(?:reach|get\s+to|bring|raise|hit)|target(?:ing)?)\s+(?:a\s+)?(\d+\.?\d*)\s*(?:gpa)?\b/i)
+      ?? question.match(/\b(\d+\.?\d*)\s*gpa\b/i)
+
+    let gpaContext = `GPA Simulation Data:\n`
+    gpaContext += `Current Cumulative GPA: ${currentGpa?.toFixed(2) ?? "unknown"}\n`
+    gpaContext += `Credits Applied: ${currentCredits ?? "unknown"}\n\n`
+    gpaContext += `GPA Formula: (current_quality_points + new_quality_points) / total_credits\n`
+    gpaContext += `Grade Points: A/A+=4.0, A-=3.7, B+=3.3, B=3.0, B-=2.7, C+=2.3, C=2.0, C-=1.7, D+=1.3, D=1.0, D-=0.7, F=0.0\n\n`
+
+    if (gradeMatch && creditMatch && currentGpa != null && currentCredits != null) {
+      const grade = gradeMatch[1].toUpperCase()
+      const newCredits = parseInt(creditMatch[1])
+      const projection = computeGpaProjection(summary, [{ credits: newCredits, expectedGrade: grade }])
+      if (projection) {
+        const gradePoints = GRADE_POINTS[grade] ?? "?"
+        gpaContext += `Projection: If you earn a ${grade} in a ${newCredits}-credit course:\n`
+        gpaContext += `  New GPA = (${currentGpa.toFixed(2)} × ${currentCredits} + ${gradePoints} × ${newCredits}) / ${currentCredits + newCredits} = ${projection.projectedGpa.toFixed(2)}\n`
+      }
+    }
+
+    if (targetGpaMatch && currentGpa != null && currentCredits != null) {
+      const targetGpa = parseFloat(targetGpaMatch[1])
+      const semCredits = creditMatch ? parseInt(creditMatch[1]) : 15
+      const needed = computeNeededSemesterGpa(summary, targetGpa, semCredits)
+      if (needed != null) {
+        gpaContext += `To reach a ${targetGpa.toFixed(2)} GPA after ${semCredits} credits:\n`
+        gpaContext += `  You need a semester GPA of ${needed.toFixed(2)} this term.\n`
+        if (needed > 4.0) gpaContext += `  Note: A ${needed.toFixed(2)} is mathematically impossible (max 4.0) — the target cannot be reached in one semester.\n`
+      }
+    }
+
+    gpaContext += `\nInstruction: Use the data above to answer the student's GPA projection question clearly. Show the math. State the projected GPA. If target is impossible, say so kindly and suggest a realistic timeline.`
+
+    return {
+      mode: "DB_ONLY",
+      answer: await generateDbResponse(question, `${studentContextBlock}${gpaContext}`, history),
+      data: null,
     }
   }
 
