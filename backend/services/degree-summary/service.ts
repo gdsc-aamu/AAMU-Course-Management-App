@@ -109,7 +109,7 @@ export function computeAcademicStanding(summary: DegreeSummaryRow | null): Acade
   const gpa = summary.overall_gpa
   const credits = summary.credits_applied
 
-  if (gpa < 1.50 && credits < 24) {
+  if (gpa < 1.50 && credits <= 24) {
     return {
       standing: "warning",
       gpa,
