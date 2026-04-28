@@ -40,6 +40,12 @@ import { fetchUserAcademicProfile } from "@/backend/services/user-profile/servic
 import {
   fetchFullDegreeSummary,
   formatDegreeSummaryForLLM,
+  computeAcademicStanding,
+  computeSapStatus,
+  computeExpectedGraduation,
+  formatDegreeWorksNeeds,
+  GRADE_POINTS,
+  type FullDegreeSummary,
 } from "@/backend/services/degree-summary/service"
 
 function asksPrerequisiteQuestion(question: string): boolean {
@@ -377,6 +383,21 @@ function extractCourseCodeFromQuestion(question: string): string | null {
   return `${codeMatch[1].toUpperCase()} ${codeMatch[2].toUpperCase()}`
 }
 
+function buildAcademicStatusBlock(degreeSummaryData: FullDegreeSummary | null): string {
+  if (!degreeSummaryData?.summary) return ""
+  const standing = computeAcademicStanding(degreeSummaryData.summary)
+  const sap = computeSapStatus(degreeSummaryData.summary)
+
+  const lines: string[] = []
+  if (standing.standing === "warning" || standing.standing === "probation") {
+    lines.push(standing.message)
+  }
+  if (sap.gpaThreatMessage) {
+    lines.push(sap.gpaThreatMessage)
+  }
+  return lines.length > 0 ? `\n${lines.join("\n")}\n` : ""
+}
+
 /**
  * Handle DB_ONLY queries — curriculum and course prerequisites
  */
@@ -415,7 +436,7 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   ])
 
   const degreeSummaryBlock = degreeSummaryData
-    ? formatDegreeSummaryForLLM(degreeSummaryData)
+    ? formatDegreeSummaryForLLM(degreeSummaryData) + buildAcademicStatusBlock(degreeSummaryData)
     : ""
 
   const classification = payload.session?.classification ?? userProfile?.classification ?? null
@@ -698,6 +719,11 @@ ${upcomingLines}`
 
     const gapContext = formatGraduationGapForLLM(gap)
 
+    const gradTimeline = computeExpectedGraduation(degreeSummaryData?.summary ?? null)
+    const gradTimelineBlock = gradTimeline
+      ? `\n\nExpected Graduation Timeline (based on DegreeWorks credits remaining):\n- At 15 credits/semester (standard): ${gradTimeline.standardGradTerm}\n- At 19 credits/semester (accelerated, requires 3.0 GPA): ${gradTimeline.acceleratedGradTerm}\n- At 12 credits/semester (minimum): ${gradTimeline.minimumGradTerm}\n- Credits remaining: ${gradTimeline.creditsRemaining}`
+      : ""
+
     // Graduation timeline math
     const catalogStart = fallbackBulletinYear ? parseInt(fallbackBulletinYear.split("-")[0]) : null
     const targetGradYear = catalogStart ? catalogStart + 4 : null
@@ -728,7 +754,7 @@ ${upcomingLines}`
       : `\n\nInstruction: List what courses are still needed by semester, grouping by Fall vs Spring based on the [offered X] label on each course. Include credit totals.${timelineLine}`
     const answer = await generateDbResponse(
       question,
-      `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${gapContext}${degreeworksNote}`,
+      `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${gapContext}${gradTimelineBlock}${degreeworksNote}`,
       history
     )
     return { mode: "DB_ONLY", answer, data: gap }
@@ -1089,6 +1115,9 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
     const enrollmentGuard = `\nCRITICAL: Any course in "Currently Enrolled" or "Pre-Registered" sections is already on the student's schedule — never recommend it. Only recommend courses from the Suggested Schedule below. If the degree summary says a course is "still needed" but it appears enrolled/pre-registered, the summary is stale — trust the enrolled list.`
 
     const planningContext = buildNextCoursesContext(filteredRecommendation, classification, termSplit, degreeSummaryData?.summary?.credits_applied ?? 0)
+    const degreeWorksNeedsBlock = degreeSummaryData
+      ? "\n\n" + formatDegreeWorksNeeds(degreeSummaryData)
+      : ""
 
     const suggestedScheduleBlock = scheduleLines.length > 0
       ? `\n\n— Suggested Schedule for Next Semester —\n${scheduleLines.join("\n")}`
@@ -1096,7 +1125,7 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
 
     const answer = await generateDbResponse(
       question,
-      `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${planningContext}${suggestedScheduleBlock}${scheduleNote}${enrollmentGuard}`,
+      `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${planningContext}${degreeWorksNeedsBlock}${suggestedScheduleBlock}${scheduleNote}${enrollmentGuard}`,
       history
     )
 
