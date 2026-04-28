@@ -699,7 +699,7 @@ ${upcomingLines}`
     const currentCredits = summary.credits_applied
 
     const gradeMatch = question.match(/\b(a\+?|a-|b\+?|b-|c\+?|c-|d\+?|d-|f)\b/i)
-    const creditMatch = question.match(/\b(\d+)\s*cr(?:edit\s*hours?|s?)?\b/i)
+    const creditMatch = question.match(/\b(\d+)\s*(?:credit\s*hours?|credits?|cr)\b/i)
     const targetGpaMatch = question.match(/\b(?:to\s+(?:reach|get\s+to|bring|raise|hit)|target(?:ing)?)\s+(?:a\s+)?(\d+\.?\d*)\s*(?:gpa)?\b/i)
       ?? question.match(/\b(\d+\.?\d*)\s*gpa\b/i)
 
