@@ -51,29 +51,33 @@ export async function PUT(request: Request) {
       programCode?: string | null
       bulletinYear?: string | null
       classification?: string | null
+      concentrationCode?: string | null
       isInternational?: boolean | null
       scholarshipType?: string | null
       scholarshipName?: string | null
       scholarshipMinGpa?: number | null
       scholarshipMinCreditsPerYear?: number | null
+      isAthlete?: boolean | null
+      hoursWorkedPerWeek?: number | null
     }
 
-    const isInternational = payload.isInternational as boolean | undefined
-    const scholarshipType = payload.scholarshipType as string | undefined
-    const scholarshipName = payload.scholarshipName as string | undefined
-    const scholarshipMinGpa = payload.scholarshipMinGpa as number | undefined
-    const scholarshipMinCreditsPerYear = payload.scholarshipMinCreditsPerYear as number | undefined
+    const { programCode, bulletinYear, classification, concentrationCode, isInternational,
+            scholarshipType, scholarshipName, scholarshipMinGpa, scholarshipMinCreditsPerYear,
+            isAthlete, hoursWorkedPerWeek } = payload
 
     const profile = await saveUserAcademicProfile({
       userId: auth.userId,
-      programCode: payload.programCode ?? null,
-      bulletinYear: payload.bulletinYear ?? null,
-      classification: payload.classification ?? null,
+      programCode,
+      bulletinYear,
+      classification,
+      concentrationCode,
       isInternational,
       scholarshipType,
       scholarshipName,
       scholarshipMinGpa,
       scholarshipMinCreditsPerYear,
+      isAthlete,
+      hoursWorkedPerWeek,
     })
 
     return NextResponse.json({ success: true, profile })

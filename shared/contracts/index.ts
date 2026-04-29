@@ -30,7 +30,9 @@ export interface ChatQueryRequest {
     bulletinYear?: string;
     classification?: string;
     studentName?: string;
+    concentrationCode?: string;
     isInternational?: boolean;
+    isAthlete?: boolean;
     scholarshipType?: string;
     scholarshipMinGpa?: number;
     scholarshipMinCreditsPerYear?: number;
@@ -139,6 +141,14 @@ export interface SemesterRemaining {
   slots: SemesterRemainingSlot[];
 }
 
+export interface NeedsRetakeSlot {
+  courseId: string;
+  title: string;
+  gradeEarned: string;
+  minGradeRequired: string;
+  semesterLabel: string;
+}
+
 export interface GraduationGap {
   programCode: string;
   programName: string;
@@ -151,6 +161,9 @@ export interface GraduationGap {
   remainingBySemester: SemesterRemaining[];
   electiveSlotsRemaining: number;
   isOnTrack: boolean;
+  needsRetake: NeedsRetakeSlot[];        // courses where grade < min_grade required
+  graduationRequirements: string[];      // program-level rules (e.g. "C in all BIO courses")
+  capstoneRule: string | null;
 }
 
 export interface ConcentrationSlot {

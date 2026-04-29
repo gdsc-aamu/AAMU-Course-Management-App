@@ -65,6 +65,8 @@ export default function SettingsPage() {
 
   // Enrollment & Financial Aid state
   const [isInternational, setIsInternational] = useState(false)
+  const [isAthlete, setIsAthlete] = useState(false)
+  const [hoursWorkedPerWeek, setHoursWorkedPerWeek] = useState("")
   const [scholarshipType, setScholarshipType] = useState('')
   const [scholarshipName, setScholarshipName] = useState('')
   const [scholarshipMinGpa, setScholarshipMinGpa] = useState('')
@@ -76,6 +78,8 @@ export default function SettingsPage() {
 
   const savedEnrollmentRef = useRef({
     isInternational: false,
+    isAthlete: false,
+    hoursWorkedPerWeek: '',
     scholarshipType: '',
     scholarshipName: '',
     scholarshipMinGpa: '',
@@ -110,13 +114,17 @@ export default function SettingsPage() {
         }
         // Set enrollment fields from response
         const enrollSnap = {
-          isInternational: p.is_international ?? false,
-          scholarshipType: p.scholarship_type ?? '',
-          scholarshipName: p.scholarship_name ?? '',
-          scholarshipMinGpa: p.scholarship_min_gpa?.toString() ?? '',
-          scholarshipMinCreditsPerYear: p.scholarship_min_credits_per_year?.toString() ?? '',
+          isInternational: p.is_international ?? p.isInternational ?? false,
+          isAthlete: p.isAthlete ?? false,
+          hoursWorkedPerWeek: p.hoursWorkedPerWeek?.toString() ?? '',
+          scholarshipType: p.scholarship_type ?? p.scholarshipType ?? '',
+          scholarshipName: p.scholarship_name ?? p.scholarshipName ?? '',
+          scholarshipMinGpa: (p.scholarship_min_gpa ?? p.scholarshipMinGpa)?.toString() ?? '',
+          scholarshipMinCreditsPerYear: (p.scholarship_min_credits_per_year ?? p.scholarshipMinCreditsPerYear)?.toString() ?? '',
         }
         setIsInternational(enrollSnap.isInternational)
+        setIsAthlete(enrollSnap.isAthlete)
+        setHoursWorkedPerWeek(enrollSnap.hoursWorkedPerWeek)
         setScholarshipType(enrollSnap.scholarshipType)
         setScholarshipName(enrollSnap.scholarshipName)
         setScholarshipMinGpa(enrollSnap.scholarshipMinGpa)
@@ -281,6 +289,8 @@ export default function SettingsPage() {
         },
         body: JSON.stringify({
           isInternational,
+          isAthlete,
+          hoursWorkedPerWeek: hoursWorkedPerWeek ? parseInt(hoursWorkedPerWeek) : null,
           scholarshipType: scholarshipType || null,
           scholarshipName: scholarshipName || null,
           scholarshipMinGpa: scholarshipMinGpa ? parseFloat(scholarshipMinGpa) : null,
@@ -290,6 +300,8 @@ export default function SettingsPage() {
       if (!res.ok) throw new Error('Failed to save')
       savedEnrollmentRef.current = {
         isInternational,
+        isAthlete,
+        hoursWorkedPerWeek,
         scholarshipType,
         scholarshipName,
         scholarshipMinGpa,
@@ -310,6 +322,8 @@ export default function SettingsPage() {
     setEnrollmentSaveError('')
     const snap = savedEnrollmentRef.current
     setIsInternational(snap.isInternational)
+    setIsAthlete(snap.isAthlete)
+    setHoursWorkedPerWeek(snap.hoursWorkedPerWeek)
     setScholarshipType(snap.scholarshipType)
     setScholarshipName(snap.scholarshipName)
     setScholarshipMinGpa(snap.scholarshipMinGpa)
@@ -577,6 +591,41 @@ export default function SettingsPage() {
                       )}
                     </div>
 
+                    {/* Athlete Checkbox */}
+                    <div>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isAthlete}
+                          onChange={(e) => setIsAthlete(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-[#78103A] accent-[#78103A] cursor-pointer"
+                        />
+                        <span className="text-sm font-medium text-gray-900">I am a student-athlete (NCAA)</span>
+                      </label>
+                      {isAthlete && (
+                        <p className="mt-2 ml-7 text-xs text-blue-700 bg-blue-50 rounded-md px-3 py-2">
+                          NCAA Division I athletes must maintain 12 credits/semester and earn 24 credits/academic year.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Hours Worked Per Week */}
+                    <div>
+                      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                        Hours Worked Per Week (optional)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="60"
+                        value={hoursWorkedPerWeek}
+                        onChange={(e) => setHoursWorkedPerWeek(e.target.value)}
+                        placeholder="e.g. 20"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#78103A] focus:border-transparent"
+                      />
+                      <p className="mt-1 text-xs text-gray-400">Used to recommend a manageable credit load</p>
+                    </div>
+
                     {/* Scholarship Type */}
                     <div>
                       <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
@@ -684,6 +733,16 @@ export default function SettingsPage() {
                         </p>
                       )}
                     </div>
+                    <div>
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Student-Athlete</div>
+                      <div className="text-base font-medium text-gray-900">{isAthlete ? "Yes (NCAA)" : "No"}</div>
+                    </div>
+                    {hoursWorkedPerWeek && (
+                      <div>
+                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Hours Worked/Week</div>
+                        <div className="text-base font-medium text-gray-900">{hoursWorkedPerWeek} hrs</div>
+                      </div>
+                    )}
                     <div>
                       <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Scholarship</div>
                       <div className="text-base font-medium text-gray-900">

@@ -136,6 +136,7 @@ interface SavePlanAction {
 
 export function AISuggestions({ currentCourses = [], threadId, planSemester }: AISuggestionsProps) {
   const [messages, setMessages] = useState<Message[]>([])
+  const messagesRef = useRef<Message[]>([])
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -146,6 +147,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
     bulletinYear?: string
     classification?: string
     isInternational?: boolean
+    isAthlete?: boolean
     scholarshipType?: string
     scholarshipMinGpa?: number
     scholarshipMinCreditsPerYear?: number
@@ -161,6 +163,11 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
   const bottomRef = useRef<HTMLDivElement>(null)
   const messageCounterRef = useRef(1)
   const { toast } = useToast()
+
+  // Keep ref in sync so sendMessage always reads latest messages (avoids stale closure)
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
 
   // Reset auto-name flag when switching threads
   useEffect(() => {
@@ -257,10 +264,11 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
                 programCode: profilePayload.profile.programCode ?? undefined,
                 bulletinYear: profilePayload.profile.bulletinYear ?? undefined,
                 classification: profilePayload.profile.classification ?? undefined,
-                isInternational: profilePayload.profile.is_international ?? false,
-                scholarshipType: profilePayload.profile.scholarship_type ?? undefined,
-                scholarshipMinGpa: profilePayload.profile.scholarship_min_gpa ?? undefined,
-                scholarshipMinCreditsPerYear: profilePayload.profile.scholarship_min_credits_per_year ?? undefined,
+                isInternational: profilePayload.profile.is_international ?? profilePayload.profile.isInternational ?? false,
+                isAthlete: profilePayload.profile.isAthlete ?? false,
+                scholarshipType: profilePayload.profile.scholarship_type ?? profilePayload.profile.scholarshipType ?? undefined,
+                scholarshipMinGpa: profilePayload.profile.scholarship_min_gpa ?? profilePayload.profile.scholarshipMinGpa ?? undefined,
+                scholarshipMinCreditsPerYear: profilePayload.profile.scholarship_min_credits_per_year ?? profilePayload.profile.scholarshipMinCreditsPerYear ?? undefined,
               }
               setSessionContext(ctx)
               sessionCache.write(uid, ctx)
@@ -303,9 +311,8 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
       const { data } = await supabase.auth.getSession()
       const liveStudentId = data.session?.user.id ?? studentId ?? null
 
-      // Build history from all messages visible before this new user message
-      // (exclude the welcome placeholder and filter to user/assistant roles only)
-      const historySnapshot: ConversationMessage[] = messages
+      // Build history from ref (always current — avoids stale closure on messages state)
+      const historySnapshot: ConversationMessage[] = messagesRef.current
         .filter((m) => m.id !== "msg-welcome" && (m.role === "user" || m.role === "assistant"))
         .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }))
 
@@ -320,6 +327,7 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
           classification: sessionContext.classification,
           studentName: studentName ?? undefined,
           isInternational: sessionContext.isInternational,
+          isAthlete: sessionContext.isAthlete,
           scholarshipType: sessionContext.scholarshipType,
           scholarshipMinGpa: sessionContext.scholarshipMinGpa,
           scholarshipMinCreditsPerYear: sessionContext.scholarshipMinCreditsPerYear,
