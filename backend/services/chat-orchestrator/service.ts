@@ -432,16 +432,32 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   // Guard: single-word affirmatives with no conversation history should not trigger a full schedule.
   // The router may still send CHITCHAT here when intent is CHITCHAT; handle gracefully.
   if (intent === "CHITCHAT" || /^(ok|okay|yes|yeah|yep|sure|alright|got\s+it|sounds\s+good|cool|great|thanks?|thank\s+you|bye|hello|hi|hey|noted)\.?$/i.test(question)) {
-    if (history.length === 0) {
-      return {
-        mode: "DB_ONLY",
-        answer: "Hi! I'm your AAMU academic advisor. I can help you with:\n- What courses to take next semester\n- Your graduation progress and remaining requirements\n- Course prerequisites\n- GE and free elective options\n- Scholarship and international credit requirements\n\nWhat would you like to know?",
-        data: null,
-      }
-    }
+    const chitchatContext = `You are a warm, knowledgeable, and conversational AAMU academic advisor AI. Your personality is encouraging, relatable, and supportive — like a senior student who knows everything about AAMU's academics.
+
+Student's message: "${question}"
+${history.length === 0 ? "\nThis is the start of the conversation — greet them warmly and explain what you can help with." : "\nThis is a follow-up in an ongoing conversation — acknowledge naturally without repeating your full intro."}
+
+What you can help with (mention some if relevant to greeting):
+- Course registration and what to take next semester
+- Graduation progress, credits remaining, GPA
+- GPA simulation ("if I get an A in BIO 201, what's my GPA?")
+- Multi-semester graduation roadmap
+- Prerequisites for any course
+- Scholarship GPA and credit requirements
+- International student (F-1) credit minimums
+- Grade repeat / retake policy
+- Whether it's safe to drop a course
+- Credit load recommendations
+- Free electives and GE courses
+- Concentration and minor requirements
+
+If the student says something emotional ("I'm stressed", "I hate chemistry", "I'm overwhelmed"), respond with empathy first, then gently pivot to something actionable you can help with.
+If they ask who you are or what you are, explain warmly that you're an AI academic advisor built specifically for AAMU students.
+Be conversational. Use natural language. End with a question that opens the door to helping them academically.`
+
     return {
       mode: "DB_ONLY",
-      answer: "Got it! Is there anything else about your courses or academic progress I can help with?",
+      answer: await generateDbResponse(question, chitchatContext, history),
       data: null,
     }
   }
@@ -508,30 +524,6 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
 2. **Set your major and catalog year** — In Settings → Academic Profile, click "Edit Profile" to select your program and catalog year.
 
 Once those are done, I can tell you exactly what courses to register for next, what you've completed, and how close you are to graduating.`
-
-  // Greetings and small talk — respond directly unless it's an identity question or a follow-up reply
-  if (intent === "CHITCHAT") {
-    const isIdentityQuestion = /\b(my name|who am i|what.*my name|tell me.*my name)\b/i.test(question)
-
-    // Short affirmative/negative/follow-up words should never hit the generic greeting —
-    // always route them through the LLM so it can respond in context
-    const isShortFollowUp = /^(yes|no|sure|ok|okay|yep|nope|yeah|nah|alright|of course|definitely|absolutely|correct|right|exactly|please|go ahead|tell me|show me|and|also|what about|so|then|more|more info|more details|why|how|when|what else|anything else|what now)[\s!?.]*$/i.test(question)
-
-    if (!isIdentityQuestion && !isShortFollowUp) {
-      const greeting = studentName ? `Hey ${studentName.split(" ")[0]}!` : "Hey!"
-      return {
-        mode: "DB_ONLY",
-        answer: `${greeting} I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.`,
-        data: null,
-      }
-    }
-    if (isShortFollowUp) {
-      // Use LLM to continue the conversation naturally from history context
-      const answer = await generateDbResponse(question, studentContextBlock + degreeSummaryBlock, history)
-      return { mode: "DB_ONLY", answer, data: null }
-    }
-    // Identity questions fall through to generateDbResponse with student context
-  }
 
   // ── Setup gate — fire before any academic query that needs student data ───
   // Queries that require profile + DegreeWorks to give a useful answer
