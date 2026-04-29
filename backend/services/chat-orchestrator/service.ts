@@ -30,6 +30,8 @@ import {
   fetchFreeElectiveOptions,
   formatFreeElectivesForLLM,
   AAMU_SCHOLARSHIP_RULES,
+  buildMultiSemesterRoadmap,
+  type RoadmapSemester,
 } from "@/backend/services/curriculum/service"
 import {
   fetchUserCompletedCourses,
@@ -135,6 +137,10 @@ function asksGradeRepeat(question: string): boolean {
 
 function asksWithdrawalImpact(question: string): boolean {
   return /\b(what\s+happens?\s+if\s+i\s+(drop|withdraw)|should\s+i\s+(drop|withdraw)|impact\s+of\s+(dropping|withdrawing|a\s+w\s+grade)|w\s+grade\s+(impact|affect|do\s+to)|if\s+i\s+withdraw|if\s+i\s+drop\s+(a\s+|this\s+|[a-z]+\s+\d)|drop\s+deadline|late\s+withdrawal|what\s+does\s+a\s+w\s+do)\b/i.test(question)
+}
+
+function asksMultiSemesterPlan(question: string): boolean {
+  return /\b(map\s+out|plan\s+(my\s+)?(next|remaining|future)\s+(semesters?|years?)|semester\s+(plan|roadmap)|multi[\s-]semester|fastest\s+(path|way|route)\s+(to\s+)?graduat|plan\s+to\s+graduate|graduation\s+(plan|roadmap)|course\s+roadmap|how\s+(do\s+i|can\s+i)\s+graduate\s+(by|in|on\s+time))\b/i.test(question)
 }
 
 function extractClassificationFromQuestion(question: string): string | null {
@@ -482,6 +488,7 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   const isGpaSimulationQuery = intent === "GPA_SIMULATION" || asksGpaSimulation(question)
   const isGradeRepeatQuery = intent === "GRADE_REPEAT" || asksGradeRepeat(question)
   const isWithdrawalImpactQuery = intent === "WITHDRAWAL_IMPACT" || asksWithdrawalImpact(question)
+  const isMultiSemesterPlanQuery = intent === "MULTI_SEMESTER_PLAN" || asksMultiSemesterPlan(question)
   const isFreeElectiveQuery = intent === "FREE_ELECTIVE"       || (asksFreeElectiveQuestion(question) && intent !== "ELECTIVES")
   const isElectiveQuery     = intent === "ELECTIVES"          || (asksElectiveQuestion(question) && intent !== "FREE_ELECTIVE")
   const isConcentrationQuery = intent === "CONCENTRATION"     || asksConcentrationQuestion(question)
@@ -827,6 +834,63 @@ Instruction: Answer the student's question about retaking/repeating a course usi
       mode: "DB_ONLY",
       answer: await generateDbResponse(question, `${studentContextBlock}${withdrawalContext}`, history),
       data: null,
+    }
+  }
+
+  if (isMultiSemesterPlanQuery) {
+    if (!payload.studentId || !programCode) {
+      return { mode: "DB_ONLY", answer: SETUP_NEEDED_MESSAGE, data: null }
+    }
+
+    const creditsRemaining = degreeSummaryData?.summary?.credits_remaining ?? null
+    if (creditsRemaining == null || creditsRemaining <= 0) {
+      return {
+        mode: "DB_ONLY",
+        answer: `You appear to have completed all required credits — congratulations! If this seems wrong, your DegreeWorks data may need a refresh. Contact the Registrar's Office.`,
+        data: null,
+      }
+    }
+
+    const loadMatch = question.match(/\b(19|18|15|12)\s*credits?\b/i)
+    const creditsPerSemester = loadMatch ? parseInt(loadMatch[1]) : 15
+    const isFastestPath = /fastest|accelerat|quick(est)?|as\s+fast\s+as\s+possible/i.test(question)
+    const effectiveLoad = isFastestPath ? 19 : creditsPerSemester
+
+    const roadmap = await buildMultiSemesterRoadmap({
+      programCode,
+      bulletinYear: fallbackBulletinYear,
+      userId: payload.studentId,
+      creditsRemaining,
+      creditsPerSemester: effectiveLoad,
+    })
+
+    const gradTimeline = computeExpectedGraduation(degreeSummaryData?.summary ?? null)
+
+    let roadmapText = `Multi-Semester Graduation Roadmap (${effectiveLoad} credits/semester):\n`
+    roadmapText += `Credits Remaining: ${creditsRemaining}\n`
+    if (gradTimeline) {
+      roadmapText += `Projected Graduation: ${isFastestPath ? gradTimeline.acceleratedGradTerm : gradTimeline.standardGradTerm}\n`
+    }
+    roadmapText += "\n"
+
+    for (const sem of roadmap) {
+      roadmapText += `${sem.label} (${sem.totalCredits} credits):\n`
+      for (const c of sem.courses) {
+        roadmapText += `  - ${c.courseId}: ${c.title} (${c.creditHours} cr) [${c.tag}]\n`
+      }
+      roadmapText += "\n"
+    }
+
+    if (effectiveLoad === 19) {
+      roadmapText += `⚠️ Note: 19 credits/semester requires a 3.0+ GPA and an Overload Request Form approved by the Office of Academic Affairs.\n`
+    }
+
+    roadmapText += `\nInstruction: Present this roadmap clearly semester by semester. Tell the student their projected graduation term. Note that course availability is subject to semester scheduling — verify with the AAMU Registrar. If they asked for the fastest path, confirm the 3.0 GPA overload requirement.`
+
+    return {
+      mode: "DB_ONLY",
+      answer: await generateDbResponse(question, `${studentContextBlock}${roadmapText}`, history),
+      data: { roadmap, creditsRemaining },
     }
   }
 

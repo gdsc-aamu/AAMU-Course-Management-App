@@ -1208,3 +1208,101 @@ export function formatFreeElectivesForLLM(ctx: FreeElectiveContext): string {
 
   return lines.join('\n')
 }
+
+export interface RoadmapSemester {
+  label: string
+  courses: Array<{ courseId: string; title: string; creditHours: number; tag: string }>
+  totalCredits: number
+}
+
+export async function buildMultiSemesterRoadmap(params: {
+  programCode: string
+  bulletinYear?: string | null
+  userId: string
+  creditsRemaining: number
+  creditsPerSemester?: number
+}): Promise<RoadmapSemester[]> {
+  const { programCode, bulletinYear, userId, creditsRemaining, creditsPerSemester = 15 } = params
+  const catalogYear = parseCatalogYear(bulletinYear)
+
+  const [program, userCourses, geData] = await Promise.all([
+    getProgram(programCode, catalogYear),
+    getUserCourseStatuses(userId).catch(() => []),
+    getAvailableGECourses(new Set<string>()).catch(() => []),
+  ])
+  if (!program) return []
+
+  const takenCodes = new Set(
+    userCourses
+      .filter((c) => c.status === "completed" || c.status === "in_progress")
+      .flatMap((c) => [c.code.trim().toUpperCase(), normalizeHonorsCourseCode(c.code.trim().toUpperCase())])
+  )
+
+  const slots = await getCurriculumSlots(program.id)
+  const allRequired = slots
+    .filter((s) => !s.is_elective_slot)
+    .sort((a, b) => a.semester_number - b.semester_number || a.slot_order - b.slot_order)
+    .flatMap((s) => {
+      const courses = Array.isArray(s.courses) ? s.courses : s.courses ? [s.courses] : []
+      return (courses as Array<{ course_id: string; title: string; credit_hours?: number }>)
+        .filter((c) => !takenCodes.has(c.course_id.trim().toUpperCase()))
+        .map((c) => ({
+          courseId: c.course_id as string,
+          title: c.title as string,
+          creditHours: (s.credit_hours ?? c.credit_hours ?? 3) as number,
+          tag: SEMESTER_LABELS[s.semester_number] ?? `Semester ${s.semester_number}`,
+        }))
+    })
+
+  const roadmap: RoadmapSemester[] = []
+  let remainingRequired = [...allRequired]
+  let remainingGe = geData.filter((ge) => !takenCodes.has(ge.course_code.trim().toUpperCase()))
+  let creditsLeft = creditsRemaining
+
+  const now = new Date()
+  const month = now.getMonth() + 1
+  let currentSeason = month <= 7 ? "Fall" : "Spring"
+  let currentYear = month <= 7 ? now.getFullYear() : now.getFullYear() + 1
+
+  const MAX_SEMESTERS = 10
+
+  for (let i = 0; i < MAX_SEMESTERS && creditsLeft > 0; i++) {
+    const semLabel = `${currentSeason} ${currentYear}`
+    const selected: RoadmapSemester["courses"] = []
+    let semCredits = 0
+    const cap = Math.min(creditsPerSemester, 19)
+
+    const stillNeeded: typeof remainingRequired = []
+    for (const c of remainingRequired) {
+      if (semCredits + c.creditHours <= cap) {
+        selected.push(c)
+        semCredits += c.creditHours
+      } else {
+        stillNeeded.push(c)
+      }
+    }
+    remainingRequired = stillNeeded
+
+    const stillNeededGe: typeof remainingGe = []
+    for (const ge of remainingGe) {
+      if (semCredits >= cap) { stillNeededGe.push(ge); continue }
+      if (semCredits + ge.credit_hours <= cap) {
+        selected.push({ courseId: ge.course_code, title: ge.course_title, creditHours: ge.credit_hours, tag: `GE – ${ge.area_name}` })
+        semCredits += ge.credit_hours
+      } else {
+        stillNeededGe.push(ge)
+      }
+    }
+    remainingGe = stillNeededGe
+
+    if (selected.length > 0) {
+      roadmap.push({ label: semLabel, courses: selected, totalCredits: semCredits })
+      creditsLeft -= semCredits
+    }
+
+    if (currentSeason === "Fall") { currentSeason = "Spring" }
+    else { currentSeason = "Fall"; currentYear++ }
+  }
+
+  return roadmap
+}
