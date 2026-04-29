@@ -1397,6 +1397,23 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       ? "\n\n" + formatDegreeWorksNeeds(degreeSummaryData)
       : ""
 
+    // Map DegreeWorks incomplete blocks to credit needs for labeling recommendations
+    const blockNeedsMap = new Map<string, number>()
+    if (degreeSummaryData?.blocks) {
+      for (const block of degreeSummaryData.blocks) {
+        if (block.status !== "complete" && block.credits_required != null) {
+          const needed = (block.credits_required ?? 0) - (block.credits_applied ?? 0)
+          if (needed > 0) blockNeedsMap.set(block.block_name, needed)
+        }
+      }
+    }
+
+    const dwNeedsNote = blockNeedsMap.size > 0
+      ? `\nDegreeWorks shows these requirement blocks are incomplete: ${Array.from(blockNeedsMap.entries()).map(([b, n]) => `${b} (${n} credits still needed)`).join(", ")}. When presenting the schedule, mention which DegreeWorks requirement each course satisfies — e.g. "BIO 305 (3 cr) — counts toward your Major Requirements block" or "HIS 201 (3 cr) — satisfies your General Education – History requirement."`
+      : ""
+
+    scheduleNote = scheduleNote + dwNeedsNote
+
     const suggestedScheduleBlock = scheduleLines.length > 0
       ? `\n\n— Suggested Schedule for Next Semester —\n${scheduleLines.join("\n")}`
       : ""
