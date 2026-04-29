@@ -143,6 +143,10 @@ function asksMultiSemesterPlan(question: string): boolean {
   return /\b(map\s+out|plan\s+(my\s+)?(next|remaining|future)\s+(semesters?|years?)|semester\s+(plan|roadmap)|multi[\s-]semester|fastest\s+(path|way|route)\s+(to\s+)?graduat|plan\s+to\s+graduate|graduation\s+(plan|roadmap)|course\s+roadmap|how\s+(do\s+i|can\s+i)\s+graduate\s+(by|in|on\s+time))\b/i.test(question)
 }
 
+function asksCreditLoad(question: string): boolean {
+  return /\b(how\s+many\s+credits?\s+(should\s+i\s+take|is\s+(too\s+)?much|can\s+i\s+handle)|recommended?\s+(credit\s+)?load|credit\s+load|course\s+load|too\s+many\s+credits?|overload|how\s+heavy|full[\s-]time\s+student\s+credits?|how\s+much\s+should\s+i\s+(take|enroll))\b/i.test(question)
+}
+
 function extractClassificationFromQuestion(question: string): string | null {
   if (/\bas\s+a\s+(freshman|first[- ]year)\b/i.test(question)) return "Freshman"
   if (/\bas\s+a\s+(sophomore|second[- ]year)\b/i.test(question)) return "Sophomore"
@@ -489,6 +493,7 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   const isGradeRepeatQuery = intent === "GRADE_REPEAT" || asksGradeRepeat(question)
   const isWithdrawalImpactQuery = intent === "WITHDRAWAL_IMPACT" || asksWithdrawalImpact(question)
   const isMultiSemesterPlanQuery = intent === "MULTI_SEMESTER_PLAN" || asksMultiSemesterPlan(question)
+  const isCreditLoadQuery = intent === "CREDIT_LOAD" || asksCreditLoad(question)
   const isFreeElectiveQuery = intent === "FREE_ELECTIVE"       || (asksFreeElectiveQuestion(question) && intent !== "ELECTIVES")
   const isElectiveQuery     = intent === "ELECTIVES"          || (asksElectiveQuestion(question) && intent !== "FREE_ELECTIVE")
   const isConcentrationQuery = intent === "CONCENTRATION"     || asksConcentrationQuestion(question)
@@ -891,6 +896,75 @@ Instruction: Answer the student's question about retaking/repeating a course usi
       mode: "DB_ONLY",
       answer: await generateDbResponse(question, `${studentContextBlock}${roadmapText}`, history),
       data: { roadmap, creditsRemaining },
+    }
+  }
+
+  if (isCreditLoadQuery) {
+    const gpa = degreeSummaryData?.summary?.overall_gpa ?? null
+    const standing = degreeSummaryData?.summary ? computeAcademicStanding(degreeSummaryData.summary) : null
+    const isInternational = payload.session?.isInternational ?? false
+    const scholarshipType = payload.session?.scholarshipType ?? null
+    const scholarshipRule = scholarshipType ? AAMU_SCHOLARSHIP_RULES[scholarshipType] ?? null : null
+    const isAthlete = (payload.session as any)?.isAthlete ?? false
+
+    let recommendation = 15
+    const reasons: string[] = []
+    const warnings: string[] = []
+
+    reasons.push("Standard full-time load at AAMU is 15 credits (5 courses of 3 credits).")
+
+    if (standing?.standing === "probation") {
+      recommendation = 12
+      reasons.push(`You are on Academic Probation (GPA ${gpa?.toFixed(2)}). 12 credits lets you focus on performance without overextending.`)
+      warnings.push("⚠️ Academic Probation: prioritize GPA recovery over credit count.")
+    } else if (standing?.standing === "warning") {
+      recommendation = 13
+      reasons.push(`You are on Academic Warning (GPA ${gpa?.toFixed(2)}). A lighter load helps you recover.`)
+    } else if (gpa != null && gpa >= 3.5) {
+      recommendation = 17
+      reasons.push(`Your GPA of ${gpa.toFixed(2)} qualifies you to take up to 19 credits with an Overload Request Form.`)
+    }
+
+    if (isInternational) {
+      if (recommendation < 12) {
+        recommendation = 12
+        warnings.push("🌍 F-1 Visa: You MUST take at least 12 credits per semester (minimum 9 in-person). Dropping below 12 is a status violation.")
+      } else {
+        reasons.push("As an international student, maintain at least 12 credits/semester for F-1 compliance (9 in-person minimum).")
+      }
+    }
+
+    if (scholarshipRule) {
+      const semMin = Math.ceil(scholarshipRule.minCreditsPerYear / 2)
+      if (recommendation < semMin) {
+        recommendation = semMin
+        warnings.push(`💰 Scholarship: ${scholarshipType} requires ${semMin} credits/semester (${scholarshipRule.minCreditsPerYear}/year) to renew.`)
+      } else {
+        reasons.push(`${scholarshipType} requires ${semMin} credits/semester — your recommended load meets this.`)
+      }
+    }
+
+    if (isAthlete) {
+      if (recommendation < 12) {
+        recommendation = 12
+        warnings.push("🏆 NCAA: You must maintain at least 12 credits/semester for athletic eligibility.")
+      }
+      reasons.push("Division I athletes must earn 24 credits/academic year (at least 18 between fall and spring).")
+    }
+
+    if (recommendation > 19) recommendation = 19
+    const overloadNote = recommendation === 19
+      ? `19 credits requires an Overload Request Form signed by appropriate personnel and submitted to the Office of Academic Affairs. Eligible only with 3.0+ GPA.`
+      : recommendation > 15
+      ? `Taking more than 15 credits is allowed — just ensure your GPA supports it. An Overload Request Form is required for 20+ credits.`
+      : ""
+
+    const loadContext = `Credit Load Recommendation:\n\nRecommended load for this student: ${recommendation} credits/semester\n\nReasoning:\n${reasons.map(r => `• ${r}`).join("\n")}\n\n${warnings.length > 0 ? "Warnings:\n" + warnings.join("\n") + "\n\n" : ""}AAMU Load Limits:\n• Maximum: 19 credits/semester (overload requires 3.0 GPA + form)\n• Summer maximum: 10 credits (12 with special permission for graduation eligibility)\n${overloadNote}\n\nInstruction: Give the student a clear credit load recommendation with the reasoning. Be direct: "I recommend X credits this semester." Then explain why based on their situation.`
+
+    return {
+      mode: "DB_ONLY",
+      answer: await generateDbResponse(question, `${studentContextBlock}${loadContext}`, history),
+      data: { recommendedCredits: recommendation },
     }
   }
 
