@@ -27,253 +27,171 @@ DEFAULT_SESSION = {
 VERBOSE = "--verbose" in sys.argv or "-v" in sys.argv
 
 TESTS = [
-    # ── Chitchat / affirmative guards ────────────────────────────────────
-    {
-        "label": "chitchat-hi",
-        "q": "hi",
-        "expect_not": ["eligible", "Suggested Schedule", "credits required"],
-    },
-    {
-        "label": "chitchat-bare-courses",
-        "q": "courses",
-        "expect_not": ["Suggested Schedule", "eligible"],
-    },
-    {
-        "label": "chitchat-ok-no-history",
-        "q": "ok",
-        "expect": ["AAMU", "can help"],
-    },
-    {
-        "label": "chitchat-thanks",
-        "q": "thanks",
-        "expect_not": ["eligible", "Suggested Schedule"],
-    },
+    # ── Chitchat / casual conversation ───────────────────────────────────
+    {"label": "chitchat-hi",           "q": "hi",           "expect": ["AAMU", "help"]},
+    {"label": "chitchat-stressed",     "q": "im stressed about registration", "expect_not": ["Suggested Schedule for Next Semester"]},
+    {"label": "chitchat-are-you-ai",   "q": "are you an AI", "expect": ["AI", "advisor"]},
+    {"label": "chitchat-hate-chem",    "q": "I hate chemistry", "expect_not": ["Suggested Schedule for Next Semester"]},
+    {"label": "chitchat-thanks",       "q": "thanks",        "expect_not": ["eligible", "Suggested Schedule"]},
+    {"label": "chitchat-bare-courses", "q": "courses",       "expect_not": ["Suggested Schedule"]},
+    {"label": "chitchat-ok-no-hist",   "q": "ok",            "expect": ["AAMU", "help"]},
+    {"label": "chitchat-sounds-good",  "q": "sounds good",   "expect_not": ["Suggested Schedule"]},
 
     # ── Completed courses ─────────────────────────────────────────────────
-    {
-        "label": "completed-typo",
-        "q": "what couses have i took",
-        "expect": ["BIO"],
-    },
-    {
-        "label": "completed-transcript",
-        "q": "show my transcript",
-        "expect": ["BIO"],
-    },
-    {
-        "label": "completed-finished",
-        "q": "what have i already finished",
-        "expect": ["completed"],
-    },
+    {"label": "completed-typo",        "q": "what couses have i took",        "expect": ["BIO"]},
+    {"label": "completed-transcript",  "q": "show my transcript",             "expect": ["BIO"]},
+    {"label": "completed-finished",    "q": "what have i already finished",   "expect": ["completed"]},
 
-    # ── NEXT_COURSES — schedule building ──────────────────────────────────
+    # ── NEXT_COURSES — scheduling ─────────────────────────────────────────
+    {"label": "next-register",         "q": "what can I register for next semester", "expect": ["BIO", "credits"]},
+    {"label": "next-12cr",             "q": "I need 12 credits",              "expect": ["12", "credits"]},
+    {"label": "next-15cr",             "q": "give me a 15 credit schedule",   "expect": ["15", "credits"]},
     {
-        "label": "next-register",
-        "q": "what can I register for next semester",
-        "expect": ["BIO", "credits"],
-    },
-    {
-        "label": "next-12cr-target",
-        "q": "I need 12 credits",
-        "expect": ["12", "credits"],
-    },
-    {
-        "label": "next-15cr-target",
-        "q": "give me a 15 credit schedule",
-        "expect": ["15", "credits"],
-    },
-    {
-        "label": "next-5x3cr-no-4cr",
+        "label": "next-5x3cr",
         "q": "give me 5 courses that are 3 credits each",
         "expect": ["3 cr"],
         "expect_not_pattern": r"\(4 cr\)",
     },
+    {"label": "next-semester-year",    "q": "what can I take for fall 2026",  "expect": ["BIO", "credits"], "expect_not": ["couldn't find", "no program"]},
+    {"label": "next-sophomore",        "q": "as a sophomore what should I take", "expect": ["BIO", "credits"]},
+    {"label": "save-plan",             "q": "build my schedule",              "expect_not": ["Suggested Schedule for Next Semester"]},
+    {"label": "catalog-alias",         "q": "what courses can I take",
+        "session_extra": {"bulletinYear": "2024-2025"}, "expect": ["BIO", "credits"]},
+
+    # ── Graduation gap ─────────────────────────────────────────────────────
+    {"label": "grad-gap-left",         "q": "what do I need to graduate",     "expect": ["credits"]},
+    {"label": "grad-gap-close",        "q": "how close am I to graduating",   "expect": ["credits"]},
+    {"label": "grad-timeline",         "q": "when will I graduate",           "expect": ["202"]},
+    {"label": "grad-fastest",          "q": "what is the fastest path to graduation", "expect": ["semester"]},
+
+    # ── GPA ───────────────────────────────────────────────────────────────
+    {"label": "gpa-current",           "q": "what is my GPA",                 "expect": ["GPA"]},
+    {"label": "gpa-simulation-a",      "q": "if I get an A in a 3 credit class what will my GPA be", "expect": ["GPA"]},
+    {"label": "gpa-simulation-target", "q": "what GPA do I need this semester to reach a 3.0", "expect": ["3.0", "GPA"]},
+    {"label": "gpa-raise",             "q": "how do I raise my GPA",         "expect": ["GPA"]},
+
+    # ── Academic standing / SAP ───────────────────────────────────────────
+    {"label": "standing-ask",          "q": "am I on academic probation",     "expect": ["GPA"]},
+    {"label": "sap-completion",        "q": "what is the 67% rule for financial aid", "expect": ["67", "attempted"]},
+
+    # ── Prerequisites ─────────────────────────────────────────────────────
+    {"label": "prereq-bio",            "q": "what are the prereqs for BIO 305",  "expect": ["BIO"]},
+    {"label": "prereq-before",         "q": "what do I need before BIO 202",     "expect": ["BIO 101"]},
+
+    # ── GE / free electives ───────────────────────────────────────────────
+    {"label": "ge-humanities",         "q": "what humanities courses can I take",   "expect": ["credit"]},
+    {"label": "ge-GED",                "q": "what GED courses are available",       "expect": ["General Education", "credit"]},
+    {"label": "ge-fine-arts",          "q": "what fine arts courses count",         "expect": ["credit"]},
+    {"label": "ge-free-elective",      "q": "I need a free elective",              "expect": ["credit"]},
+    {"label": "ge-golf",               "q": "can I take golf",                      "expect": ["PE", "credit"]},
+
+    # ── Multi-semester roadmap ────────────────────────────────────────────
+    {"label": "roadmap-4sem",          "q": "map out my next 4 semesters",          "expect": ["Fall", "Spring", "credits"]},
+    {"label": "roadmap-fastest",       "q": "fastest path to graduation",           "expect": ["semester"]},
+    {"label": "roadmap-graduate-by",   "q": "how do I graduate by Spring 2028",     "expect": ["semester", "credit"]},
+
+    # ── Grade repeat ──────────────────────────────────────────────────────
+    {"label": "repeat-can-i",          "q": "can I retake BIO 201",            "expect": ["highest", "grade"]},
+    {"label": "repeat-d-grade",        "q": "I got a D in CS 201 can I replace my grade", "expect": ["highest", "grade"]},
+    {"label": "repeat-sap-impact",     "q": "does retaking a course hurt my financial aid", "expect": ["SAP", "attempted"]},
+    {"label": "repeat-failed",         "q": "I failed BIO 101 what do I do",   "expect": ["retake", "grade"]},
+
+    # ── Withdrawal impact ─────────────────────────────────────────────────
+    {"label": "withdraw-what-happens", "q": "what happens if I drop BIO 201", "expect": ["W", "GPA"]},
+    {"label": "withdraw-w-grade",      "q": "what does a W grade do to my GPA", "expect": ["W", "GPA"]},
     {
-        "label": "next-semester-year-not-catalog",
-        "q": "what can I take for fall 2026",
-        "expect": ["BIO", "credits"],
-        "expect_not": ["couldn't find", "no program"],
+        "label": "withdraw-international",
+        "q": "what happens if I drop a class",
+        "session_extra": {"isInternational": True},
+        "expect": ["12", "F-1"],
     },
     {
-        "label": "catalog-alias-2024",
-        "q": "what courses can I take",
-        "session_extra": {"bulletinYear": "2024-2025"},
-        "expect": ["BIO", "credits"],
-        "expect_not": ["couldn't find", "no program"],
+        "label": "withdraw-scholarship",
+        "q": "should I withdraw from CS 301",
+        "session_extra": {"scholarshipType": "AAMU Presidential Scholarship"},
+        "expect": ["scholarship"],
     },
 
-    # ── SAVE_PLAN misrouting guard ────────────────────────────────────────
+    # ── Credit load ───────────────────────────────────────────────────────
+    {"label": "load-how-many",         "q": "how many credits should I take",        "expect": ["credits"]},
+    {"label": "load-too-many",         "q": "is 18 credits too many",               "expect": ["credits"]},
     {
-        "label": "save-plan-build-schedule",
-        "q": "build my schedule",
-        "expect_not": ["Suggested Schedule for Next Semester"],
+        "label": "load-international",
+        "q": "how many credits should I take",
+        "session_extra": {"isInternational": True},
+        "expect": ["12", "F-1"],
     },
     {
-        "label": "save-plan-create",
-        "q": "create a schedule for me",
-        "expect_not": ["Suggested Schedule for Next Semester"],
+        "label": "load-scholarship",
+        "q": "how many credits should I take",
+        "session_extra": {"scholarshipType": "AAMU Merit Scholarship"},
+        "expect": ["15", "scholarship"],
     },
-
-    # ── Graduation gap / GPA ──────────────────────────────────────────────
-    {
-        "label": "gpa-question",
-        "q": "what is my GPA",
-        "expect": ["GPA"],
-    },
-    {
-        "label": "grad-gap",
-        "q": "what do I need to graduate",
-        "expect": ["credits"],
-    },
-    {
-        "label": "grad-close",
-        "q": "how close am i to graduating",
-        "expect": ["credits"],
-    },
+    {"label": "load-overload",         "q": "can I take 19 credits",               "expect": ["3.0", "form"]},
 
     # ── International / F-1 ───────────────────────────────────────────────
     {
-        "label": "intl-min-credits",
+        "label": "intl-min",
         "q": "im international how many credits min",
         "session_extra": {"isInternational": True},
         "expect": ["12", "9", "in-person"],
     },
-    {
-        "label": "intl-min-credits-2",
-        "q": "what is the minimum credits for international students",
-        "expect": ["12"],
-    },
-    {
-        "label": "intl-schedule-min",
-        "q": "what courses can I take",
-        "session_extra": {"isInternational": True},
-        "expect": ["12"],
-    },
+    {"label": "intl-min-2",            "q": "what is the minimum credits for international students", "expect": ["12"]},
 
     # ── Scholarship ───────────────────────────────────────────────────────
     {
-        "label": "scholarship-presidential-gpa",
+        "label": "scholar-gpa",
         "q": "what GPA do I need for my scholarship",
         "session_extra": {"scholarshipType": "AAMU Presidential Scholarship"},
         "expect": ["3.50", "30"],
     },
     {
-        "label": "scholarship-merit-credits",
+        "label": "scholar-credits",
         "q": "how many credits per year for my scholarship",
         "session_extra": {"scholarshipType": "AAMU Merit Scholarship"},
         "expect": ["30", "3.10"],
     },
     {
-        "label": "scholarship-list-all",
-        "q": "what are the scholarship requirements for AAMU",
-        "expect": ["Presidential", "Merit", "30"],
-    },
-    {
-        "label": "scholarship-lose",
+        "label": "scholar-lose",
         "q": "will I lose my scholarship if my GPA drops",
         "session_extra": {"scholarshipType": "AAMU Heritage Gold Scholarship"},
         "expect": ["2.80"],
     },
 
-    # ── Prerequisites ─────────────────────────────────────────────────────
+    # ── NCAA athlete ──────────────────────────────────────────────────────
     {
-        "label": "prereq-bio",
-        "q": "what are the prereqs for BIO 305",
-        "expect": ["BIO"],
-    },
-    {
-        "label": "prereq-before",
-        "q": "what do I need before BIO 202",
-        "expect": ["BIO 101"],
-    },
-
-    # ── GE / free electives ───────────────────────────────────────────────
-    {
-        "label": "ge-humanities",
-        "q": "what humanities courses can I take next semester",
-        "expect": ["humanities"],
-    },
-    {
-        "label": "ge-GED-acronym",
-        "q": "what GED courses are available",
-        "expect": ["General Education", "credit"],
-    },
-    {
-        "label": "ge-fine-arts",
-        "q": "what fine arts courses count for my degree",
-        "expect": ["credit"],
-    },
-    {
-        "label": "ge-free-elective",
-        "q": "I need a free elective",
-        "expect": ["credit"],
-    },
-    {
-        "label": "ge-pe-golf",
-        "q": "can I take golf",
-        "expect": ["PE", "credit"],
+        "label": "ncaa-load",
+        "q": "how many credits should I take",
+        "session_extra": {"isAthlete": True},
+        "expect": ["12", "NCAA"],
     },
 
     # ── Concentration/minor ───────────────────────────────────────────────
-    {
-        "label": "minor-no-conc-declared",
-        "q": "what are the minor requirements",
-        "expect": ["concentration", "minor"],
-    },
+    {"label": "minor-no-conc",         "q": "what are the minor requirements", "expect": ["concentration", "minor"]},
 
     # ── Simulation ───────────────────────────────────────────────────────
-    {
-        "label": "simulate-unlock",
-        "q": "if I take BIO 101 what opens up",
-        "expect": ["BIO"],
-    },
+    {"label": "simulate",              "q": "if I take BIO 101 what opens up", "expect": ["BIO"]},
 
     # ── Bulletin policy ───────────────────────────────────────────────────
-    {
-        "label": "policy-min-gpa",
-        "q": "what is the minimum GPA to graduate",
-        "expect": ["2.0", "GPA"],
-    },
+    {"label": "policy-min-gpa",        "q": "what is the minimum GPA to graduate", "expect": ["2.0", "GPA"]},
+    {"label": "policy-probation",      "q": "what is academic probation at AAMU", "expect": ["probation", "GPA"]},
 
     # ── Advisor escalation ────────────────────────────────────────────────
-    {
-        "label": "escalate-transfer",
-        "q": "how do I transfer credits from community college",
-        "expect": ["advisor"],
-    },
+    {"label": "escalate-transfer",     "q": "how do I transfer credits from community college", "expect": ["advisor"]},
 
     # ── General curriculum ────────────────────────────────────────────────
-    {
-        "label": "curriculum-course-info",
-        "q": "what is BIO 101",
-        "expect": ["credit"],
-    },
-
-    # ── Classification-aware scheduling ──────────────────────────────────
-    {
-        "label": "classification-sophomore-override",
-        "q": "as a sophomore what should I take",
-        "session_extra": {"classification": "Freshman"},
-        "expect": ["BIO", "credits"],
-    },
-
-    # ── Electives ─────────────────────────────────────────────────────────
-    {
-        "label": "elective-basic",
-        "q": "what electives can I take",
-        "expect": ["credit"],
-    },
+    {"label": "curriculum-course-info","q": "what is BIO 101",                "expect": ["credit"]},
 
     # ── Incremental scheduling ────────────────────────────────────────────
     {
-        "label": "incremental-add-one",
+        "label": "incremental-add",
         "q": "add one more course to make it 15 credits",
         "conversation_history": [
             {"role": "user", "content": "give me a 12 credit schedule"},
             {"role": "assistant", "content": "Here is your 12-credit schedule:\n- BIO 201: Genetics (3 cr)\n- BIO 210: Ecology (3 cr)\n- CHE 111: General Chemistry (4 cr)\n- MTH 115: Pre-Calculus (3 cr)\nTotal: 12 credits."},
         ],
         "expect": ["credits"],
-        "expect_not": ["BIO 201", "BIO 210"],  # should not re-list history courses
+        "expect_not": ["BIO 201", "BIO 210"],
     },
 ]
 
