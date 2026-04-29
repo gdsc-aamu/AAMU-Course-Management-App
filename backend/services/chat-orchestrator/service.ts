@@ -129,6 +129,14 @@ function asksGpaSimulation(question: string): boolean {
   return /\b(if\s+i\s+get\s+(an?\s+)?[abcdf]|what\s+(gpa|grade)\s+(will|would)\s+i\s+(have|get|end\s+up\s+with)|what\s+gpa\s+do\s+i\s+need\s+to\s+(reach|get\s+to|bring|raise|hit)|raise\s+my\s+gpa|boost\s+my\s+gpa|gpa\s+(simulation|calculator|projection)|project(ed)?\s+gpa)\b/i.test(question)
 }
 
+function asksGradeRepeat(question: string): boolean {
+  return /\b(retake|re-?take|repeat\s+(a\s+)?(course|class)|can\s+i\s+take\s+.{1,30}\s+again|grade\s+(replacement|forgiveness|repeat)|replace\s+(my\s+)?grade|took\s+.{1,20}\s+(twice|again|before)|failed\s+.{0,20}(retake|repeat|again)|academic\s+bankruptcy)\b/i.test(question)
+}
+
+function asksWithdrawalImpact(question: string): boolean {
+  return /\b(what\s+happens?\s+if\s+i\s+(drop|withdraw)|should\s+i\s+(drop|withdraw)|impact\s+of\s+(dropping|withdrawing|a\s+w\s+grade)|w\s+grade\s+(impact|affect|do\s+to)|if\s+i\s+withdraw|if\s+i\s+drop\s+(a\s+|this\s+|[a-z]+\s+\d)|drop\s+deadline|late\s+withdrawal|what\s+does\s+a\s+w\s+do)\b/i.test(question)
+}
+
 function extractClassificationFromQuestion(question: string): string | null {
   if (/\bas\s+a\s+(freshman|first[- ]year)\b/i.test(question)) return "Freshman"
   if (/\bas\s+a\s+(sophomore|second[- ]year)\b/i.test(question)) return "Sophomore"
@@ -472,6 +480,8 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   const isCompletedCoursesQuery = intent === "COMPLETED_COURSES" || asksCompletedCoursesQuestion(question)
   const isGraduationGapQuery = intent === "GRADUATION_GAP"   || asksGraduationGapQuestion(question) || asksGpaQuestion(question)
   const isGpaSimulationQuery = intent === "GPA_SIMULATION" || asksGpaSimulation(question)
+  const isGradeRepeatQuery = intent === "GRADE_REPEAT" || asksGradeRepeat(question)
+  const isWithdrawalImpactQuery = intent === "WITHDRAWAL_IMPACT" || asksWithdrawalImpact(question)
   const isFreeElectiveQuery = intent === "FREE_ELECTIVE"       || (asksFreeElectiveQuestion(question) && intent !== "ELECTIVES")
   const isElectiveQuery     = intent === "ELECTIVES"          || (asksElectiveQuestion(question) && intent !== "FREE_ELECTIVE")
   const isConcentrationQuery = intent === "CONCENTRATION"     || asksConcentrationQuestion(question)
@@ -736,6 +746,86 @@ ${upcomingLines}`
     return {
       mode: "DB_ONLY",
       answer: await generateDbResponse(question, `${studentContextBlock}${gpaContext}`, history),
+      data: null,
+    }
+  }
+
+  if (isGradeRepeatQuery) {
+    const courseCode = extractCourseCodeFromQuestion(question)
+    const courseContext = courseCode ? `\nCourse mentioned by student: ${courseCode}` : ""
+
+    const policy = `AAMU Course Repeat / Grade Replacement Policy (verified from aamu.edu):
+
+1. GRADE REPLACEMENT: Students may repeat courses to improve their GPA. Only the HIGHEST grade earned counts toward the GPA calculation. All attempts remain on the official transcript.
+2. CREDIT AWARDED ONCE: Credit for a course is awarded only once, regardless of how many times it is repeated.
+3. FINANCIAL AID (SAP) IMPACT: Repeated courses count toward total hours ATTEMPTED for SAP purposes. Repeating too many courses can push a student over the 192-hour maximum or below the 67% completion rate threshold.
+4. FAILED COURSES: Credit for any course in which a student received a grade of 'F' can be obtained only by repeating the course and earning a passing grade. There is no other way to clear an F.
+5. ACADEMIC BANKRUPTCY: AAMU has an Academic Bankruptcy provision — consult the Registrar's Office for specific eligibility criteria (typically used after a poor academic period to restart GPA calculation).
+6. WHEN TO RETAKE: Retaking is most beneficial when the grade difference is significant (D→A saves 3 quality points per credit) and the course is a prerequisite for higher-level courses.${courseContext}
+
+Instruction: Answer the student's question about retaking/repeating a course using the policy above. If they mention a specific course (${courseCode ?? "none mentioned"}), confirm they can retake it and explain the GPA impact. Be encouraging but honest about the SAP implications.`
+
+    return {
+      mode: "DB_ONLY",
+      answer: await generateDbResponse(question, `${studentContextBlock}${policy}`, history),
+      data: null,
+    }
+  }
+
+  if (isWithdrawalImpactQuery) {
+    const courseCode = extractCourseCodeFromQuestion(question)
+    const creditMatch = question.match(/\b(\d)\s*cr(?:edit)?\b/i)
+    const droppingCredits = creditMatch ? parseInt(creditMatch[1]) : null
+
+    // termSplit is not yet computed at this point — fetch in-progress courses for threshold check
+    let upcomingCredits: number | null = null
+    if (payload.studentId) {
+      const inProg = await fetchUserInProgressCourses(payload.studentId).catch(() => [])
+      const split = splitInProgressByTerm(inProg)
+      upcomingCredits = split.upcomingRegistered.reduce((s, c) => s + c.creditHours, 0)
+    }
+    const creditsAfterDrop = (upcomingCredits != null && droppingCredits != null)
+      ? upcomingCredits - droppingCredits
+      : null
+
+    const isInternational = payload.session?.isInternational ?? false
+    const scholarshipType = payload.session?.scholarshipType ?? null
+    const scholarshipRule = scholarshipType ? AAMU_SCHOLARSHIP_RULES[scholarshipType] ?? null : null
+    const isAthlete = (payload.session as any)?.isAthlete ?? false
+
+    let withdrawalContext = `Withdrawal Impact Analysis:\n`
+    withdrawalContext += `W Grade Policy: A Withdrawal ("W") does NOT affect GPA. However:\n`
+    withdrawalContext += `  - W grades COUNT as hours ATTEMPTED for SAP (financial aid eligibility)\n`
+    withdrawalContext += `  - Too many W grades can drop your completion rate below the 67% SAP minimum\n`
+    withdrawalContext += `  - W grade deadline: must drop at least 2 weeks before final examinations\n\n`
+
+    if (courseCode) withdrawalContext += `Course in question: ${courseCode}\n`
+    if (droppingCredits) withdrawalContext += `Credits that would be dropped: ${droppingCredits}\n`
+    if (upcomingCredits != null) withdrawalContext += `Your current registered credits (upcoming term): ${upcomingCredits}\n`
+    if (creditsAfterDrop != null) withdrawalContext += `Credits after dropping: ${creditsAfterDrop}\n\n`
+
+    withdrawalContext += `Thresholds to check:\n`
+    withdrawalContext += `  - Full-time status (financial aid): 12 credits minimum${creditsAfterDrop != null ? ` → After drop: ${creditsAfterDrop} (${creditsAfterDrop < 12 ? "⚠️ BELOW full-time — financial aid at risk" : "✓ still full-time"})` : ""}\n`
+
+    if (isInternational) {
+      withdrawalContext += `  - F-1 Visa minimum: 12 credits (9 in-person)${creditsAfterDrop != null ? ` → After drop: ${creditsAfterDrop} (${creditsAfterDrop < 12 ? "🚨 BELOW F-1 minimum — STATUS VIOLATION RISK — contact DSO immediately" : "✓ still compliant"})` : ""}\n`
+    }
+
+    if (scholarshipRule) {
+      const semMin = Math.ceil(scholarshipRule.minCreditsPerYear / 2)
+      withdrawalContext += `  - ${scholarshipType} requires ${semMin} credits/semester (${scholarshipRule.minCreditsPerYear}/year)${creditsAfterDrop != null ? ` → After drop: ${creditsAfterDrop} (${creditsAfterDrop < semMin ? `⚠️ BELOW scholarship minimum — scholarship at risk` : "✓ still meets requirement"})` : ""}\n`
+    }
+
+    if (isAthlete) {
+      withdrawalContext += `  - NCAA eligibility (Division I): 12 credits minimum${creditsAfterDrop != null ? ` → After drop: ${creditsAfterDrop} (${creditsAfterDrop < 12 ? "🚨 BELOW NCAA minimum — athletic eligibility at risk" : "✓ still eligible"})` : ""}\n`
+    }
+
+    withdrawalContext += `\n  - SAP 67% completion rate: W grades count as attempted but not earned. Excessive withdrawals reduce your completion rate.\n`
+    withdrawalContext += `\nInstruction: Analyze whether it's safe for this student to drop the course. Flag any threshold violations with clear warnings. Be direct about risks. Always note that the W grade deadline requires dropping 2+ weeks before finals.`
+
+    return {
+      mode: "DB_ONLY",
+      answer: await generateDbResponse(question, `${studentContextBlock}${withdrawalContext}`, history),
       data: null,
     }
   }
