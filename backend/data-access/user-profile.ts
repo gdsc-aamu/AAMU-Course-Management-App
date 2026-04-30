@@ -17,8 +17,6 @@ export interface UserAcademicProfileRow {
   scholarship_name: string | null
   scholarship_min_gpa: number | null
   scholarship_min_credits_per_year: number | null
-  is_athlete: boolean | null
-  hours_worked_per_week: number | null
   updated_at: string
 }
 
@@ -33,7 +31,7 @@ export async function getUserAcademicProfile(userId: string): Promise<UserAcadem
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from("user_academic_profiles")
-      .select("user_id, program_code, bulletin_year, classification, concentration_code, is_international, scholarship_type, scholarship_name, scholarship_min_gpa, scholarship_min_credits_per_year, is_athlete, hours_worked_per_week, updated_at")
+      .select("user_id, program_code, bulletin_year, classification, concentration_code, is_international, scholarship_type, scholarship_name, scholarship_min_gpa, scholarship_min_credits_per_year, updated_at")
     .eq("user_id", userId)
     .maybeSingle()
 
@@ -55,8 +53,6 @@ export async function upsertUserAcademicProfile(params: {
   scholarshipName?: string | null
   scholarshipMinGpa?: number | null
   scholarshipMinCreditsPerYear?: number | null
-  isAthlete?: boolean | null
-  hoursWorkedPerWeek?: number | null
 }): Promise<UserAcademicProfileRow> {
   const supabase = getSupabaseClient()
 
@@ -93,17 +89,10 @@ export async function upsertUserAcademicProfile(params: {
   if (params.scholarshipMinCreditsPerYear !== undefined) {
     row.scholarship_min_credits_per_year = params.scholarshipMinCreditsPerYear
   }
-  if (params.isAthlete !== undefined) {
-    row.is_athlete = params.isAthlete
-  }
-  if (params.hoursWorkedPerWeek !== undefined) {
-    row.hours_worked_per_week = params.hoursWorkedPerWeek
-  }
-
   const { data, error } = await supabase
     .from("user_academic_profiles")
     .upsert(row, { onConflict: "user_id" })
-    .select("user_id, program_code, bulletin_year, classification, concentration_code, is_international, scholarship_type, scholarship_name, scholarship_min_gpa, scholarship_min_credits_per_year, is_athlete, hours_worked_per_week, updated_at")
+    .select("user_id, program_code, bulletin_year, classification, concentration_code, is_international, scholarship_type, scholarship_name, scholarship_min_gpa, scholarship_min_credits_per_year, updated_at")
     .single()
 
   if (error || !data) {

@@ -119,6 +119,24 @@ function normalizeHonorsCourseCode(code: string): string {
   return code.trim().toUpperCase().replace(/([A-Z]{2,5}\s*\d{3})H$/, "$1")
 }
 
+// AAMU has renumbered several courses over the years.
+// Students who completed the old code satisfy the requirement for the new code.
+const COURSE_EQUIVALENTS: Record<string, string> = {
+  "MTH 125": "MAT 147",  // Calculus I (old → new)
+  "MTH 126": "MAT 148",  // Calculus II (old → new)
+  "MTH 227": "MAT 201",  // Calculus III (old → new)
+  "MTH 237": "MAT 237",  // Linear Algebra (old → new, if renamed)
+  "CS 102":  "CS 109",   // Intro Programming I → II (if applicable)
+}
+
+// Return both the original code and any equivalents so completed-course
+// filtering recognises courses taken under old numbering.
+function expandWithEquivalents(code: string): string[] {
+  const upper = code.trim().toUpperCase()
+  const equiv = COURSE_EQUIVALENTS[upper]
+  return equiv ? [upper, equiv] : [upper]
+}
+
 const GRADE_ARRAY = ["F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"]
 
 function gradeAtLeast(earned: string | null | undefined, required: string | null | undefined): boolean {
@@ -199,10 +217,11 @@ export async function recommendNextCoursesForUser(params: {
   for (const course of userCourses.filter((c) => c.status === "completed")) {
     const raw = course.code.trim().toUpperCase()
     const normalized = normalizeHonorsCourseCode(raw)
-    completedCourseCodes.add(raw)
-    completedCourseCodes.add(normalized)
-    courseGrades.set(normalized, course.grade ?? null)
-    if (raw !== normalized) courseGrades.set(raw, course.grade ?? null)
+    // Add original code, honors-normalized code, and any renamed equivalents
+    for (const code of [raw, normalized, ...expandWithEquivalents(raw), ...expandWithEquivalents(normalized)]) {
+      completedCourseCodes.add(code)
+      courseGrades.set(code, course.grade ?? null)
+    }
   }
 
   // Add hypothetical completions for simulate mode (no grade — treated as passing)

@@ -21,8 +21,6 @@ export interface UserAcademicProfile {
   scholarshipName: string | null
   scholarshipMinGpa: number | null
   scholarshipMinCreditsPerYear: number | null
-  isAthlete: boolean | null
-  hoursWorkedPerWeek: number | null
   updatedAt: string
 }
 
@@ -38,8 +36,6 @@ function mapRow(row: UserAcademicProfileRow): UserAcademicProfile {
     scholarshipName: row.scholarship_name,
     scholarshipMinGpa: row.scholarship_min_gpa,
     scholarshipMinCreditsPerYear: row.scholarship_min_credits_per_year,
-    isAthlete: row.is_athlete,
-    hoursWorkedPerWeek: row.hours_worked_per_week,
     updatedAt: row.updated_at,
   }
 }
@@ -64,17 +60,11 @@ export async function saveUserAcademicProfile(params: {
   scholarshipName?: string | null
   scholarshipMinGpa?: number | null
   scholarshipMinCreditsPerYear?: number | null
-  isAthlete?: boolean | null
-  hoursWorkedPerWeek?: number | null
 }): Promise<UserAcademicProfile> {
   if (!params.userId.trim()) {
     throw new Error("[user-profile:saveUserAcademicProfile] userId is required")
   }
 
-  const row = await upsertUserAcademicProfile({
-    ...params,
-    isAthlete: params.isAthlete,
-    hoursWorkedPerWeek: params.hoursWorkedPerWeek,
-  })
+  const row = await upsertUserAcademicProfile(params)
   return mapRow(row)
 }

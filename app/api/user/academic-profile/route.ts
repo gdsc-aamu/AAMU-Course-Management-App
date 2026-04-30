@@ -76,8 +76,6 @@ export async function PUT(request: Request) {
       scholarshipName,
       scholarshipMinGpa,
       scholarshipMinCreditsPerYear,
-      isAthlete,
-      hoursWorkedPerWeek,
     })
 
     return NextResponse.json({ success: true, profile })
