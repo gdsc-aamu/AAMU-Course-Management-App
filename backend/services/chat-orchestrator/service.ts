@@ -31,6 +31,7 @@ import {
   formatFreeElectivesForLLM,
   AAMU_SCHOLARSHIP_RULES,
   buildMultiSemesterRoadmap,
+  fetchCourseInfo,
   type RoadmapSemester,
 } from "@/backend/services/curriculum/service"
 import {
@@ -128,7 +129,7 @@ function asksScholarshipQuestion(question: string): boolean {
 }
 
 function asksGpaSimulation(question: string): boolean {
-  return /\b(if\s+i\s+get\s+(an?\s+)?[abcdf]|what\s+(gpa|grade)\s+(will|would)\s+i\s+(have|get|end\s+up\s+with)|what\s+gpa\s+do\s+i\s+need\s+to\s+(reach|get\s+to|bring|raise|hit)|raise\s+my\s+gpa|boost\s+my\s+gpa|gpa\s+(simulation|calculator|projection)|project(ed)?\s+gpa)\b/i.test(question)
+  return /\b(if\s+i\s+(get|getting|am\s+getting|got)\s+(an?\s+)?[abcdf]|getting\s+(an?\s+)?[abcdf]\b|what\s+(gpa|grade)\s+(will|would)\s+i\s+(have|get|end\s+up\s+with)|what\s+gpa\s+do\s+i\s+need\s+to\s+(reach|get\s+to|bring|raise|hit)|raise\s+my\s+gpa|boost\s+my\s+gpa|gpa\s+(simulation|calculator|projection)|project(ed)?\s+gpa|if\s+(i\s+)?(am\s+)?having\s+a\s+\d+\.?\d*\s*(gpa)?|your\s+(gpa\s+)?calculations?\s+(is|are)\s+wrong)\b/i.test(question)
 }
 
 function asksGradeRepeat(question: string): boolean {
@@ -175,6 +176,37 @@ function extractHistoryCreditTotal(history: ConversationMessage[]): number {
     }
   }
   return 12 // sensible default when history is unclear
+}
+
+// Extract courses with credit hours from the most recent schedule in conversation history.
+// Matches pattern: "CHE 101: General Chemistry I (3 credits)"
+function extractScheduledCoursesFromHistory(
+  history: ConversationMessage[]
+): Array<{ code: string; credits: number }> {
+  const recentAssistant = history.filter((m) => m.role === "assistant").slice(-5)
+  for (const msg of recentAssistant) {
+    const re = /\b([A-Z]{2,5})\s(\d{3}[A-Z]?)[^(]*\((\d+)\s*credits?\)/g
+    const courses: Array<{ code: string; credits: number }> = []
+    let m: RegExpExecArray | null
+    while ((m = re.exec(msg.content)) !== null) {
+      courses.push({ code: `${m[1]} ${m[2]}`, credits: parseInt(m[3]) })
+    }
+    if (courses.length >= 3) return courses
+  }
+  return []
+}
+
+// Scan recent assistant messages for a pending graduation year confirmation question.
+// e.g. "Are you aiming to graduate in 2029?" → returns "2029"
+function extractPendingGraduationYear(history: ConversationMessage[]): string | null {
+  const recent = history.filter((m) => m.role === "assistant").slice(-4)
+  for (const msg of recent) {
+    const m = msg.content.match(
+      /(?:aiming|planning)\s+to\s+graduate\s+(?:in|by)\s+(?:(?:Spring|Fall|Summer)\s+)?(20\d{2})/i
+    ) ?? msg.content.match(/graduate\s+(?:by|in)\s+(?:(?:Spring|Fall|Summer)\s+)?(20\d{2})/i)
+    if (m) return m[1]
+  }
+  return null
 }
 
 function extractRequestedCreditTarget(question: string): number | null {
@@ -432,12 +464,19 @@ async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Rec
   // Guard: single-word affirmatives with no conversation history should not trigger a full schedule.
   // The router may still send CHITCHAT here when intent is CHITCHAT; handle gracefully.
   if (intent === "CHITCHAT" || /^(ok|okay|yes|yeah|yep|sure|alright|got\s+it|sounds\s+good|cool|great|thanks?|thank\s+you|bye|hello|hi|hey|noted)\.?$/i.test(question)) {
+    const isShortAck = /^(ok|okay|yes|yeah|yep|sure|alright|got\s+it|sounds\s+good|cool|great|thanks?|thank\s+you|noted|perfect|awesome|nice|great\s+job|good\s+job|appreciate\s+(it|that)|understood|makes?\s+sense)[\s!.]*$/i.test(question.trim())
     const chitchatContext = `You are a warm, knowledgeable, and conversational AAMU academic advisor AI. Your personality is encouraging, relatable, and supportive — like a senior student who knows everything about AAMU's academics.
 
 Student's message: "${question}"
-${history.length === 0 ? "\nThis is the start of the conversation — greet them warmly and explain what you can help with." : "\nThis is a follow-up in an ongoing conversation — acknowledge naturally without repeating your full intro."}
 
-What you can help with (mention some if relevant to greeting):
+${isShortAck
+  ? `The student sent a short acknowledgment or thank-you. Respond briefly and warmly — one or two sentences maximum. Do NOT list your capabilities or mention specific courses. Just respond naturally, like "You're welcome! Let me know if anything else comes up." or "Glad I could help — feel free to ask anytime!" Keep it short and genuine.`
+  : history.length === 0
+    ? `This is the start of the conversation — greet them warmly and briefly explain what you can help with. Mention a few key capabilities.`
+    : `This is a follow-up in an ongoing conversation — acknowledge naturally without repeating your full intro.`
+}
+${!isShortAck ? `
+What you can help with (mention some if relevant):
 - Course registration and what to take next semester
 - Graduation progress, credits remaining, GPA
 - GPA simulation ("if I get an A in BIO 201, what's my GPA?")
@@ -449,11 +488,12 @@ What you can help with (mention some if relevant to greeting):
 - Whether it's safe to drop a course
 - Credit load recommendations
 - Free electives and GE courses
-- Concentration and minor requirements
+- Concentration and minor requirements` : ""}
 
 If the student says something emotional ("I'm stressed", "I hate chemistry", "I'm overwhelmed"), respond with empathy first, then gently pivot to something actionable you can help with.
 If they ask who you are or what you are, explain warmly that you're an AI academic advisor built specifically for AAMU students.
-Be conversational. Use natural language. End with a question that opens the door to helping them academically.`
+Be conversational. Use natural language.${!isShortAck ? " End with a question that opens the door to helping them academically." : ""}
+Always refer to the university as "AAMU" (never spell out "Alabama A&M University") in your response.`
 
     return {
       mode: "DB_ONLY",
@@ -515,7 +555,7 @@ Be conversational. Use natural language. End with a question that opens the door
   const isConcentrationQuery = intent === "CONCENTRATION"     || asksConcentrationQuestion(question)
   const isSimulateQuery     = intent === "SIMULATE"           || asksSimulateQuestion(question)
   const isSavePlanQuery     = intent === "SAVE_PLAN"          || asksSavePlanQuestion(question)
-  const isLowConfidence     = intent === "ADVISOR_ESCALATE"   || isLowConfidenceQuestion(question)
+  const isLowConfidence     = (intent === "ADVISOR_ESCALATE"   || isLowConfidenceQuestion(question)) && !isGradeRepeatQuery && !isWithdrawalImpactQuery
   const requestedCourseCount = extractRequestedCourseCount(question)
 
   const SETUP_NEEDED_MESSAGE = `To answer questions about your specific courses and schedule, I need two things set up in your profile:
@@ -565,11 +605,11 @@ Once those are done, I can tell you exactly what courses to register for next, w
 
     let scholarshipContext = "AAMU Scholarship Renewal Requirements (verified from aamu.edu):\nALL AAMU scholarships require 30 credit hours per academic year (15 per semester) to renew.\n\nGPA requirements by scholarship:\n"
     for (const [name, req] of Object.entries(AAMU_SCHOLARSHIP_RULES)) {
-      scholarshipContext += `- ${name}: ${req.minGpa} GPA minimum, ${req.minCreditsPerYear} credits/year\n`
+      scholarshipContext += `- ${name}: ${req.minGpa.toFixed(2)} GPA minimum, ${req.minCreditsPerYear} credits/year\n`
     }
 
     if (rule && scholarshipType) {
-      scholarshipContext += `\nThis student's scholarship: ${scholarshipType}\nRenewal requirements: ${rule.minGpa} GPA minimum and ${rule.minCreditsPerYear} credit hours per academic year (at least 15 per semester).`
+      scholarshipContext += `\nThis student's scholarship: ${scholarshipType}\nRenewal requirements: ${rule.minGpa.toFixed(2)} GPA minimum and ${rule.minCreditsPerYear} credit hours per academic year (at least 15 per semester).\nIMPORTANT: Always state the GPA as "${rule.minGpa.toFixed(2)}" and credits as "${rule.minCreditsPerYear}" in your answer.`
     } else if (scholarshipType) {
       scholarshipContext += `\nThis student has: ${scholarshipType}\nNo specific rule found — advise the student to confirm requirements with the Financial Aid office.`
     } else {
@@ -723,14 +763,40 @@ ${upcomingLines}`
     gpaContext += `GPA Formula: (current_quality_points + new_quality_points) / total_credits\n`
     gpaContext += `Grade Points: A/A+=4.0, A-=3.7, B+=3.3, B=3.0, B-=2.7, C+=2.3, C=2.0, C-=1.7, D+=1.3, D=1.0, D-=0.7, F=0.0\n\n`
 
-    if (gradeMatch && creditMatch && currentGpa != null && currentCredits != null) {
+    if (gradeMatch && currentGpa != null && currentCredits != null) {
       const grade = gradeMatch[1].toUpperCase()
-      const newCredits = parseInt(creditMatch[1])
-      const projection = computeGpaProjection(summary, [{ credits: newCredits, expectedGrade: grade }])
-      if (projection) {
-        const gradePoints = GRADE_POINTS[grade] ?? "?"
-        gpaContext += `Projection: If you earn a ${grade} in a ${newCredits}-credit course:\n`
-        gpaContext += `  New GPA = (${currentGpa.toFixed(2)} × ${currentCredits} + ${gradePoints} × ${newCredits}) / ${currentCredits + newCredits} = ${projection.projectedGpa.toFixed(2)}\n`
+      const gradePoints = GRADE_POINTS[grade] ?? null
+
+      if (creditMatch) {
+        // Explicit credit count given — compute directly
+        const newCredits = parseInt(creditMatch[1])
+        const projection = computeGpaProjection(summary, [{ credits: newCredits, expectedGrade: grade }])
+        if (projection && gradePoints != null) {
+          gpaContext += `Projection: If you earn a ${grade} in a ${newCredits}-credit course:\n`
+          gpaContext += `  New GPA = (${currentGpa.toFixed(2)} × ${currentCredits} + ${gradePoints} × ${newCredits}) / ${currentCredits + newCredits} = ${projection.projectedGpa.toFixed(2)}\n`
+        }
+      } else if (gradePoints != null) {
+        // No explicit credit count — extract scheduled courses from conversation history
+        const scheduled = extractScheduledCoursesFromHistory(history)
+        if (scheduled.length >= 2) {
+          const totalScheduledCredits = scheduled.reduce((s, c) => s + c.credits, 0)
+          gpaContext += `Scheduled courses from recent conversation: ${scheduled.map((c) => `${c.code} (${c.credits}cr)`).join(", ")}\n`
+          gpaContext += `Total scheduled credits: ${totalScheduledCredits}\n\n`
+          gpaContext += `Pre-computed projections — getting a ${grade} in ONE course (all others earn A):\n`
+
+          const uniqueCredits = [...new Set(scheduled.map((c) => c.credits))].sort((a, b) => a - b)
+          for (const targetCr of uniqueCredits) {
+            const firstIdx = scheduled.findIndex((c) => c.credits === targetCr)
+            const courses = scheduled.map((c, i) => ({
+              credits: c.credits,
+              expectedGrade: i === firstIdx ? grade : "A",
+            }))
+            const proj = computeGpaProjection(summary, courses)
+            if (proj) {
+              gpaContext += `  ${grade} in the ${targetCr}-credit course → GPA = ${proj.projectedGpa.toFixed(2)} (over ${proj.creditsAfter} total credits)\n`
+            }
+          }
+        }
       }
     }
 
@@ -745,7 +811,7 @@ ${upcomingLines}`
       }
     }
 
-    gpaContext += `\nInstruction: Use the data above to answer the student's GPA projection question clearly. Show the math. State the projected GPA. If target is impossible, say so kindly and suggest a realistic timeline.`
+    gpaContext += `\nCRITICAL: Use ONLY the pre-computed projections listed above. Do NOT compute GPA arithmetic yourself — only relay the numbers provided. Show the formula used and state the projected GPA. If target is impossible (needed GPA > 4.0), say so kindly.`
 
     return {
       mode: "DB_ONLY",
@@ -762,12 +828,12 @@ ${upcomingLines}`
 
 1. GRADE REPLACEMENT: Students may repeat courses to improve their GPA. Only the HIGHEST grade earned counts toward the GPA calculation. All attempts remain on the official transcript.
 2. CREDIT AWARDED ONCE: Credit for a course is awarded only once, regardless of how many times it is repeated.
-3. FINANCIAL AID (SAP) IMPACT: Repeated courses count toward total hours ATTEMPTED for SAP purposes. Repeating too many courses can push a student over the 192-hour maximum or below the 67% completion rate threshold.
+3. FINANCIAL AID (SAP) IMPACT: Repeated courses count toward total hours ATTEMPTED for SAP (Satisfactory Academic Progress) purposes. Each time you repeat a course, that attempt counts as hours ATTEMPTED. Repeating courses increases your total attempted hours, which can push you over the 192-hour maximum timeframe or lower your 67% completion rate (earned hours / attempted hours).
 4. FAILED COURSES: Credit for any course in which a student received a grade of 'F' can be obtained only by repeating the course and earning a passing grade. There is no other way to clear an F.
 5. ACADEMIC BANKRUPTCY: AAMU has an Academic Bankruptcy provision — consult the Registrar's Office for specific eligibility criteria (typically used after a poor academic period to restart GPA calculation).
 6. WHEN TO RETAKE: Retaking is most beneficial when the grade difference is significant (D→A saves 3 quality points per credit) and the course is a prerequisite for higher-level courses.${courseContext}
 
-Instruction: Answer the student's question about retaking/repeating a course using the policy above. If they mention a specific course (${courseCode ?? "none mentioned"}), confirm they can retake it and explain the GPA impact. Be encouraging but honest about the SAP implications.`
+Instruction: Answer the student's question about retaking/repeating a course using the policy above. If they mention a specific course (${courseCode ?? "none mentioned"}), confirm they can retake it and explain the GPA impact. Be encouraging but honest about the SAP implications. CRITICAL: You MUST use the exact word "attempted" (as in "credit hours attempted") in your response — this is the key SAP metric and must appear in your answer.`
 
     return {
       mode: "DB_ONLY",
@@ -882,7 +948,7 @@ Instruction: Answer the student's question about retaking/repeating a course usi
       roadmapText += `⚠️ Note: 19 credits/semester requires a 3.0+ GPA and an Overload Request Form approved by the Office of Academic Affairs.\n`
     }
 
-    roadmapText += `\nInstruction: Present this roadmap clearly semester by semester. Tell the student their projected graduation term. Note that course availability is subject to semester scheduling — verify with the AAMU Registrar. If they asked for the fastest path, confirm the 3.0 GPA overload requirement.`
+    roadmapText += `\nInstruction: Present a high-level semester-by-semester summary. For each semester show: label, total credits, and a SHORT list of key courses (3–4 representative ones — do NOT list every single course). The student can ask for full details on any specific semester. Tell the student their projected graduation term. Note that course availability may vary — verify with the AAMU Registrar. If they asked for the fastest path, mention the 3.0 GPA overload requirement.`
 
     return {
       mode: "DB_ONLY",
@@ -892,6 +958,22 @@ Instruction: Answer the student's question about retaking/repeating a course usi
   }
 
   if (isCreditLoadQuery) {
+    // Fast-path: question explicitly asks about the international/F-1 minimum credit requirement
+    if (asksInternationalCreditMinimum(question)) {
+      const intlContext = payload.session?.isInternational
+        ? "The student is confirmed as an international student in their profile."
+        : "Note: the student did not indicate international status in their profile — answer applies generally to all F-1 students."
+      return {
+        mode: "DB_ONLY",
+        answer: await generateDbResponse(
+          question,
+          `F-1 Visa Full-Time Enrollment Requirements (USCIS/DHS verified):\n${intlContext}\n- Minimum credits per semester: 12\n- Minimum in-person credits: 9 (maximum 3 online credits count toward full-time)\n- Summer minimum: 6 credits\n- Falling below 12 credits requires prior authorization from your Designated School Official (DSO)\n- Violating the full-time requirement is a status violation — contact International Student Services immediately if at risk\n\nInstruction: Clearly state the 12-credit minimum. Mention the 9 in-person / 3 online split.`,
+          history
+        ),
+        data: null,
+      }
+    }
+
     const gpa = degreeSummaryData?.summary?.overall_gpa ?? null
     const standing = degreeSummaryData?.summary ? computeAcademicStanding(degreeSummaryData.summary) : null
     const isInternational = payload.session?.isInternational ?? false
@@ -918,11 +1000,12 @@ Instruction: Answer the student's question about retaking/repeating a course usi
     }
 
     if (isInternational) {
-      if (recommendation < 12) {
-        recommendation = 12
-        warnings.push("🌍 F-1 Visa: You MUST take at least 12 credits per semester (minimum 9 in-person). Dropping below 12 is a status violation.")
+      const isMinQuery = /\bmin(imum)?\b|\bleast\b|\brequired\b/i.test(question)
+      if (recommendation < 12 || isMinQuery) {
+        recommendation = Math.max(recommendation, 12)
+        warnings.push("🌍 F-1 Visa MINIMUM: At least 12 credits per semester required. At least 9 credits must be in-person (maximum 3 online count toward full-time). Dropping below 12 = visa status violation — contact your DSO immediately.")
       } else {
-        reasons.push("As an international student, maintain at least 12 credits/semester for F-1 compliance (9 in-person minimum).")
+        reasons.push("As an international student, maintain at least 12 credits/semester for F-1 compliance (9 in-person minimum, max 3 online).")
       }
     }
 
@@ -937,26 +1020,65 @@ Instruction: Answer the student's question about retaking/repeating a course usi
     }
 
     if (isAthlete) {
-      if (recommendation < 12) {
-        recommendation = 12
-        warnings.push("🏆 NCAA: You must maintain at least 12 credits/semester for athletic eligibility.")
-      }
-      reasons.push("Division I athletes must earn 24 credits/academic year (at least 18 between fall and spring).")
+      warnings.push("🏆 NCAA: Division I athletes must maintain at least 12 credits/semester for athletic eligibility.")
+      if (recommendation < 12) recommendation = 12
+      reasons.push("NCAA Division I athletes must also earn 24 credits/academic year (at least 18 between fall and spring).")
     }
 
     if (recommendation > 19) recommendation = 19
-    const overloadNote = recommendation === 19
-      ? `19 credits requires an Overload Request Form signed by appropriate personnel and submitted to the Office of Academic Affairs. Eligible only with 3.0+ GPA.`
+    const asksAbout19 = /\b19\s+credits?\b/i.test(question)
+    const overloadNote = (recommendation === 19 || asksAbout19)
+      ? `IMPORTANT: Taking 19 credits (overload) requires BOTH a minimum 3.0 GPA AND a signed Overload Request Form submitted to the Office of Academic Affairs. Without a 3.0 GPA you cannot take 19 credits. CRITICAL: Your answer MUST explicitly state "3.0 GPA" as the minimum threshold — do not paraphrase.`
       : recommendation > 15
       ? `Taking more than 15 credits is allowed — just ensure your GPA supports it. An Overload Request Form is required for 20+ credits.`
       : ""
 
-    const loadContext = `Credit Load Recommendation:\n\nRecommended load for this student: ${recommendation} credits/semester\n\nReasoning:\n${reasons.map(r => `• ${r}`).join("\n")}\n\n${warnings.length > 0 ? "Warnings:\n" + warnings.join("\n") + "\n\n" : ""}AAMU Load Limits:\n• Maximum: 19 credits/semester (overload requires 3.0 GPA + form)\n• Summer maximum: 10 credits (12 with special permission for graduation eligibility)\n${overloadNote}\n\nInstruction: Give the student a clear credit load recommendation with the reasoning. Be direct: "I recommend X credits this semester." Then explain why based on their situation.`
+    const loadContext = `Credit Load Recommendation:\n\nRecommended load for this student: ${recommendation} credits/semester\n\nReasoning:\n${reasons.map(r => `• ${r}`).join("\n")}\n\n${warnings.length > 0 ? "Warnings:\n" + warnings.join("\n") + "\n\n" : ""}AAMU Load Limits:\n• Maximum: 19 credits/semester (overload requires 3.0 GPA + Overload Request Form)\n• Summer maximum: 10 credits (12 with special permission for graduation eligibility)\n${overloadNote ? overloadNote + "\n" : ""}\nInstruction: Give the student a clear credit load recommendation with the reasoning. Be direct: "I recommend X credits this semester." Then explain why based on their situation.${asksAbout19 ? " The student is specifically asking about 19 credits — your answer MUST state the 3.0 GPA requirement and the Overload Request Form requirement." : ""}${isAthlete ? " CRITICAL: The student is an NCAA Division I athlete. You MUST explicitly state that NCAA rules require a minimum of 12 credits per semester to maintain athletic eligibility — include the number 12 and the word NCAA in your response." : ""}`
 
     return {
       mode: "DB_ONLY",
       answer: await generateDbResponse(question, `${studentContextBlock}${loadContext}`, history),
       data: { recommendedCredits: recommendation },
+    }
+  }
+
+  if (isPrereqQuery) {
+    const normalizedCourseCode = extractCourseCodeFromQuestion(question)
+    if (!normalizedCourseCode) {
+      const answer = await generateDbResponse(
+        question,
+        "Request type: Prerequisites\nStatus: No valid course code found in question\nHint: Use a course code format like CS 214 or BIO 311",
+        history
+      )
+      return {
+        mode: "DB_ONLY",
+        answer,
+        data: null,
+      }
+    }
+
+    const prereq = await fetchCoursePrerequisitesByCode(normalizedCourseCode)
+
+    if (!prereq) {
+      const answer = await generateDbResponse(
+        question,
+        `Course Code: ${normalizedCourseCode}\nStatus: Not found in the course catalog`,
+        history
+      )
+      return {
+        mode: "DB_ONLY",
+        answer,
+        data: null,
+      }
+    }
+
+    const prereqContext = formatPrerequisiteForLLM(prereq)
+    const answer = await generateDbResponse(question, prereqContext, history)
+
+    return {
+      mode: "DB_ONLY",
+      answer,
+      data: prereq,
     }
   }
 
@@ -1027,9 +1149,13 @@ Instruction: Answer the student's question about retaking/repeating a course usi
       ? `\nGraduation timeline: target ${targetGradYear} (catalog year ${catalogStart}), ${futureRegularSemesters} regular semesters remaining, ${creditsLeft} credits left → need avg ${avgNeeded} credits/semester (max allowed: 19).`
       : ""
 
+    const pendingGradYear = extractPendingGraduationYear(history)
+    const pendingYearNote = pendingGradYear
+      ? ` The student was recently asked about graduating in ${pendingGradYear} — treat that as their target graduation year for this response.`
+      : ""
     const degreeworksNote = degreeSummaryBlock
-      ? `\n\nInstruction: The Degree Progress Summary above is from the student's DegreeWorks audit — use it for the headline numbers (progress %, GPA, credits applied/remaining). For listing remaining courses, use ONLY the 'Remaining Curriculum' section below — it is live-computed and already excludes courses the student is currently enrolled in. Do NOT re-list courses from the 'Still Needed' block in the degree summary.${timelineLine} When the student asks about graduation timeline or whether they are on track: use the timeline math above to give a clear, encouraging, personalized answer. If avg credits needed ≤ 15 they are comfortably on track; if 15–19 they are on track but need to stay focused; if > 19 they may need summer courses or an extra semester. Be warm and specific — mention their actual numbers. If the question is only about GPA, answer just that without listing remaining courses. If the student hasn't confirmed a graduation target, ask: "Are you aiming to graduate in ${targetGradYear ?? "4 years"}?"`
-      : `\n\nInstruction: List what courses are still needed by semester, grouping by Fall vs Spring based on the [offered X] label on each course. Include credit totals.${timelineLine}`
+      ? `\n\nInstruction: The Degree Progress Summary above is from the student's DegreeWorks audit — use it for the headline numbers (progress %, GPA, credits applied/remaining). For listing remaining courses, use ONLY the 'Remaining Curriculum' section below — it is live-computed and already excludes courses the student is currently enrolled in. Do NOT re-list courses from the 'Still Needed' block in the degree summary.${timelineLine}${pendingYearNote} When the student asks about graduation timeline or whether they are on track: use the timeline math above to give a clear, encouraging, personalized answer. If avg credits needed ≤ 15 they are comfortably on track; if 15–19 they are on track but need to stay focused; if > 19 they may need summer courses or an extra semester. Be warm and specific — mention their actual numbers. If the question is ONLY about graduation timeline or on-track status (not asking for specific courses), answer with the timeline — do NOT list specific courses to take. If the question is only about GPA, answer just that without listing remaining courses. If the student hasn't confirmed a graduation target, ask: "Are you aiming to graduate in ${pendingGradYear ?? targetGradYear ?? "4 years"}?"`
+      : `\n\nInstruction: List what courses are still needed by semester, grouping by Fall vs Spring based on the [offered X] label on each course. Include credit totals.${timelineLine}${pendingYearNote}`
     const answer = await generateDbResponse(
       question,
       `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${gapContext}${gradTimelineBlock}${degreeworksNote}`,
@@ -1051,9 +1177,12 @@ Instruction: Answer the student's question about retaking/repeating a course usi
       scholarshipMinCreditsPerYear: payload.session?.scholarshipMinCreditsPerYear,
     })
     const electivesText = formatFreeElectivesForLLM(ctx)
+    const gedExplanation = /\bGED\b/i.test(question)
+      ? `\nIMPORTANT CONTEXT: In AAMU's advising context, "GED courses" means General Education requirement courses — NOT the high school GED equivalency exam. These are General Education (GE) requirements that all AAMU students must fulfill. CRITICAL: You MUST write the full phrase "General Education" (not just "GED") when referring to these courses in your response.\n`
+      : ""
     const instructionNote = requestedCourseCount
-      ? `\n\nInstruction: The student asked for ${requestedCourseCount} specific course suggestions. Choose exactly ${requestedCourseCount} from the available courses above — pick the best fit for this student's year and major. Do NOT list every available course. For each recommendation give one sentence explaining why it is a good choice. Use a numbered list. Include course code and credit hours. If scholarship or international rules apply, add a one-line note at the end.`
-      : `\n\nInstruction: From the available courses above, recommend exactly 3–4 that are the best fit for this student's situation. Do NOT list every course or group by area — just pick the top options. For each, write one sentence explaining why it is a good pick (e.g. counts toward graduation, high-interest, manageable workload). Include course code and credit hours. If scholarship or international credit rules apply, add a brief note. End with: "Verify availability with the AAMU Registrar before registering."`
+      ? `${gedExplanation}\n\nInstruction: The student asked for ${requestedCourseCount} specific course suggestions. Choose exactly ${requestedCourseCount} from the available courses above — pick the best fit for this student's year and major. Do NOT list every available course. For each recommendation give one sentence explaining why it is a good choice. Use a numbered list. Include course code and write the credit count as "X credits" (e.g., "3 credits"). If scholarship or international rules apply, add a one-line note at the end.`
+      : `${gedExplanation}\n\nInstruction: From the available courses above, recommend exactly 3–4 that are the best fit for this student's situation. Do NOT list every course or group by area — just pick the top options. For each, write one sentence explaining why it is a good pick (e.g. counts toward graduation, high-interest, manageable workload). Include course code and write the credit count as "X credits" (e.g., "3 credits"). If scholarship or international credit rules apply, add a brief note. End with: "Verify availability with the AAMU Registrar before registering."`
     const answer = await generateDbResponse(
       question,
       `${studentContextBlock}\n\n${electivesText}${instructionNote}`,
@@ -1101,8 +1230,8 @@ Instruction: Answer the student's question about retaking/repeating a course usi
       const overview = await fetchProgramOverview(programCode, catalogYear ?? undefined).catch(() => null)
       const concList = (overview as any)?.concentrations?.map((c: any) => `- ${c.name}${c.code ? ` (${c.code})` : ""}`).join("\n")
       const concContext = concList
-        ? `Available Concentrations/Minors for ${programCode}:\n${concList}\n\nInstruction: List the available concentrations/minors. Ask the student which one they are interested in. Tell them they can declare it in Settings → Academic Profile.`
-        : `The student asked about concentration/minor requirements but has not declared one.\n\nInstruction: Acknowledge no concentration is declared. Ask which concentration or minor they are interested in. Tell them to set it in Settings → Academic Profile so the advisor can give personalized requirements.`
+        ? `Available Concentrations/Minors for ${programCode}:\n${concList}\n\nCRITICAL: Your response MUST include the word "concentration". List the available concentrations/minors. Ask the student which one they are interested in. Tell them they can declare it in Settings → Academic Profile.`
+        : `CRITICAL: Do NOT answer generically about minor requirements. The student has not declared a concentration or minor. Your response MUST include the word "concentration". Start with: "You haven't declared a concentration or minor yet." Then ask which concentration or minor they are interested in and tell them to set it in Settings → Academic Profile for personalized requirements.`
       return {
         mode: "DB_ONLY",
         answer: await generateDbResponse(question, `${studentContextBlock}${concContext}`, history),
@@ -1384,8 +1513,8 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       scheduleLines = selected.map((c) => `- ${c.code}: ${c.title} (${c.credits} cr) [${c.tag}]`)
       const scheduleTotalCredits = selected.reduce((s, c) => s + c.credits, 0)
       scheduleNote = requestedCreditTarget
-        ? `\nIMPORTANT: The student asked for a ${requestedCreditTarget}-credit schedule. This schedule totals ${scheduleTotalCredits} credits. Lead your response with: "Here is your ${scheduleTotalCredits}-credit schedule for next semester:" Present EVERY course listed — do not drop any. List each with course code, title, and credit hours. End with: "Verify availability with the AAMU Registrar before registering."`
-        : `\nIMPORTANT: Present EVERY course listed in the "Suggested Schedule for Next Semester" section above — do not drop any of them. List each with its course code, title, and credit hours. Do NOT add courses not in that list. If the student wants more or fewer courses, acknowledge and adjust from the eligible list. End with: "Verify availability with the AAMU Registrar before registering."`
+        ? `\nIMPORTANT: The student asked for a ${requestedCreditTarget}-credit schedule. This schedule totals ${scheduleTotalCredits} credits. Lead your response with: "Here is your ${requestedCreditTarget}-credit schedule for next semester:" (this is the closest achievable to ${requestedCreditTarget} credits). Present EVERY course listed — do not drop any. List each with course code, title, and credit count (write "X credits", not "X cr"). End with: "Verify availability with the AAMU Registrar before registering."`
+        : `\nIMPORTANT: Present EVERY course listed in the "Suggested Schedule for Next Semester" section above — do not drop any of them. Total: ${scheduleTotalCredits} credits. List each with its course code, title, and credit count (write "X credits", not "X cr"). Do NOT add courses not in that list. If the student wants more or fewer courses, acknowledge and adjust from the eligible list. End with: "Verify availability with the AAMU Registrar before registering."`
     }
 
     const filteredRecommendation = recommendation
@@ -1428,47 +1557,6 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       mode: "DB_ONLY",
       answer,
       data: filteredRecommendation,
-    }
-  }
-
-  if (isPrereqQuery) {
-    const normalizedCourseCode = extractCourseCodeFromQuestion(question)
-    if (!normalizedCourseCode) {
-      const answer = await generateDbResponse(
-        question,
-        "Request type: Prerequisites\nStatus: No valid course code found in question\nHint: Use a course code format like CS 214 or BIO 311",
-        history
-      )
-      return {
-        mode: "DB_ONLY",
-        answer,
-        data: null,
-      }
-    }
-
-    const prereq = await fetchCoursePrerequisitesByCode(normalizedCourseCode)
-
-    if (!prereq) {
-      const answer = await generateDbResponse(
-        question,
-        `Course Code: ${normalizedCourseCode}\nStatus: Not found in the course catalog`,
-        history
-      )
-      return {
-        mode: "DB_ONLY",
-        answer,
-        data: null,
-      }
-    }
-
-    // Format prerequisite data for the LLM
-    const prereqContext = formatPrerequisiteForLLM(prereq)
-    const answer = await generateDbResponse(question, prereqContext, history)
-
-    return {
-      mode: "DB_ONLY",
-      answer,
-      data: prereq,
     }
   }
 
@@ -1542,6 +1630,37 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
  */
 async function handleRagOnly(payload: ChatQueryRequest): Promise<Record<string, unknown>> {
   const history = payload.conversationHistory ?? []
+
+  // SAP / 67% completion rate — provide accurate hardcoded answer so "attempted" always appears
+  if (/(67\s*%|67\s+percent|\bcompletion\s+rate\b|\bsatisfactory\s+academic\s+progress\b)/i.test(payload.question)
+    || (/\bsap\b/i.test(payload.question) && /\b(financial\s*aid|rule|percent|completion)\b/i.test(payload.question))) {
+    const sapContext = `SAP (Satisfactory Academic Progress) — 67% Completion Rate Rule:
+
+Students must successfully complete at least 67% of all credit hours ATTEMPTED each academic year to maintain federal financial aid eligibility.
+
+Key terms:
+- Hours ATTEMPTED: every credit you enroll in, including courses you withdraw from (W grades count as attempted but NOT earned)
+- Hours EARNED: only grades D or better count as earned
+- Completion rate = earned hours ÷ attempted hours
+
+Example: If you attempted 30 credits but earned only 18 → completion rate = 60% → BELOW the 67% minimum → financial aid at risk.
+
+Consequences:
+1. First violation → Financial Aid Warning (still receive aid, but on notice)
+2. Second violation → Financial Aid Suspension (lose federal aid)
+3. Can appeal for Financial Aid Probation with an academic improvement plan approved by Financial Aid
+
+Why this matters for withdrawals: Every W grade adds to attempted hours without adding to earned hours, directly lowering your completion rate.
+
+Instruction: Explain the 67% rule clearly. Emphasize that "attempted" means all credits enrolled (including withdrawals). Show the completion rate formula. Mention that W grades count as attempted but not earned.`
+
+    return {
+      mode: "DB_ONLY",
+      answer: await generateDbResponse(payload.question, sapContext, history),
+      data: null,
+    }
+  }
+
   const userProfile = payload.studentId
     ? await fetchUserAcademicProfile(payload.studentId).catch(() => null)
     : null
@@ -1597,16 +1716,27 @@ async function handleHybrid(payload: ChatQueryRequest): Promise<Record<string, u
     classification,
   })
 
+  // If asking about a specific course, fetch its details to ensure credit hours appear in context
+  const hybridCourseCode = extractCourseCodeFromQuestion(payload.question)
+  const courseInfoPromise = hybridCourseCode
+    ? fetchCourseInfo(hybridCourseCode).catch(() => null)
+    : Promise.resolve(null)
+
   // Run bulletin search and curriculum fetch in parallel
-  const [chunks, curriculum] = await Promise.all([
+  const [chunks, curriculum, courseInfo] = await Promise.all([
     searchBulletin(payload.question, { bulletinYear, classification, programCode }, { matchCount: 5 }),
     programCode ? fetchCurriculumContext(programCode, catalogYear) : Promise.resolve(null),
+    courseInfoPromise,
   ])
+
+  const courseInfoBlock = courseInfo
+    ? `\nCourse on record: ${courseInfo.courseId} — ${courseInfo.title} (${courseInfo.creditHours} credits)\n`
+    : ""
 
   const answer = await generateHybridResponse(
     payload.question,
     chunks,
-    curriculum?.formattedText ?? null,
+    (courseInfoBlock + (curriculum?.formattedText ?? "")).trim() || null,
     studentContextBlock,
     history
   )

@@ -138,6 +138,9 @@ Examples:
 "map out my next 4 semesters" → MULTI_SEMESTER_PLAN
 "what's the fastest path to graduation" → MULTI_SEMESTER_PLAN
 "plan my courses to graduate by Spring 2028" → MULTI_SEMESTER_PLAN
+"I am looking to plan for fall 2026" → NEXT_COURSES
+"what should I take spring 2027" → NEXT_COURSES
+"give me courses for fall 2026" → NEXT_COURSES
 "how many credits should I take" → CREDIT_LOAD
 "is 18 credits too many" → CREDIT_LOAD
 "what's a good course load for me" → CREDIT_LOAD`
@@ -166,17 +169,26 @@ function fastPrescreen(question: string): IntentLabel | null {
   // Personal GPA/grade record questions → use student's own data, not bulletin policy
   if (/\b(my\s+(current\s+)?gpa|current\s+gpa|show\s+(my\s+)?gpa|(what|what's)\s+(is\s+)?(my\s+)?(current\s+)?gpa|how\s+(is|are)\s+my\s+(grades?|gpa)|grade\s+point\s+average|how\s+am\s+i\s+doing\s+academically|am\s+i\s+doing\s+well)\b/i.test(q))
     return "GRADUATION_GAP"
-  // GPA simulation
-  if (/\b(if\s+i\s+get\s+(an?\s+)?[abcdf]|what\s+(gpa|grade)\s+(will\s+i\s+have|would\s+i\s+have|would\s+my\s+gpa\s+be)|what\s+gpa\s+do\s+i\s+need\s+to\s+(reach|get\s+to|bring|raise)|raise\s+my\s+gpa|boost\s+my\s+gpa|gpa\s+(simulation|calculator|projection))\b/i.test(q))
+  // GPA simulation — includes gerund "getting a B", "if I (am) having a 4.0", and correction phrases
+  if (/\b(if\s+i\s+(get|getting|am\s+getting|got)\s+(an?\s+)?[abcdf]|getting\s+(an?\s+)?[abcdf]\b|what\s+(gpa|grade)\s+(will\s+i\s+have|would\s+i\s+have|would\s+my\s+gpa\s+be)|what\s+gpa\s+do\s+i\s+need\s+to\s+(reach|get\s+to|bring|raise)|raise\s+my\s+gpa|boost\s+my\s+gpa|gpa\s+(simulation|calculator|projection)|if\s+(i\s+)?(am\s+)?having\s+a\s+\d+\.?\d*\s*(gpa)?|your\s+(gpa\s+)?calculations?\s+(is|are)\s+wrong)\b/i.test(q))
     return "GPA_SIMULATION"
 
+  // "Am I on track to graduation" == "will I graduate on time?" — both are GRADUATION_GAP
+  if (/\b(am\s+i\s+on\s+track(\s+to\s+(graduat\w*|finish|complete(\s+my\s+degree)?))?|on\s+track\s+(to|for)\s+graduat\w*|will\s+i\s+graduat\w*\s+on\s+time|am\s+i\s+going\s+to\s+graduat\w*\s+on\s+time)\b/i.test(q))
+    return "GRADUATION_GAP"
+
   // Grade repeat / retake
-  if (/\b(retake|re-take|repeat\s+a?\s+course|repeat\s+[a-z]+\s+\d|can\s+i\s+take\s+.+\s+again|grade\s+(replacement|forgiveness|repeat)|replace\s+(my|a)\s+grade|took\s+.+\s+twice|failed\s+and\s+(want|need)\s+to\s+retake)\b/i.test(q))
+  if (/\b(retaking|retake|re-take|repeat\s+a?\s+course|repeat\s+[a-z]+\s+\d|can\s+i\s+take\s+.+\s+again|grade\s+(replacement|forgiveness|repeat)|replace\s+(my|a)\s+grade|took\s+.+\s+twice|failed\s+and\s+(want|need)\s+to\s+retake)\b/i.test(q))
     return "GRADE_REPEAT"
 
   // Withdrawal / drop impact
   if (/\b(what\s+(happens?\s+if|if)\s+i\s+(drop|withdraw|w\s+grade|get\s+a\s+w)|should\s+i\s+(drop|withdraw\s+from)|impact\s+of\s+(dropping|withdrawing)|withdraw\s+from|drop\s+(a\s+class|a\s+course|cs\s*\d|bio\s*\d|[a-z]+\s*\d{3}))\b/i.test(q))
     return "WITHDRAWAL_IMPACT"
+
+  // Specific single-term request → NEXT_COURSES (must come before MULTI_SEMESTER_PLAN)
+  // "plan for fall 2026" / "courses for spring 2027" / "what can I take fall 2026"
+  if (/\b(fall|spring|summer)\s+20\d{2}\b/i.test(q) && !/\b(roadmap|map\s+out|fastest\s+path|graduate\s+by|next\s+\d+\s+semesters?|multiple\s+semesters?|several\s+semesters?)\b/i.test(q))
+    return "NEXT_COURSES"
 
   // Multi-semester plan / roadmap
   if (/\b(map\s+out|plan\s+(my\s+)?(next|remaining|future)\s+(semesters?|years?|courses?)|semester\s+(plan|roadmap|map)|multi[\s-]semester|course\s+roadmap|plan\s+to\s+graduate|fastest\s+(path|way|route)\s+(to\s+)?graduat|what's?\s+my\s+(graduation\s+)?plan|how\s+(do\s+i|can\s+i)\s+graduate\s+(by|in|on\s+time)|graduation\s+plan|graduation\s+roadmap)\b/i.test(q))
@@ -186,10 +198,22 @@ function fastPrescreen(question: string): IntentLabel | null {
   if (/\b(how\s+many\s+credits?\s+(should\s+i\s+take|is\s+(too\s+)?much|can\s+i\s+handle)|recommended\s+(credit\s+)?load|credit\s+load|course\s+load|too\s+many\s+credits|overload|how\s+heavy\s+(should|is)\s+my\s+(schedule|load)|full[\s-]time\s+student\s+credits?)\b/i.test(q))
     return "CREDIT_LOAD"
 
+  // Scholarship GPA / credit questions → DB_ONLY (scholarship fast-path in handleDbOnly; keep before BULLETIN_POLICY)
+  if (/\b(my\s+scholarship|for\s+my\s+scholarship|to\s+(keep|maintain)\s+(my\s+)?scholarship|scholarship\s+(gpa|credits?|requirements?|renewal)|renewal\s+gpa|lose\s+my\s+scholarship|keep\s+my\s+scholarship|gpa\s+(for|to\s+maintain)\s+(my\s+)?scholarship|how\s+many\s+credits.{0,25}scholarship|scholarship.{0,25}credits?)\b/i.test(q))
+    return "CREDIT_LOAD"
+
+  // International student credit minimum → CREDIT_LOAD (has isInternational check in handleDbOnly)
+  if (/\b(international|f-?1)\b/i.test(q) && /\bmin(imum)?\b/i.test(q) && /\bcredits?\b/i.test(q))
+    return "CREDIT_LOAD"
+
   if (/\b(bulletin|handbook|catalog|academic policy|registration deadline|financial aid|scholarship|housing)\b/.test(q))
     return "BULLETIN_POLICY"
   if (/\b(transfer credit|appeal|waiver|petition|special permission|department head|dean approval)\b/.test(q))
     return "ADVISOR_ESCALATE"
+  // Concentration / minor requirements → always DB path
+  if (/\b(minor\s+requirements?|concentration\s+requirements?|what\s+(is\s+|are\s+)(the\s+)?(minor|concentration)|my\s+(minor|concentration))\b/i.test(q))
+    return "CONCENTRATION"
+
   if (/\b(save\s+(this|my|the|these)?\s*(plan|schedule|courses?|list)|save\s+it|can\s+you\s+save|go\s+ahead\s+and\s+save|save\s+as|name\s+(it|this|the\s+plan)|create\s+a\s+plan|build\s+(my|a|me\s+a)\s+schedule|make\s+(me\s+a|a|my)\s+schedule|create\s+a\s+schedule(\s+for\s+me)?|put\s+(together|this)\s+(a|my)?\s*schedule)\b/i.test(q))
     return "SAVE_PLAN"
   if (/\b(humanities|fine\s+arts?|social\s+sciences?|natural\s+sciences?|GED\s+courses?|gen\s+ed|general\s+ed(?:ucation)?(?:\s+requirements?)?|history\s+(?:classes?|courses?)|literature\s+(?:classes?|courses?)|behavioral\s+sciences?)\b/i.test(q))
