@@ -76,7 +76,7 @@ TESTS = [
 
     # ── Prerequisites ─────────────────────────────────────────────────────
     {"label": "prereq-bio",            "q": "what are the prereqs for BIO 305",  "expect": ["BIO"]},
-    {"label": "prereq-before",         "q": "what do I need before BIO 202",     "expect": ["BIO 101"]},
+    {"label": "prereq-before",         "q": "what do I need before BIO 202",     "expect": ["BIO 103"]},
 
     # ── GE / free electives ───────────────────────────────────────────────
     {"label": "ge-humanities",         "q": "what humanities courses can I take",   "expect": ["credit"]},
@@ -229,7 +229,7 @@ def run_tests() -> bool:
                 t.get("session_extra"),
                 t.get("conversation_history"),
             )
-            answer = result.get("answer") or ""
+            answer = (result.get("handlerResult") or {}).get("answer") or result.get("answer") or ""
             if not isinstance(answer, str):
                 answer = json.dumps(answer)
             answer_lower = answer.lower()

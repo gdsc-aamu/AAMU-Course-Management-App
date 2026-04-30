@@ -29,6 +29,7 @@ export interface CourseRow {
   id: string
   course_id: string
   title: string
+  credit_hours?: number
 }
 
 export interface CourseRelationRow {
@@ -177,7 +178,7 @@ export async function getCourseByCode(courseCode: string): Promise<CourseRow | n
   const normalizedCode = courseCode.trim().toUpperCase()
   const { data: course, error } = await supabase
     .from("courses")
-    .select("id, course_id, title")
+    .select("id, course_id, title, credit_hours")
     .eq("course_id", normalizedCode)
     .single()
 

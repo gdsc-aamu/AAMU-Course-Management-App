@@ -51,6 +51,10 @@ const QUICK_ACTIONS = [
   "What courses can I take?",
   "What should I take next?",
   "Will I graduate on time?",
+]
+
+// Additional action for desktop only
+const QUICK_ACTIONS_DESKTOP_ONLY = [
   "Check my requirements",
 ]
 
@@ -463,13 +467,25 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-2 border-b p-2 overflow-x-auto">
+      <div className="flex flex-wrap gap-2 border-b p-2 justify-start">
         {QUICK_ACTIONS.map((label) => (
           <Button
             key={label}
             variant="outline"
             size="sm"
-            className="shrink-0 text-xs h-7"
+            className="text-xs h-7"
+            onClick={() => sendMessage(label)}
+            disabled={isLoading || isTyping}
+          >
+            {label}
+          </Button>
+        ))}
+        {QUICK_ACTIONS_DESKTOP_ONLY.map((label) => (
+          <Button
+            key={label}
+            variant="outline"
+            size="sm"
+            className="hidden md:inline-flex text-xs h-7"
             onClick={() => sendMessage(label)}
             disabled={isLoading || isTyping}
           >

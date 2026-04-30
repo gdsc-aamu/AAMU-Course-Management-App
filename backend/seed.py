@@ -178,10 +178,12 @@ def seed(client: Client, data: dict, source_path: str | None = None):
     program_code = f"{meta['department_code']}-{meta['degree_abbreviation']}"
     print("Upserting program...")
     result = client.table("programs").upsert({
-        "code":               program_code,
-        "name":               meta["program_name"],
-        "catalog_year":       catalog_year,
-        "total_credit_hours": parse_credit_hours(meta["total_credit_hours"]),
+        "code":                    program_code,
+        "name":                    meta["program_name"],
+        "catalog_year":            catalog_year,
+        "total_credit_hours":      parse_credit_hours(meta["total_credit_hours"]),
+        "graduation_requirements": meta.get("graduation_requirements") or [],
+        "capstone_rule":           meta.get("capstone_rule"),
     }, on_conflict="code,catalog_year").execute()
     program_id = result.data[0]["id"]
     print(f"  program_id: {program_id} (code: {program_code}, catalog_year: {catalog_year})")

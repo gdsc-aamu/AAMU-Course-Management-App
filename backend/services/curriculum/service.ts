@@ -439,6 +439,21 @@ export async function fetchProgramOverview(
 }
 
 /**
+ * Fetch basic course info (title, credit hours) by course code
+ */
+export async function fetchCourseInfo(
+  courseCode: string
+): Promise<{ courseId: string; title: string; creditHours: number } | null> {
+  const course = await getCourseByCode(courseCode)
+  if (!course) return null
+  return {
+    courseId: course.course_id as string,
+    title: course.title as string,
+    creditHours: (course as any).credit_hours ?? 0,
+  }
+}
+
+/**
  * Fetch course prerequisites by course code
  */
 export async function fetchCoursePrerequisitesByCode(
@@ -967,14 +982,21 @@ export function extractMinorNameFromQuestion(question: string): string | null {
   const q = question.trim()
   // "minor in X" / "concentration in X" / "major in X"
   const afterIn = q.match(/\b(?:minor|concentration|minor in|concentrate in|major in)\s+(?:in\s+)?([a-zA-Z\s]+?)(?:\s*\?|$|,|\band\b)/i)
-  if (afterIn) return afterIn[1].trim()
+  if (afterIn) {
+    const candidate = afterIn[1].trim()
+    if (!/^(a|the|my|this|that|double|second|another|requirements?|courses?|classes?|options?|available|what|are|is|there|any)$/i.test(candidate)) {
+      return candidate
+    }
+  }
 
   // "X minor" / "X concentration"
   const beforeLabel = q.match(/\b([a-zA-Z\s]+?)\s+(?:minor|concentration)\b/i)
   if (beforeLabel) {
     const candidate = beforeLabel[1].trim()
-    // Filter out noise words
-    if (!/^(a|the|my|this|that|double|second|another)$/i.test(candidate)) {
+    const noiseWords = /^(a|the|my|this|that|double|second|another|requirements?|courses?|classes?|options?|available|what|are|is|there|any|of|for|in|about|do|i|want|need|have)$/i
+    // Reject if every word in the candidate is a noise/function word (not a real subject name)
+    const words = candidate.split(/\s+/)
+    if (!words.every(w => noiseWords.test(w))) {
       return candidate
     }
   }
