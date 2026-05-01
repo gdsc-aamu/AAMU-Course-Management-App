@@ -5,14 +5,27 @@ from models import Course, StudentInfo, RequirementBlock, BlockRequirement, Degr
 
 # ── Course line patterns ────────────────────────────────────────────────────
 
+# Term suffix shared by completed + REG patterns.
+# Handles: "Fall 2023", "Spring 2024", "Summer 2022", "Summer I 2022", "Summer II 2022",
+#          2-digit years like "Fall 22" (rare but seen on older audits).
+_TERM_PAT = r"(?:Fall|Spring|Summer)(?:\s+I{1,3})?\s+\d{2,4}"
+
 # Completed: "ENG 101H Composition I Honors A 3 Fall 2023"
+# Grade allows 1-2 uppercase letters so transfer grades like "TR" and "IP" are matched directly.
 _COMPLETED_RE = re.compile(
-    r"^([A-Z]{2,5})\s+(\d{3}[A-Z]{0,2})\s+(.+?)\s+([A-Z][+-]?)\s+(\d+(?:\.\d+)?)\s+((?:Fall|Spring|Summer)\s+\d{4})$"
+    r"^([A-Z]{2,5})\s+(\d{3}[A-Z]{0,2})\s+(.+?)\s+([A-Z]{1,2}[+-]?)\s+(\d+(?:\.\d+)?)\s+(" + _TERM_PAT + r")$"
+)
+
+# Fallback for completed courses that have no term listed (e.g. AP credits, very old courses,
+# or PDFs where pdfplumber drops the term column).  Only used when _COMPLETED_RE fails.
+# Extra safety: require credits to be a small integer (≤ 6) to avoid false positives.
+_COMPLETED_NO_TERM_RE = re.compile(
+    r"^([A-Z]{2,5})\s+(\d{3}[A-Z]{0,2})\s+(.+?)\s+([A-Z]{1,2}[+-]?)\s+([0-6](?:\.\d+)?)$"
 )
 
 # REG (pre-registered future semester): "CS 401 Software Engineering REG (3) Spring 2026"
 _REG_RE = re.compile(
-    r"^([A-Z]{2,5})\s+(\d{3}[A-Z]{0,2})\s+(.+?)\s+REG\s+\((\d+(?:\.\d+)?)\)\s+((?:Fall|Spring|Summer)\s+\d{4})$"
+    r"^([A-Z]{2,5})\s+(\d{3}[A-Z]{0,2})\s+(.+?)\s+REG\s+\((\d+(?:\.\d+)?)\)\s+(" + _TERM_PAT + r")$"
 )
 
 # ── Block header pattern ────────────────────────────────────────────────────
@@ -177,7 +190,7 @@ def parse_degreeworks_pdf(pdf_path: str) -> DegreeWorksResult:
             ))
             continue
 
-        # ── Completed course ──
+        # ── Completed course (primary pattern — includes term) ──
         m = _COMPLETED_RE.match(line)
         if m:
             raw_code = f"{m.group(1)} {m.group(2)}"
@@ -191,6 +204,27 @@ def parse_degreeworks_pdf(pdf_path: str) -> DegreeWorksResult:
                     grade=m.group(4),
                     credits=float(m.group(5)),
                     term=m.group(6),
+                    status="completed",
+                    section=current_block,
+                    is_registered=False,
+                ))
+            continue
+
+        # ── Completed course (fallback — no term; AP credit, transfer, old audit) ──
+        m = _COMPLETED_NO_TERM_RE.match(line)
+        if m:
+            raw_code = f"{m.group(1)} {m.group(2)}"
+            code = _normalize_course_code(raw_code)
+            key = f"{code}|no-term"
+            # Only add if this course hasn't already been captured with a term
+            if key not in seen and not any(s.startswith(f"{code}|") for s in seen):
+                seen.add(key)
+                completed.append(Course(
+                    code=code,
+                    title=m.group(3).strip(),
+                    grade=m.group(4),
+                    credits=float(m.group(5)),
+                    term=None,
                     status="completed",
                     section=current_block,
                     is_registered=False,
