@@ -121,12 +121,13 @@ function normalizeHonorsCourseCode(code: string): string {
 
 // AAMU has renumbered several courses over the years.
 // Students who completed the old code satisfy the requirement for the new code.
+// Only add an entry here when the two codes represent the SAME course under different numbers.
+// CS 102 and CS 109 are distinct courses (different semesters in the plan) — NOT equivalents.
 const COURSE_EQUIVALENTS: Record<string, string> = {
   "MTH 125": "MAT 147",  // Calculus I (old → new)
   "MTH 126": "MAT 148",  // Calculus II (old → new)
   "MTH 227": "MAT 201",  // Calculus III (old → new)
-  "MTH 237": "MAT 237",  // Linear Algebra (old → new, if renamed)
-  "CS 102":  "CS 109",   // Intro Programming I → II (if applicable)
+  "MTH 237": "MAT 237",  // Linear Algebra (old → new)
 }
 
 // Return both the original code and any equivalents so completed-course
@@ -213,8 +214,10 @@ export async function recommendNextCoursesForUser(params: {
 
   const completedCourseCodes = new Set<string>()
   const courseGrades = new Map<string, string | null>()
+  let actualCompletedCount = 0
 
   for (const course of userCourses.filter((c) => c.status === "completed")) {
+    actualCompletedCount++
     const raw = course.code.trim().toUpperCase()
     const normalized = normalizeHonorsCourseCode(raw)
     // Add original code, honors-normalized code, and any renamed equivalents
@@ -347,7 +350,7 @@ export async function recommendNextCoursesForUser(params: {
   return {
     programCode: program.code,
     catalogYear: program.catalog_year ?? null,
-    completedCount: completedCourseCodes.size,
+    completedCount: actualCompletedCount,
     currentTermCount: currentTermCourseCodes.size,
     preRegisteredCount: preRegisteredCourseCodes.size,
     currentTermCredits,

@@ -295,7 +295,17 @@ Semantic equivalence rules — treat these as identical in meaning:
 - "registered for next semester" = pre-registered upcoming term courses (NOT currently enrolled)
 - "need" = "still need" = "haven't taken" = "remaining" = not yet completed
 - An honors course (e.g. ENG 101H) satisfies the standard course requirement (e.g. ENG 101)
-- "GED" in advising context = General Education requirements (not high school GED)`
+- "GED" in advising context = General Education requirements (not high school GED)
+
+Course code exactness rule (CRITICAL — never violate):
+- ALWAYS use the EXACT course codes shown in the data context. NEVER substitute, rename, or translate codes using knowledge from your training data.
+- AAMU has renumbered courses over the years (e.g., MTH 125 was later renumbered MAT 147). The database stores the code that is authoritative for this student's curriculum. Your training knowledge about renames is irrelevant — use what the data says.
+- If the context says "MTH 125", write "MTH 125". If it says "MAT 147", write "MAT 147". Never swap them.
+
+DegreeWorks data integrity rule:
+- The "Completed Courses" count in the context reflects only what is stored in the student's database record.
+- If a student tells you they already completed a course that appears in the eligible/recommended list, take them seriously: their DegreeWorks data in the system may be incomplete or stale.
+- When this happens, respond: "It looks like that course may not be showing as completed in your profile yet. Please re-upload your DegreeWorks PDF in Settings to sync your completed courses — once that's updated, I'll be able to give you accurate recommendations."`
 
 /**
  * Generate a response based on structured database/curriculum data

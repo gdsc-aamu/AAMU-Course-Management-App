@@ -418,9 +418,18 @@ ${upcomingLines}${capNote}`
     classificationAdvisory = `\n\n⚠️ Note: The following courses are several semesters ahead of the student's current position in the program. They have the prerequisites but should confirm with their advisor: ${farList}.`
   }
 
+  // Detect potential stale DegreeWorks: non-freshman student with freshman-level courses eligible.
+  // When this happens, tell the LLM so it can surface the DegreeWorks re-upload hint if the
+  // student pushes back on a recommendation they claim to have already completed.
+  const isNonFreshman = classification && classification !== "Freshman"
+  const hasEarlyCoursesEligible = rec.eligibleNow.some((c) => (c.semesterNumber ?? 99) <= 2)
+  const staleDataNote = isNonFreshman && hasEarlyCoursesEligible
+    ? `\n\n⚠️ DATA NOTE: This ${classification} student has Freshman-level courses in the eligible list. If they say they already completed any of these, their DegreeWorks upload may be out of date. Tell them: "It looks like that course may not be showing as completed in your profile. Please re-upload your DegreeWorks PDF in Settings to sync your completed courses."`
+    : ""
+
   return `AAMU Semester Credit Cap: ${rec.semesterCreditCap} credits max per semester (dean approval required to exceed)
 Program: ${rec.programCode} | Catalog Year: ${rec.catalogYear ?? "latest"}${classification ? ` | Classification: ${classification}` : ""}
-Completed Courses: ${rec.completedCount}
+Completed Courses (from DegreeWorks upload): ${rec.completedCount}
 
 ${enrolledSection}
 
@@ -428,7 +437,7 @@ ${enrolledSection}
 ${eligibleLines}
 
 — Blocked (prerequisites not yet satisfied) —
-${blockedLines}${classificationAdvisory}`
+${blockedLines}${classificationAdvisory}${staleDataNote}`
 }
 
 function extractCourseCodeFromQuestion(question: string): string | null {
