@@ -1414,8 +1414,20 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
     // schedule so the LLM receives a ready-made list, not raw data to reason about.
     // Required courses come first; GE options fill remaining slots.
     const requestedCreditTarget = extractRequestedCreditTarget(question)
-    const TARGET_CREDITS = requestedCreditTarget ?? 12
     const CREDIT_CAP = 19
+
+    // Remaining semester capacity after pre-registered courses — must never exceed this
+    const preRegisteredCreditsUpcoming = termSplit?.upcomingRegistered?.reduce((s, c) => s + c.creditHours, 0) ?? 0
+    const semesterCapacityRemaining = Math.max(0, CREDIT_CAP - preRegisteredCreditsUpcoming)
+    const hasPreRegisteredCourses = preRegisteredCreditsUpcoming > 0
+
+    // When the student already has courses locked in, target only the remaining gap.
+    // When no courses are registered yet, suggest a standard 12-credit load.
+    const TARGET_CREDITS = requestedCreditTarget != null
+      ? Math.min(requestedCreditTarget, semesterCapacityRemaining)
+      : hasPreRegisteredCourses
+        ? semesterCapacityRemaining          // fill remaining gap exactly
+        : 12                                 // default full-semester suggestion
 
     let scheduleLines: string[]
     let scheduleNote: string
@@ -1547,17 +1559,15 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
     // ── Build the course list from code so the LLM cannot rename or hallucinate courses ──
     // GPT models substitute AAMU-specific codes (e.g. MTH 125 → MAT 147) based on training
     // knowledge. The only reliable fix is to generate the course list in code and ask the LLM
-    // only for a brief intro sentence.
-    const upcomingCreditsForCap = termSplit?.upcomingRegistered?.reduce((s, c) => s + c.creditHours, 0) ?? 0
-    const derivedUpcomingTermLabel = (() => {
+    // only for a brief conversational intro.
+    const termLabelForSchedule = (() => {
       if (termSplit?.upcomingRegistered?.length) {
         const first = termSplit.upcomingRegistered[0]
         if ("term" in first && (first as any).term) return (first as any).term as string
       }
-      // Fall back to the term label inferred inside buildNextCoursesContext
+      if (termSplit?.currentTerm) return termSplit.currentTerm
       return "next semester"
     })()
-    const termLabelForSchedule = derivedUpcomingTermLabel
 
     const formattedCourseLines = scheduleLines.map(line =>
       line
@@ -1566,51 +1576,54 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
         .replace(/ \((\d+) cr\)$/, " ($1 credits)")
     )
 
-    const dwBlockAnnotations = blockNeedsMap.size > 0
-      ? "\n" + formattedCourseLines
-          .map((line) => {
-            const codeMatch = line.match(/^([A-Z]{2,5} \d{3}[A-Z]?)/)
-            if (!codeMatch) return null
-            // Annotate with the first incomplete block that could plausibly match this course
-            // (rough heuristic: prefix-based — CS courses → Major block, GE tags are included already)
-            const prefix = codeMatch[1].split(" ")[0]
-            const blockEntry = Array.from(blockNeedsMap.entries()).find(([b]) =>
-              (prefix === "CS" && /major|core|cs/i.test(b)) ||
-              (["ENG", "HIS", "PHY", "BIO", "MTH"].includes(prefix) && /gen.?ed|general/i.test(b))
-            )
-            return blockEntry ? `  → ${blockEntry[0]}` : null
-          })
-          .filter(Boolean)
-          .join("\n")
-      : ""
+    const addedCredits = scheduleLines.reduce((s, l) => {
+      const m = l.match(/\((\d+) cr\)/)
+      return s + (m ? parseInt(m[1]) : 0)
+    }, 0)
 
-    const scheduleTotalCredits2 = formattedCourseLines.length > 0
-      ? scheduleLines.reduce((s, l) => {
-          const m = l.match(/\((\d+) cr\)/)
-          return s + (m ? parseInt(m[1]) : 0)
-        }, 0)
-      : 0
+    // ── Code-generated schedule block ───────────────────────────────────────
+    let codeScheduleBlock: string
 
-    let capLine = ""
-    if (upcomingCreditsForCap > 0) {
-      const totalAfter = upcomingCreditsForCap + scheduleTotalCredits2
-      capLine = totalAfter > 19
-        ? `\n⚠️ Adding all of these would bring your total to ${totalAfter} credits — over the 19-credit semester cap. You'll need to drop a pre-registered course or pick a subset of these.`
-        : `\nYou already have ${upcomingCreditsForCap} credits pre-registered for ${termLabelForSchedule}. Adding these brings your total to ${totalAfter} credits.`
+    if (hasPreRegisteredCourses) {
+      // Show what's already registered, then what can be added
+      const preRegLines = (termSplit?.upcomingRegistered ?? []).map(
+        (c) => `- ${c.code}: ${c.title} (${c.creditHours} credits)`
+      )
+
+      const preRegSection = `**Already registered for ${termLabelForSchedule} (${preRegisteredCreditsUpcoming} credits):**\n${preRegLines.join("\n")}`
+
+      const capacityLine = semesterCapacityRemaining === 0
+        ? `\n\n**You're at the 19-credit cap for ${termLabelForSchedule}.** To add any course you'd need to drop one first.`
+        : `\n\n**Remaining capacity: ${semesterCapacityRemaining} credits** (AAMU max is 19 per semester)`
+
+      const addSection = formattedCourseLines.length > 0
+        ? `\n\n**Courses you could add (${addedCredits} credit${addedCredits !== 1 ? "s" : ""}, fits within your remaining capacity):**\n${formattedCourseLines.join("\n")}\n\n**Total after adding: ${preRegisteredCreditsUpcoming + addedCredits} / 19 credits.**`
+        : semesterCapacityRemaining > 0
+          ? `\n\nNo required courses fit within your remaining ${semesterCapacityRemaining} credits right now — you might consider a General Education elective to fill the gap.`
+          : ""
+
+      codeScheduleBlock = `\n\n${preRegSection}${capacityLine}${addSection}\n\nVerify availability with the AAMU Registrar before registering.`
+    } else {
+      // No pre-registered courses — show a full semester recommendation
+      const scheduleSection = formattedCourseLines.length > 0
+        ? `**Recommended courses for ${termLabelForSchedule}:**\n\n${formattedCourseLines.join("\n")}\n\n**Total: ${addedCredits} credits.**`
+        : "No eligible required courses found — all may be completed or blocked by prerequisites."
+      codeScheduleBlock = `\n\n${scheduleSection}\n\nVerify availability with the AAMU Registrar before registering.`
     }
 
-    // Code-generated schedule block — NOT passed through the LLM
-    const codeScheduleBlock = scheduleLines.length > 0
-      ? `\n\n**Recommended courses for ${termLabelForSchedule}:**\n\n${formattedCourseLines.join("\n")}${dwBlockAnnotations}\n\n**Total: ${scheduleTotalCredits2} credits.**${capLine}\n\nVerify availability with the AAMU Registrar before registering.`
-      : "\n\nNo eligible courses found — all required courses may be completed or blocked by prerequisites."
-
-    // Ask LLM for ONLY a brief personalized intro (1-2 sentences); no course listing
+    // Ask LLM for ONLY a brief conversational intro; no course listing, no course codes
+    const hasCapacity = semesterCapacityRemaining > 0 && hasPreRegisteredCourses
+    const atCap = semesterCapacityRemaining === 0 && hasPreRegisteredCourses
     const advisoryContext = `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${planningContext}${degreeWorksNeedsBlock}
 
-IMPORTANT: The course schedule has already been generated and formatted. Do NOT list any courses yourself and do NOT include any course codes in your response. Write ONLY:
-1. One sentence introducing the schedule (e.g. "Based on your progress, here's what I recommend for ${termLabelForSchedule}:")
-2. Optionally one sentence of advice (prerequisite order, workload warning, DegreeWorks block note) — only if genuinely relevant
-Do NOT repeat, paraphrase, or modify the course list. Do NOT add a "Verify availability" line.`
+IMPORTANT: The course schedule has already been generated and will be shown below your response. Do NOT list any courses yourself and do NOT include any course codes. Write ONLY 1–2 sentences:
+${hasPreRegisteredCourses
+  ? atCap
+    ? `The student is already at the 19-credit cap. Acknowledge this warmly and ask if they want to swap a course or adjust their plan.`
+    : `The student has ${preRegisteredCreditsUpcoming} credits registered. Acknowledge that, mention they have ${semesterCapacityRemaining} credits of space, and invite them to confirm if they want to add from the suggestions or have a different goal (e.g. lighter load, specific type of course).`
+  : `Introduce the recommended schedule for ${termLabelForSchedule}. One sentence only.`
+}
+Do NOT add a "Verify availability" line — it's already included.`
 
     const llmIntro = await generateDbResponse(question, advisoryContext, history)
 
