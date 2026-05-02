@@ -1528,14 +1528,12 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
 
     const filteredRecommendation = recommendation
 
-    const enrollmentGuard = `\nCRITICAL: Any course in "Currently Enrolled" or "Pre-Registered" sections is already on the student's schedule — never recommend it. Only recommend courses from the Suggested Schedule below. If the degree summary says a course is "still needed" but it appears enrolled/pre-registered, the summary is stale — trust the enrolled list.`
-
     const planningContext = buildNextCoursesContext(filteredRecommendation, classification, termSplit, degreeSummaryData?.summary?.credits_applied ?? 0)
     const degreeWorksNeedsBlock = degreeSummaryData
       ? "\n\n" + formatDegreeWorksNeeds(degreeSummaryData)
       : ""
 
-    // Map DegreeWorks incomplete blocks to credit needs for labeling recommendations
+    // Map DegreeWorks incomplete blocks for labeling recommendations
     const blockNeedsMap = new Map<string, number>()
     if (degreeSummaryData?.blocks) {
       for (const block of degreeSummaryData.blocks) {
@@ -1546,21 +1544,77 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       }
     }
 
-    const dwNeedsNote = blockNeedsMap.size > 0
-      ? `\nDegreeWorks shows these requirement blocks are incomplete: ${Array.from(blockNeedsMap.entries()).map(([b, n]) => `${b} (${n} credits still needed)`).join(", ")}. When presenting the schedule, mention which DegreeWorks requirement each course satisfies — e.g. "BIO 305 (3 cr) — counts toward your Major Requirements block" or "HIS 201 (3 cr) — satisfies your General Education – History requirement."`
-      : ""
+    // ── Build the course list from code so the LLM cannot rename or hallucinate courses ──
+    // GPT models substitute AAMU-specific codes (e.g. MTH 125 → MAT 147) based on training
+    // knowledge. The only reliable fix is to generate the course list in code and ask the LLM
+    // only for a brief intro sentence.
+    const upcomingCreditsForCap = termSplit?.upcomingRegistered?.reduce((s, c) => s + c.creditHours, 0) ?? 0
+    const derivedUpcomingTermLabel = (() => {
+      if (termSplit?.upcomingRegistered?.length) {
+        const first = termSplit.upcomingRegistered[0]
+        if ("term" in first && (first as any).term) return (first as any).term as string
+      }
+      // Fall back to the term label inferred inside buildNextCoursesContext
+      return "next semester"
+    })()
+    const termLabelForSchedule = derivedUpcomingTermLabel
 
-    scheduleNote = scheduleNote + dwNeedsNote
-
-    const suggestedScheduleBlock = scheduleLines.length > 0
-      ? `\n\n— Suggested Schedule for Next Semester —\n${scheduleLines.join("\n")}`
-      : ""
-
-    const answer = await generateDbResponse(
-      question,
-      `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${planningContext}${degreeWorksNeedsBlock}${suggestedScheduleBlock}${scheduleNote}${enrollmentGuard}`,
-      history
+    const formattedCourseLines = scheduleLines.map(line =>
+      line
+        .replace(/^- /, "")
+        .replace(/ \((\d+) cr\)\s*\[.*?\]$/, " ($1 credits)")
+        .replace(/ \((\d+) cr\)$/, " ($1 credits)")
     )
+
+    const dwBlockAnnotations = blockNeedsMap.size > 0
+      ? "\n" + formattedCourseLines
+          .map((line) => {
+            const codeMatch = line.match(/^([A-Z]{2,5} \d{3}[A-Z]?)/)
+            if (!codeMatch) return null
+            // Annotate with the first incomplete block that could plausibly match this course
+            // (rough heuristic: prefix-based — CS courses → Major block, GE tags are included already)
+            const prefix = codeMatch[1].split(" ")[0]
+            const blockEntry = Array.from(blockNeedsMap.entries()).find(([b]) =>
+              (prefix === "CS" && /major|core|cs/i.test(b)) ||
+              (["ENG", "HIS", "PHY", "BIO", "MTH"].includes(prefix) && /gen.?ed|general/i.test(b))
+            )
+            return blockEntry ? `  → ${blockEntry[0]}` : null
+          })
+          .filter(Boolean)
+          .join("\n")
+      : ""
+
+    const scheduleTotalCredits2 = formattedCourseLines.length > 0
+      ? scheduleLines.reduce((s, l) => {
+          const m = l.match(/\((\d+) cr\)/)
+          return s + (m ? parseInt(m[1]) : 0)
+        }, 0)
+      : 0
+
+    let capLine = ""
+    if (upcomingCreditsForCap > 0) {
+      const totalAfter = upcomingCreditsForCap + scheduleTotalCredits2
+      capLine = totalAfter > 19
+        ? `\n⚠️ Adding all of these would bring your total to ${totalAfter} credits — over the 19-credit semester cap. You'll need to drop a pre-registered course or pick a subset of these.`
+        : `\nYou already have ${upcomingCreditsForCap} credits pre-registered for ${termLabelForSchedule}. Adding these brings your total to ${totalAfter} credits.`
+    }
+
+    // Code-generated schedule block — NOT passed through the LLM
+    const codeScheduleBlock = scheduleLines.length > 0
+      ? `\n\n**Recommended courses for ${termLabelForSchedule}:**\n\n${formattedCourseLines.join("\n")}${dwBlockAnnotations}\n\n**Total: ${scheduleTotalCredits2} credits.**${capLine}\n\nVerify availability with the AAMU Registrar before registering.`
+      : "\n\nNo eligible courses found — all required courses may be completed or blocked by prerequisites."
+
+    // Ask LLM for ONLY a brief personalized intro (1-2 sentences); no course listing
+    const advisoryContext = `${studentContextBlock}${degreeSummaryBlock ? degreeSummaryBlock + "\n\n" : ""}${planningContext}${degreeWorksNeedsBlock}
+
+IMPORTANT: The course schedule has already been generated and formatted. Do NOT list any courses yourself and do NOT include any course codes in your response. Write ONLY:
+1. One sentence introducing the schedule (e.g. "Based on your progress, here's what I recommend for ${termLabelForSchedule}:")
+2. Optionally one sentence of advice (prerequisite order, workload warning, DegreeWorks block note) — only if genuinely relevant
+Do NOT repeat, paraphrase, or modify the course list. Do NOT add a "Verify availability" line.`
+
+    const llmIntro = await generateDbResponse(question, advisoryContext, history)
+
+    const answer = llmIntro.trim() + codeScheduleBlock
 
     return {
       mode: "DB_ONLY",
