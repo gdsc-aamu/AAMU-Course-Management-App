@@ -1554,12 +1554,7 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       }
 
       // Fill with GE courses before falling back to legacy-code required courses.
-      // Suggest ONE good GE option — a 3-credit course at 18/19 is fine, no need to force 19.
       if (total < TARGET_CREDITS && geCtx && geCtx.availableCourses.length > 0) {
-        // Sort priority:
-        // 1. Non-math before math (labs/sciences/humanities over calculus sequences)
-        // 2. Closest to 3 credits first (avoids 1-credit labs and 4-credit courses)
-        // 3. Alphabetical tiebreaker
         const isMathGE = (code: string) => /^MA[TH] /i.test(code)
         const distFrom3 = (cr: number) => Math.abs(cr - 3)
         const geSorted = [...geCtx.availableCourses].sort((a, b) => {
@@ -1570,12 +1565,24 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
           if (distDiff !== 0) return distDiff
           return a.course_code.localeCompare(b.course_code)
         })
-        // Prefer a 3-credit course; only fall back to other sizes if nothing 3-credit fits
-        const bestGe = geSorted.find((ge) => ge.credit_hours === 3 && total + ge.credit_hours <= CREDIT_CAP)
-          ?? geSorted.find((ge) => total + ge.credit_hours <= CREDIT_CAP)
-        if (bestGe) {
-          selected.push({ code: bestGe.course_code, title: bestGe.course_title, credits: bestGe.credit_hours, tag: `GE – ${bestGe.area_name}` })
-          total += bestGe.credit_hours
+
+        if (selected.length === 0) {
+          // No required courses found — student is likely near graduation with only electives left.
+          // Offer a choice list (top 5 GE options that fit the remaining capacity) instead of
+          // forcing a single arbitrary course.
+          const geOptions = geSorted.filter((ge) => ge.credit_hours <= semesterCapacityRemaining)
+          for (const ge of geOptions.slice(0, 5)) {
+            selected.push({ code: ge.course_code, title: ge.course_title, credits: ge.credit_hours, tag: `GE – ${ge.area_name}` })
+          }
+        } else {
+          // Required courses already selected — add ONE best GE filler.
+          // A 3-credit course at 18/19 is fine; no need to hunt for an exact fill.
+          const bestGe = geSorted.find((ge) => ge.credit_hours === 3 && total + ge.credit_hours <= CREDIT_CAP)
+            ?? geSorted.find((ge) => total + ge.credit_hours <= CREDIT_CAP)
+          if (bestGe) {
+            selected.push({ code: bestGe.course_code, title: bestGe.course_title, credits: bestGe.credit_hours, tag: `GE – ${bestGe.area_name}` })
+            total += bestGe.credit_hours
+          }
         }
       }
 
@@ -1591,11 +1598,14 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
         }
       }
 
+      const allGE = selected.every((c) => c.tag.startsWith("GE –"))
       scheduleLines = selected.map((c) => `- ${c.code}: ${c.title} (${c.credits} cr) [${c.tag}]`)
       const scheduleTotalCredits = selected.reduce((s, c) => s + c.credits, 0)
       scheduleNote = requestedCreditTarget
         ? `\nIMPORTANT: The student asked for a ${requestedCreditTarget}-credit schedule. This schedule totals ${scheduleTotalCredits} credits. Lead your response with: "Here is your ${requestedCreditTarget}-credit schedule for next semester:" (this is the closest achievable to ${requestedCreditTarget} credits). Present EVERY course listed — do not drop any. List each with course code, title, and credit count (write "X credits", not "X cr"). End with: "Contact your advisor to confirm availability before registering."`
-        : `\nIMPORTANT: Present EVERY course listed in the "Suggested Schedule for Next Semester" section above — do not drop any of them. Total: ${scheduleTotalCredits} credits. List each with its course code, title, and credit count (write "X credits", not "X cr"). Do NOT add courses not in that list. If the student wants more or fewer courses, acknowledge and adjust from the eligible list. End with: "Contact your advisor to confirm availability before registering."`
+        : allGE
+          ? `\nIMPORTANT: Your required curriculum courses are all completed or already registered. The courses listed above are General Education options that fit the student's remaining credit space (${semesterCapacityRemaining} credits available). Present them as a list of options the student can choose from — do NOT pick one for them or imply only one is acceptable. Say something like: "Since your required courses are all accounted for, here are some General Education options you could add:" then list each with course code, title, credit count (write "X credits"), and one sentence on why it's a good fit. End with: "Pick whichever fits your interests — contact your advisor to confirm availability before registering."`
+          : `\nIMPORTANT: Present EVERY course listed in the "Suggested Schedule for Next Semester" section above — do not drop any of them. Total: ${scheduleTotalCredits} credits. List each with its course code, title, and credit count (write "X credits", not "X cr"). Do NOT add courses not in that list. If the student wants more or fewer courses, acknowledge and adjust from the eligible list. End with: "Contact your advisor to confirm availability before registering."`
     }
 
     const filteredRecommendation = recommendation
