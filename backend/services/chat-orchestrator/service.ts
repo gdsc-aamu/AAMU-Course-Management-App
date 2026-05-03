@@ -1186,13 +1186,25 @@ Instruction: Answer the student's question about retaking/repeating a course usi
       scholarshipMinGpa: payload.session?.scholarshipMinGpa,
       scholarshipMinCreditsPerYear: payload.session?.scholarshipMinCreditsPerYear,
     })
-    const electivesText = formatFreeElectivesForLLM(ctx)
+
+    // Exclude courses already suggested in recent conversation so "give me more" returns new options.
+    const geHistoryCodes = history
+      .filter((m) => m.role === "assistant")
+      .slice(-4)
+      .reduce((acc, m) => { extractCourseCodesFromText(m.content).forEach((c) => acc.add(c)); return acc }, new Set<string>())
+    const filteredCtx = {
+      ...ctx,
+      availableCourses: ctx.availableCourses.filter((ge) => !geHistoryCodes.has(ge.course_code.trim().toUpperCase())),
+    }
+
+    const electivesText = formatFreeElectivesForLLM(filteredCtx)
     const gedExplanation = /\bGED\b/i.test(question)
       ? `\nIMPORTANT CONTEXT: In AAMU's advising context, "GED courses" means General Education requirement courses — NOT the high school GED equivalency exam. These are General Education (GE) requirements that all AAMU students must fulfill. CRITICAL: You MUST write the full phrase "General Education" (not just "GED") when referring to these courses in your response.\n`
       : ""
+    const strictListRule = `\nCRITICAL: You MUST only suggest courses that appear in the "Available General Education courses" list above. NEVER suggest a course not in that list, even if you know it is a GE course. If the student says they have already taken a course from the list, do NOT suggest more courses — instead respond: "It looks like those courses may not be showing as completed in your profile yet. Please re-upload your DegreeWorks PDF in Settings to sync your completed courses."`
     const instructionNote = requestedCourseCount
-      ? `${gedExplanation}\n\nInstruction: The student asked for ${requestedCourseCount} specific course suggestions. Choose exactly ${requestedCourseCount} from the available courses above — pick the best fit for this student's year and major. Do NOT list every available course. For each recommendation give one sentence explaining why it is a good choice. Use a numbered list. Include course code and write the credit count as "X credits" (e.g., "3 credits"). If scholarship or international rules apply, add a one-line note at the end.`
-      : `${gedExplanation}\n\nInstruction: From the available courses above, recommend exactly 3–4 that are the best fit for this student's situation. Do NOT list every course or group by area — just pick the top options. For each, write one sentence explaining why it is a good pick (e.g. counts toward graduation, high-interest, manageable workload). Include course code and write the credit count as "X credits" (e.g., "3 credits"). If scholarship or international credit rules apply, add a brief note. End with: "Contact your advisor to confirm availability before registering."`
+      ? `${gedExplanation}${strictListRule}\n\nInstruction: The student asked for ${requestedCourseCount} specific course suggestions. Choose exactly ${requestedCourseCount} from the available courses above — pick the best fit for this student's year and major. Do NOT list every available course. For each recommendation give one sentence explaining why it is a good choice. Use a numbered list. Include course code and write the credit count as "X credits" (e.g., "3 credits"). If scholarship or international rules apply, add a one-line note at the end.`
+      : `${gedExplanation}${strictListRule}\n\nInstruction: From the available courses above, recommend exactly 3–4 that are the best fit for this student's situation. Do NOT list every course or group by area — just pick the top options. For each, write one sentence explaining why it is a good pick (e.g. counts toward graduation, high-interest, manageable workload). Include course code and write the credit count as "X credits" (e.g., "3 credits"). If scholarship or international credit rules apply, add a brief note. End with: "Contact your advisor to confirm availability before registering."`
     const answer = await generateDbResponse(
       question,
       `${studentContextBlock}\n\n${electivesText}${instructionNote}`,
