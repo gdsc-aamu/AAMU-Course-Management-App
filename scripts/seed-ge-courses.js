@@ -68,15 +68,15 @@ const GE_DATA = [
     min_hours: 11,
     bulletin_year: '2025-2026',
     courses: [
-      // Mathematics
-      { course_code: 'MAT 110', course_title: 'Finite Mathematics', credit_hours: 3, sub_area: 'Mathematics' },
-      { course_code: 'MAT 112', course_title: 'Pre-Calculus Algebra', credit_hours: 3, sub_area: 'Mathematics' },
-      { course_code: 'MAT 113', course_title: 'Pre-Calculus Trigonometry', credit_hours: 3, sub_area: 'Mathematics' },
-      { course_code: 'MAT 115', course_title: 'Pre-Calculus', credit_hours: 3, sub_area: 'Mathematics' },
-      { course_code: 'MAT 147', course_title: 'Calculus I', credit_hours: 4, sub_area: 'Mathematics' },
-      { course_code: 'MAT 148', course_title: 'Calculus II', credit_hours: 4, sub_area: 'Mathematics' },
-      { course_code: 'MAT 200', course_title: 'Introduction to Statistics', credit_hours: 3, sub_area: 'Mathematics' },
-      { course_code: 'MAT 201', course_title: 'Calculus III', credit_hours: 4, sub_area: 'Mathematics' },
+      // Mathematics — AAMU uses MTH prefix (not MAT)
+      { course_code: 'MTH 110', course_title: 'Finite Mathematics', credit_hours: 3, sub_area: 'Mathematics' },
+      { course_code: 'MTH 112', course_title: 'Pre-Calculus Algebra', credit_hours: 3, sub_area: 'Mathematics' },
+      { course_code: 'MTH 113', course_title: 'Pre-Calculus Trigonometry', credit_hours: 3, sub_area: 'Mathematics' },
+      { course_code: 'MTH 115', course_title: 'Pre-Calculus', credit_hours: 3, sub_area: 'Mathematics' },
+      { course_code: 'MTH 125', course_title: 'Calculus I', credit_hours: 4, sub_area: 'Mathematics' },
+      { course_code: 'MTH 126', course_title: 'Calculus II', credit_hours: 4, sub_area: 'Mathematics' },
+      { course_code: 'MTH 200', course_title: 'Introduction to Statistics', credit_hours: 3, sub_area: 'Mathematics' },
+      { course_code: 'MTH 227', course_title: 'Calculus III', credit_hours: 4, sub_area: 'Mathematics' },
       // Natural Sciences
       { course_code: 'BIO 101', course_title: 'General Biology I', credit_hours: 3, sub_area: 'Natural Sciences' },
       { course_code: 'BIO 101H', course_title: 'General Biology I Honors', credit_hours: 3, sub_area: 'Natural Sciences' },

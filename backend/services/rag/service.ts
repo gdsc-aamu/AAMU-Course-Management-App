@@ -299,8 +299,8 @@ Semantic equivalence rules — treat these as identical in meaning:
 
 Course code exactness rule (CRITICAL — never violate):
 - ALWAYS use the EXACT course codes shown in the data context. NEVER substitute, rename, or translate codes using knowledge from your training data.
-- AAMU has renumbered courses over the years (e.g., MTH 125 was later renumbered MAT 147). The database stores the code that is authoritative for this student's curriculum. Your training knowledge about renames is irrelevant — use what the data says.
-- If the context says "MTH 125", write "MTH 125". If it says "MAT 147", write "MAT 147". Never swap them.
+- AAMU's current course codes use the MTH prefix (e.g. MTH 125 for Calculus I). Older catalog data in the database may use MAT codes (e.g. MAT 147). The schedule generator always translates legacy MAT codes to current MTH codes before sending them here — use what the data says.
+- If the context says "MTH 125", write "MTH 125". Never substitute or rename a course code based on training knowledge.
 
 DegreeWorks data integrity rule:
 - The "Completed Courses" count in the context reflects only what is stored in the student's database record.

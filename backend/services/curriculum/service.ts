@@ -119,16 +119,11 @@ function normalizeHonorsCourseCode(code: string): string {
   return code.trim().toUpperCase().replace(/([A-Z]{2,5}\s*\d{3})H$/, "$1")
 }
 
-// AAMU has renumbered several courses over the years.
-// Students who completed the old code satisfy the requirement for the new code.
-// Only add an entry here when the two codes represent the SAME course under different numbers.
-// CS 102 and CS 109 are distinct courses (different semesters in the plan) — NOT equivalents.
-const COURSE_EQUIVALENTS: Record<string, string> = {
-  "MTH 125": "MAT 147",  // Calculus I (old → new)
-  "MTH 126": "MAT 148",  // Calculus II (old → new)
-  "MTH 227": "MAT 201",  // Calculus III (old → new)
-  "MTH 237": "MAT 237",  // Linear Algebra (old → new)
-}
+// AAMU uses MTH prefix for all math courses — there are no MAT-prefix courses.
+// This map is intentionally empty; kept as a hook in case future catalog renames require it.
+const COURSE_EQUIVALENTS: Record<string, string> = {}
+
+export const LEGACY_TO_AAMU_CODE: Record<string, string> = {}
 
 // Return both the original code and any equivalents so completed-course
 // filtering recognises courses taken under old numbering.
@@ -1180,9 +1175,18 @@ export async function fetchFreeElectiveOptions(params: {
   const inProgress = userCourses.filter((c) => c.status === "in_progress")
 
   const takenCodes = new Set([
-    ...completed.map((c) => c.code),
-    ...inProgress.map((c) => c.code),
+    ...completed.map((c) => c.code.trim().toUpperCase()),
+    ...inProgress.map((c) => c.code.trim().toUpperCase()),
   ])
+
+  // Expand with both directions of the equivalency map so a student who completed
+  // MTH 125 also has MAT 147 excluded from GE (same course, different catalog code).
+  for (const code of [...takenCodes]) {
+    const legacyCode = COURSE_EQUIVALENTS[code]
+    if (legacyCode) takenCodes.add(legacyCode)
+    const currentCode = LEGACY_TO_AAMU_CODE[code]
+    if (currentCode) takenCodes.add(currentCode)
+  }
 
   const availableCourses = await getAvailableGECourses(takenCodes)
 
@@ -1282,6 +1286,14 @@ export async function buildMultiSemesterRoadmap(params: {
       .flatMap((c) => [c.code.trim().toUpperCase(), normalizeHonorsCourseCode(c.code.trim().toUpperCase())])
   )
 
+  // Expand with equivalents so GE filtering excludes equivalent courses (e.g. MTH 125 ↔ MAT 147)
+  for (const code of [...takenCodes]) {
+    const legacyCode = COURSE_EQUIVALENTS[code]
+    if (legacyCode) takenCodes.add(legacyCode)
+    const currentCode = LEGACY_TO_AAMU_CODE[code]
+    if (currentCode) takenCodes.add(currentCode)
+  }
+
   const slots = await getCurriculumSlots(program.id)
   const allRequired = slots
     .filter((s) => !s.is_elective_slot)
@@ -1300,7 +1312,18 @@ export async function buildMultiSemesterRoadmap(params: {
 
   const roadmap: RoadmapSemester[] = []
   let remainingRequired = [...allRequired]
-  let remainingGe = geData.filter((ge) => !takenCodes.has(ge.course_code.trim().toUpperCase()))
+  const isMathGE = (code: string) => /^MA[TH] /i.test(code)
+  let remainingGe = geData
+    .filter((ge) => !takenCodes.has(ge.course_code.trim().toUpperCase()))
+    .sort((a, b) => {
+      // Non-math before math; closest to 3 credits first (avoids 1-credit labs)
+      const aMath = isMathGE(a.course_code) ? 1 : 0
+      const bMath = isMathGE(b.course_code) ? 1 : 0
+      if (aMath !== bMath) return aMath - bMath
+      const distDiff = Math.abs(a.credit_hours - 3) - Math.abs(b.credit_hours - 3)
+      if (distDiff !== 0) return distDiff
+      return a.course_code.localeCompare(b.course_code)
+    })
   let creditsLeft = creditsRemaining
 
   const now = new Date()

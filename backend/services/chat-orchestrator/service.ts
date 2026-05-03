@@ -25,6 +25,7 @@ import {
   formatGraduationGapForLLM,
   formatElectiveOptionsForLLM,
   extractRequestedCourseCount,
+  LEGACY_TO_AAMU_CODE,
   fetchConcentrationRequirements,
   formatConcentrationForLLM,
   fetchFreeElectiveOptions,
@@ -1191,7 +1192,7 @@ Instruction: Answer the student's question about retaking/repeating a course usi
       : ""
     const instructionNote = requestedCourseCount
       ? `${gedExplanation}\n\nInstruction: The student asked for ${requestedCourseCount} specific course suggestions. Choose exactly ${requestedCourseCount} from the available courses above — pick the best fit for this student's year and major. Do NOT list every available course. For each recommendation give one sentence explaining why it is a good choice. Use a numbered list. Include course code and write the credit count as "X credits" (e.g., "3 credits"). If scholarship or international rules apply, add a one-line note at the end.`
-      : `${gedExplanation}\n\nInstruction: From the available courses above, recommend exactly 3–4 that are the best fit for this student's situation. Do NOT list every course or group by area — just pick the top options. For each, write one sentence explaining why it is a good pick (e.g. counts toward graduation, high-interest, manageable workload). Include course code and write the credit count as "X credits" (e.g., "3 credits"). If scholarship or international credit rules apply, add a brief note. End with: "Verify availability with the AAMU Registrar before registering."`
+      : `${gedExplanation}\n\nInstruction: From the available courses above, recommend exactly 3–4 that are the best fit for this student's situation. Do NOT list every course or group by area — just pick the top options. For each, write one sentence explaining why it is a good pick (e.g. counts toward graduation, high-interest, manageable workload). Include course code and write the credit count as "X credits" (e.g., "3 credits"). If scholarship or international credit rules apply, add a brief note. End with: "Contact your advisor to confirm availability before registering."`
     const answer = await generateDbResponse(
       question,
       `${studentContextBlock}\n\n${electivesText}${instructionNote}`,
@@ -1421,12 +1422,14 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
     const semesterCapacityRemaining = Math.max(0, CREDIT_CAP - preRegisteredCreditsUpcoming)
     const hasPreRegisteredCourses = preRegisteredCreditsUpcoming > 0
 
-    // When the student already has courses locked in, target only the remaining gap.
-    // When no courses are registered yet, suggest a standard 12-credit load.
+    // TARGET_CREDITS is a soft ceiling, not an exact fill goal.
+    // We want to suggest the best course(s) that fit — not hunt for a perfect credit-count match.
+    // Using semesterCapacityRemaining as a hard cap here would force 4-credit hunts
+    // when a 3-credit course is the clearly better choice and leaves 1 credit unused.
     const TARGET_CREDITS = requestedCreditTarget != null
       ? Math.min(requestedCreditTarget, semesterCapacityRemaining)
       : hasPreRegisteredCourses
-        ? semesterCapacityRemaining          // fill remaining gap exactly
+        ? semesterCapacityRemaining          // cap; scheduler stops once ≥1 good course fits
         : 12                                 // default full-semester suggestion
 
     let scheduleLines: string[]
@@ -1466,28 +1469,41 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       for (const c of pool) {
         if (selected.length >= requestedCourseCount) break
         if (!effectivePreferred || c.creditHours === effectivePreferred) {
-          selected.push({ code: c.courseId, title: c.title, credits: c.creditHours, tag: c.semesterLabel })
+          const displayCode = LEGACY_TO_AAMU_CODE[c.courseId.trim().toUpperCase()] ?? c.courseId
+          selected.push({ code: displayCode, title: c.title, credits: c.creditHours, tag: c.semesterLabel })
         }
       }
       // Relax credit-size filter if still short — but honour explicit per-course credit constraint
       if (selected.length < requestedCourseCount) {
         for (const c of pool) {
           if (selected.length >= requestedCourseCount) break
-          if (selected.find((s) => s.code === c.courseId)) continue
+          const displayCode = LEGACY_TO_AAMU_CODE[c.courseId.trim().toUpperCase()] ?? c.courseId
+          if (selected.find((s) => s.code === displayCode)) continue
           // When student explicitly specified credits-per-course, keep that hard constraint
           if (perCreditMatch && c.creditHours !== preferredCredits) continue
-          selected.push({ code: c.courseId, title: c.title, credits: c.creditHours, tag: c.semesterLabel })
+          selected.push({ code: displayCode, title: c.title, credits: c.creditHours, tag: c.semesterLabel })
         }
       }
       // Fill from GE courses if still short
       if (selected.length < requestedCourseCount && geCtx && geCtx.availableCourses.length > 0) {
+        const isMathGE = (code: string) => /^MA[TH] /i.test(code)
         const geSorted = [...geCtx.availableCourses]
           .filter((ge) => !historyCodes.has(ge.course_code))
-          .sort((a, b) =>
-            effectivePreferred
-              ? (a.credit_hours === effectivePreferred ? -1 : 1) - (b.credit_hours === effectivePreferred ? -1 : 1)
-              : b.credit_hours - a.credit_hours
-          )
+          .sort((a, b) => {
+            if (effectivePreferred) {
+              // When a credit size is requested, match it first; math still goes last within tier
+              const aMatch = a.credit_hours === effectivePreferred ? 0 : 1
+              const bMatch = b.credit_hours === effectivePreferred ? 0 : 1
+              if (aMatch !== bMatch) return aMatch - bMatch
+            }
+            // Non-math before math; closest to 3 credits first (avoids 1-credit labs)
+            const aMath = isMathGE(a.course_code) ? 1 : 0
+            const bMath = isMathGE(b.course_code) ? 1 : 0
+            if (aMath !== bMath) return aMath - bMath
+            const distDiff = Math.abs(a.credit_hours - 3) - Math.abs(b.credit_hours - 3)
+            if (distDiff !== 0) return distDiff
+            return a.course_code.localeCompare(b.course_code)
+          })
         for (const ge of geSorted) {
           if (selected.length >= requestedCourseCount) break
           if (selected.find((s) => s.code === ge.course_code)) continue
@@ -1501,32 +1517,64 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       const isIncremental = requestedCourseCount <= 2 && historyCodes.size > 0
       scheduleLines = selected.map((c) => `- ${c.code}: ${c.title} (${c.credits} cr) [${c.tag}]`)
       scheduleNote = isIncremental
-        ? `\nIMPORTANT: The student is ADDING to an existing schedule. Their current pre-registered total is ${currentCredits} credits. Present ONLY the ${selected.length} new course(s) below — do NOT re-list courses already mentioned in this conversation. State the credit hours of the new course and confirm the new total: "This adds ${addedCredits} credits, bringing your total to ${currentCredits + addedCredits} credits." End with: "Verify availability with the AAMU Registrar before registering."`
-        : `\nIMPORTANT: The student asked for exactly ${requestedCourseCount} courses${effectivePreferred ? ` (preferring ${effectivePreferred}-credit courses)` : ""}. Present EVERY course listed above — all ${selected.length}. List each with course code, title, and credit hours. Total credits: ${addedCredits} cr. End with: "Verify availability with the AAMU Registrar before registering."`
+        ? `\nIMPORTANT: The student is ADDING to an existing schedule. Their current pre-registered total is ${currentCredits} credits. Present ONLY the ${selected.length} new course(s) below — do NOT re-list courses already mentioned in this conversation. State the credit hours of the new course and confirm the new total: "This adds ${addedCredits} credits, bringing your total to ${currentCredits + addedCredits} credits." End with: "Contact your advisor to confirm availability before registering."`
+        : `\nIMPORTANT: The student asked for exactly ${requestedCourseCount} courses${effectivePreferred ? ` (preferring ${effectivePreferred}-credit courses)` : ""}. Present EVERY course listed above — all ${selected.length}. List each with course code, title, and credit hours. Total credits: ${addedCredits} cr. End with: "Contact your advisor to confirm availability before registering."`
     } else {
-      // Default: fill to TARGET_CREDITS using required courses first, then GE options
+      // Default: fill to TARGET_CREDITS.
+      // Order of preference: (1) current-code required courses, (2) GE, (3) legacy-code required courses.
+      // Legacy-code courses (e.g. MAT 147) are DB artifacts from older catalogs; AAMU uses MTH codes.
+      // Preferring GE over them avoids surfacing confusing non-AAMU course codes to students.
       const selected: Array<{ code: string; title: string; credits: number; tag: string }> = []
       let total = 0
 
+      // Partition eligibleNow: current-code courses first, legacy-code courses set aside
+      const legacyEligible: typeof recommendation.eligibleNow = []
       for (const c of recommendation.eligibleNow) {
         if (total >= TARGET_CREDITS) break
+        if (LEGACY_TO_AAMU_CODE[c.courseId.trim().toUpperCase()]) {
+          legacyEligible.push(c)
+          continue
+        }
         if (total + c.creditHours <= CREDIT_CAP) {
           selected.push({ code: c.courseId, title: c.title, credits: c.creditHours, tag: c.semesterLabel })
           total += c.creditHours
         }
       }
 
-      // Fill with GE courses if still under target
+      // Fill with GE courses before falling back to legacy-code required courses.
+      // Suggest ONE good GE option — a 3-credit course at 18/19 is fine, no need to force 19.
       if (total < TARGET_CREDITS && geCtx && geCtx.availableCourses.length > 0) {
-        // Prefer 3-credit courses; sort descending by credit_hours then alphabetically
-        const geSorted = [...geCtx.availableCourses].sort(
-          (a, b) => b.credit_hours - a.credit_hours || a.course_code.localeCompare(b.course_code)
-        )
-        for (const ge of geSorted) {
+        // Sort priority:
+        // 1. Non-math before math (labs/sciences/humanities over calculus sequences)
+        // 2. Closest to 3 credits first (avoids 1-credit labs and 4-credit courses)
+        // 3. Alphabetical tiebreaker
+        const isMathGE = (code: string) => /^MA[TH] /i.test(code)
+        const distFrom3 = (cr: number) => Math.abs(cr - 3)
+        const geSorted = [...geCtx.availableCourses].sort((a, b) => {
+          const aMath = isMathGE(a.course_code) ? 1 : 0
+          const bMath = isMathGE(b.course_code) ? 1 : 0
+          if (aMath !== bMath) return aMath - bMath
+          const distDiff = distFrom3(a.credit_hours) - distFrom3(b.credit_hours)
+          if (distDiff !== 0) return distDiff
+          return a.course_code.localeCompare(b.course_code)
+        })
+        // Prefer a 3-credit course; only fall back to other sizes if nothing 3-credit fits
+        const bestGe = geSorted.find((ge) => ge.credit_hours === 3 && total + ge.credit_hours <= CREDIT_CAP)
+          ?? geSorted.find((ge) => total + ge.credit_hours <= CREDIT_CAP)
+        if (bestGe) {
+          selected.push({ code: bestGe.course_code, title: bestGe.course_title, credits: bestGe.credit_hours, tag: `GE – ${bestGe.area_name}` })
+          total += bestGe.credit_hours
+        }
+      }
+
+      // Last resort: legacy-code courses, translated to current AAMU codes for display
+      if (total < TARGET_CREDITS) {
+        for (const c of legacyEligible) {
           if (total >= TARGET_CREDITS) break
-          if (total + ge.credit_hours <= CREDIT_CAP) {
-            selected.push({ code: ge.course_code, title: ge.course_title, credits: ge.credit_hours, tag: `GE – ${ge.area_name}` })
-            total += ge.credit_hours
+          if (total + c.creditHours <= CREDIT_CAP) {
+            const displayCode = LEGACY_TO_AAMU_CODE[c.courseId.trim().toUpperCase()] ?? c.courseId
+            selected.push({ code: displayCode, title: c.title, credits: c.creditHours, tag: c.semesterLabel })
+            total += c.creditHours
           }
         }
       }
@@ -1534,8 +1582,8 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       scheduleLines = selected.map((c) => `- ${c.code}: ${c.title} (${c.credits} cr) [${c.tag}]`)
       const scheduleTotalCredits = selected.reduce((s, c) => s + c.credits, 0)
       scheduleNote = requestedCreditTarget
-        ? `\nIMPORTANT: The student asked for a ${requestedCreditTarget}-credit schedule. This schedule totals ${scheduleTotalCredits} credits. Lead your response with: "Here is your ${requestedCreditTarget}-credit schedule for next semester:" (this is the closest achievable to ${requestedCreditTarget} credits). Present EVERY course listed — do not drop any. List each with course code, title, and credit count (write "X credits", not "X cr"). End with: "Verify availability with the AAMU Registrar before registering."`
-        : `\nIMPORTANT: Present EVERY course listed in the "Suggested Schedule for Next Semester" section above — do not drop any of them. Total: ${scheduleTotalCredits} credits. List each with its course code, title, and credit count (write "X credits", not "X cr"). Do NOT add courses not in that list. If the student wants more or fewer courses, acknowledge and adjust from the eligible list. End with: "Verify availability with the AAMU Registrar before registering."`
+        ? `\nIMPORTANT: The student asked for a ${requestedCreditTarget}-credit schedule. This schedule totals ${scheduleTotalCredits} credits. Lead your response with: "Here is your ${requestedCreditTarget}-credit schedule for next semester:" (this is the closest achievable to ${requestedCreditTarget} credits). Present EVERY course listed — do not drop any. List each with course code, title, and credit count (write "X credits", not "X cr"). End with: "Contact your advisor to confirm availability before registering."`
+        : `\nIMPORTANT: Present EVERY course listed in the "Suggested Schedule for Next Semester" section above — do not drop any of them. Total: ${scheduleTotalCredits} credits. List each with its course code, title, and credit count (write "X credits", not "X cr"). Do NOT add courses not in that list. If the student wants more or fewer courses, acknowledge and adjust from the eligible list. End with: "Contact your advisor to confirm availability before registering."`
     }
 
     const filteredRecommendation = recommendation
@@ -1596,19 +1644,20 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
         ? `\n\n**You're at the 19-credit cap for ${termLabelForSchedule}.** To add any course you'd need to drop one first.`
         : `\n\n**Remaining capacity: ${semesterCapacityRemaining} credits** (AAMU max is 19 per semester)`
 
+      const totalAfterAdding = preRegisteredCreditsUpcoming + addedCredits
       const addSection = formattedCourseLines.length > 0
-        ? `\n\n**Courses you could add (${addedCredits} credit${addedCredits !== 1 ? "s" : ""}, fits within your remaining capacity):**\n${formattedCourseLines.join("\n")}\n\n**Total after adding: ${preRegisteredCreditsUpcoming + addedCredits} / 19 credits.**`
+        ? `\n\n**Courses you could add (${addedCredits} credit${addedCredits !== 1 ? "s" : ""}):**\n${formattedCourseLines.join("\n")}\n\n**Total after adding: ${totalAfterAdding} credits** (${CREDIT_CAP - totalAfterAdding} credit${CREDIT_CAP - totalAfterAdding !== 1 ? "s" : ""} still available).`
         : semesterCapacityRemaining > 0
           ? `\n\nNo required courses fit within your remaining ${semesterCapacityRemaining} credits right now — you might consider a General Education elective to fill the gap.`
           : ""
 
-      codeScheduleBlock = `\n\n${preRegSection}${capacityLine}${addSection}\n\nVerify availability with the AAMU Registrar before registering.`
+      codeScheduleBlock = `\n\n${preRegSection}${capacityLine}${addSection}\n\nContact your advisor to confirm availability before registering.`
     } else {
       // No pre-registered courses — show a full semester recommendation
       const scheduleSection = formattedCourseLines.length > 0
         ? `**Recommended courses for ${termLabelForSchedule}:**\n\n${formattedCourseLines.join("\n")}\n\n**Total: ${addedCredits} credits.**`
         : "No eligible required courses found — all may be completed or blocked by prerequisites."
-      codeScheduleBlock = `\n\n${scheduleSection}\n\nVerify availability with the AAMU Registrar before registering.`
+      codeScheduleBlock = `\n\n${scheduleSection}\n\nContact your advisor to confirm availability before registering.`
     }
 
     // Ask LLM for ONLY a brief conversational intro; no course listing, no course codes
