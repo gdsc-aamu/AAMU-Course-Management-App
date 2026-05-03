@@ -28,7 +28,7 @@ const GE_DATA = [
     courses: [
       // Fine Arts
       { course_code: 'ART 200', course_title: 'Art Appreciation', credit_hours: 3, sub_area: 'Fine Arts' },
-      { course_code: 'MUS 200', course_title: 'Music Appreciation', credit_hours: 3, sub_area: 'Fine Arts' },
+      { course_code: 'MUS 101', course_title: 'Music Appreciation', credit_hours: 3, sub_area: 'Fine Arts' },
       { course_code: 'THE 200', course_title: 'Introduction to Theatre', credit_hours: 3, sub_area: 'Fine Arts' },
       { course_code: 'ART 101', course_title: 'Drawing I', credit_hours: 3, sub_area: 'Fine Arts' },
       { course_code: 'ART 102', course_title: 'Drawing II', credit_hours: 3, sub_area: 'Fine Arts' },
@@ -125,14 +125,14 @@ const GE_DATA = [
       { course_code: 'HIS 211', course_title: 'African American History I', credit_hours: 3, sub_area: 'History' },
       { course_code: 'HIS 212', course_title: 'African American History II', credit_hours: 3, sub_area: 'History' },
       // Economics
-      { course_code: 'ECO 201', course_title: 'Principles of Macroeconomics', credit_hours: 3, sub_area: 'Economics' },
-      { course_code: 'ECO 202', course_title: 'Principles of Microeconomics', credit_hours: 3, sub_area: 'Economics' },
+      { course_code: 'ECO 231', course_title: 'Principles of Macroeconomics', credit_hours: 3, sub_area: 'Economics' },
+      { course_code: 'ECO 232', course_title: 'Principles of Microeconomics', credit_hours: 3, sub_area: 'Economics' },
       // Other Social Sciences
       { course_code: 'GEO 200', course_title: 'Cultural Geography', credit_hours: 3, sub_area: 'Other Social Sciences' },
       { course_code: 'POL 200', course_title: 'American Government', credit_hours: 3, sub_area: 'Other Social Sciences' },
       { course_code: 'POL 201', course_title: 'Introduction to Political Science', credit_hours: 3, sub_area: 'Other Social Sciences' },
       { course_code: 'SOC 200', course_title: 'Introduction to Sociology', credit_hours: 3, sub_area: 'Behavioral Sciences' },
-      { course_code: 'PSY 200', course_title: 'Introduction to Psychology', credit_hours: 3, sub_area: 'Behavioral Sciences' },
+      { course_code: 'PSY 201', course_title: 'General Psychology', credit_hours: 3, sub_area: 'Behavioral Sciences' },
       { course_code: 'ANT 200', course_title: 'Introduction to Anthropology', credit_hours: 3, sub_area: 'Behavioral Sciences' },
       { course_code: 'CRJ 200', course_title: 'Introduction to Criminal Justice', credit_hours: 3, sub_area: 'Behavioral Sciences' },
       { course_code: 'SWK 200', course_title: 'Introduction to Social Work', credit_hours: 3, sub_area: 'Behavioral Sciences' },
@@ -149,7 +149,7 @@ const GE_DATA = [
       { course_code: 'ORI 101', course_title: 'University Orientation', credit_hours: 1, sub_area: 'Orientation' },
       { course_code: 'ORI 101H', course_title: 'University Orientation Honors', credit_hours: 1, sub_area: 'Orientation' },
       // Health
-      { course_code: 'HED 200', course_title: 'Health and Wellness', credit_hours: 2, sub_area: 'Health' },
+      { course_code: 'HED 101', course_title: 'Personal and Community Health', credit_hours: 2, sub_area: 'Health' },
       { course_code: 'HED 201', course_title: 'Personal Health', credit_hours: 2, sub_area: 'Health' },
       // Physical Education
       { course_code: 'PED 100', course_title: 'Physical Education Activity I', credit_hours: 1, sub_area: 'Physical Education' },
