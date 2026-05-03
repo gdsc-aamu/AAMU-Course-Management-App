@@ -248,7 +248,20 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
         data.session?.user.user_metadata?.full_name ??
         data.session?.user.user_metadata?.name ??
         null
-      if (name) setStudentName(name)
+      if (name) {
+        setStudentName(name)
+        // Patch the welcome message if it was rendered before the name resolved
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === "msg-welcome"
+              ? {
+                  ...m,
+                  content: `Hi ${name.split(" ")[0]}! I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.`,
+                }
+              : m
+          )
+        )
+      }
 
       if (uid && data.session?.access_token) {
         // Serve cached static context immediately, revalidate in background

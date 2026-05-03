@@ -1568,10 +1568,17 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
 
         if (selected.length === 0) {
           // No required courses found — student is likely near graduation with only electives left.
-          // Offer a choice list (top 5 GE options that fit the remaining capacity) instead of
-          // forcing a single arbitrary course.
-          const geOptions = geSorted.filter((ge) => ge.credit_hours <= semesterCapacityRemaining)
-          for (const ge of geOptions.slice(0, 5)) {
+          // Offer a choice list (5 GE options that fit the remaining capacity) instead of forcing one.
+          // Shuffle 3-credit non-math courses so the same course (e.g. ANT 200) isn't always first.
+          const fits = (ge: { credit_hours: number }) => ge.credit_hours <= semesterCapacityRemaining
+          const nonMath3 = geSorted.filter((ge) => ge.credit_hours === 3 && !isMathGE(ge.course_code) && fits(ge))
+          const rest = geSorted.filter((ge) => (ge.credit_hours !== 3 || isMathGE(ge.course_code)) && fits(ge))
+          // Fisher-Yates shuffle on the 3-credit non-math pool so variety across requests
+          for (let i = nonMath3.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [nonMath3[i], nonMath3[j]] = [nonMath3[j], nonMath3[i]]
+          }
+          for (const ge of [...nonMath3, ...rest].slice(0, 5)) {
             selected.push({ code: ge.course_code, title: ge.course_title, credits: ge.credit_hours, tag: `GE – ${ge.area_name}` })
           }
         } else {
@@ -1604,7 +1611,7 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       scheduleNote = requestedCreditTarget
         ? `\nIMPORTANT: The student asked for a ${requestedCreditTarget}-credit schedule. This schedule totals ${scheduleTotalCredits} credits. Lead your response with: "Here is your ${requestedCreditTarget}-credit schedule for next semester:" (this is the closest achievable to ${requestedCreditTarget} credits). Present EVERY course listed — do not drop any. List each with course code, title, and credit count (write "X credits", not "X cr"). End with: "Contact your advisor to confirm availability before registering."`
         : allGE
-          ? `\nIMPORTANT: Your required curriculum courses are all completed or already registered. The courses listed above are General Education options that fit the student's remaining credit space (${semesterCapacityRemaining} credits available). Present them as a list of options the student can choose from — do NOT pick one for them or imply only one is acceptable. Say something like: "Since your required courses are all accounted for, here are some General Education options you could add:" then list each with course code, title, credit count (write "X credits"), and one sentence on why it's a good fit. End with: "Pick whichever fits your interests — contact your advisor to confirm availability before registering."`
+          ? `\nIMPORTANT: Your required curriculum courses are all completed or already registered. Format your response EXACTLY like this:\n1. First sentence: "I see you have registered for [list the pre-registered courses by name]. Since your required courses are all accounted for, here are some General Education options you could add:"\n2. Then a bulleted list — one bullet per course, formatted as: "• COURSE CODE: Course Title (X credits)"\n3. Final line: "Let me know if this works or if you'd like me to suggest different options!"\nDO NOT calculate or show a combined credit total for all the options. DO NOT say 'Total after adding'. These are choices — the student picks ONE, not all of them.`
           : `\nIMPORTANT: Present EVERY course listed in the "Suggested Schedule for Next Semester" section above — do not drop any of them. Total: ${scheduleTotalCredits} credits. List each with its course code, title, and credit count (write "X credits", not "X cr"). Do NOT add courses not in that list. If the student wants more or fewer courses, acknowledge and adjust from the eligible list. End with: "Contact your advisor to confirm availability before registering."`
     }
 
