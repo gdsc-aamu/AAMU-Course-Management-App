@@ -90,6 +90,10 @@ function asksFreeElectiveQuestion(question: string): boolean {
   return /\b(free elective|elective|GE course|general education|PE course|physical education|recreational|golf|swimming|tennis|bowling|badminton)\b/i.test(question)
 }
 
+function asksShowMoreGE(question: string): boolean {
+  return /\b(show|give|bring|get)\s+(me\s+)?(more|other|different|another)\b|\bmore\s+(options?|courses?|suggestions?|choices?)\b|\bdifferent\s+(options?|courses?|set|batch)\b/i.test(question)
+}
+
 function asksElectiveQuestion(question: string): boolean {
   return /(elective|electives|what\s+(electives?|courses?)\s+can\s+i\s+(choose|pick|select)|elective\s+(options?|choices?|slot)|which\s+(electives?|courses?)\s+(count|qualify|apply|are\s+eligible))/i.test(
     question
@@ -552,7 +556,8 @@ Always refer to the university as "AAMU" (never spell out "Alabama A&M Universit
 
   // Use LLM intent label when available; fall back to regex for edge cases
   const isPrereqQuery       = intent === "PREREQUISITES"      || asksPrerequisiteQuestion(question)
-  const isNextCoursesQuery  = intent === "NEXT_COURSES"       || asksNextCoursesQuestion(question)
+  const isShowMoreGE        = asksShowMoreGE(question)
+  const isNextCoursesQuery  = intent === "NEXT_COURSES"       || asksNextCoursesQuestion(question) || isShowMoreGE
   const isCompletedCoursesQuery = intent === "COMPLETED_COURSES" || asksCompletedCoursesQuestion(question)
   const isGraduationGapQuery = intent === "GRADUATION_GAP"   || asksGraduationGapQuestion(question) || asksGpaQuestion(question)
   const isGpaSimulationQuery = intent === "GPA_SIMULATION" || asksGpaSimulation(question)
@@ -1422,6 +1427,18 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
         }).catch(() => null)
       : null
 
+    // When student says "show me more", collect all GE codes from recent assistant messages
+    // so we can exclude them and serve a genuinely different batch.
+    const geShownCodes: Set<string> = isShowMoreGE
+      ? history
+          .filter((m) => m.role === "assistant")
+          .slice(-6)
+          .reduce((acc, m) => {
+            extractCourseCodesFromText(m.content).forEach((c) => acc.add(c.trim().toUpperCase()))
+            return acc
+          }, new Set<string>())
+      : new Set<string>()
+
     // ── Build the suggested schedule ──────────────────────────────────────────
     // When the student didn't ask for a specific count, pre-compute a balanced
     // schedule so the LLM receives a ready-made list, not raw data to reason about.
@@ -1552,15 +1569,22 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       // Fill with GE courses before falling back to legacy-code required courses.
       if (total < TARGET_CREDITS && geCtx && geCtx.availableCourses.length > 0) {
         const isMathGE = (code: string) => /^MA[TH] /i.test(code)
-        const distFrom3 = (cr: number) => Math.abs(cr - 3)
-        const geSorted = [...geCtx.availableCourses].sort((a, b) => {
-          const aMath = isMathGE(a.course_code) ? 1 : 0
-          const bMath = isMathGE(b.course_code) ? 1 : 0
-          if (aMath !== bMath) return aMath - bMath
-          const distDiff = distFrom3(a.credit_hours) - distFrom3(b.credit_hours)
-          if (distDiff !== 0) return distDiff
-          return a.course_code.localeCompare(b.course_code)
-        })
+
+        // Partition into tiers: non-math 3-credit (primary), other non-math, math last.
+        // Filter out courses already shown in prior turns (covers "show me more" batch rotation).
+        const available = geCtx.availableCourses.filter(
+          (ge) => !geShownCodes.has(ge.course_code.trim().toUpperCase())
+        )
+        const nonMath3 = available.filter((ge) => !isMathGE(ge.course_code) && ge.credit_hours === 3)
+        const otherNonMath = available.filter((ge) => !isMathGE(ge.course_code) && ge.credit_hours !== 3)
+        const mathOnly = available.filter((ge) => isMathGE(ge.course_code))
+
+        // Fisher-Yates shuffle so the selection isn't always alphabetical (ANT-first cluster).
+        for (let i = nonMath3.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [nonMath3[i], nonMath3[j]] = [nonMath3[j], nonMath3[i]]
+        }
+        const geSorted = [...nonMath3, ...otherNonMath, ...mathOnly]
 
         if (selected.length === 0) {
           // Near-graduation: pick one 3-credit non-math course from each distinct GE area
@@ -1706,7 +1730,11 @@ ${hasPreRegisteredCourses
 }
 Do NOT add a "Verify availability" line — it's already included.`
 
-    const llmIntro = await generateDbResponse(question, advisoryContext, history)
+    // For "show me more" GE requests, skip the LLM entirely to prevent it from
+    // re-listing the prior batch it saw in history (which would duplicate the code block).
+    const llmIntro = isShowMoreGE && allGE
+      ? `Here's a different set of General Education options you can choose from:`
+      : await generateDbResponse(question, advisoryContext, history)
 
     const answer = llmIntro.trim() + codeScheduleBlock
 
