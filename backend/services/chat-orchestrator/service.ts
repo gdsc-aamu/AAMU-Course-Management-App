@@ -1445,7 +1445,6 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
         : 12                                 // default full-semester suggestion
 
     let scheduleLines: string[]
-    let scheduleNote: string
 
     if (requestedCourseCount) {
       // Student was explicit about number of courses — build a list that hits the count.
@@ -1528,9 +1527,6 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       const addedCredits = selected.reduce((s, c) => s + c.credits, 0)
       const isIncremental = requestedCourseCount <= 2 && historyCodes.size > 0
       scheduleLines = selected.map((c) => `- ${c.code}: ${c.title} (${c.credits} cr) [${c.tag}]`)
-      scheduleNote = isIncremental
-        ? `\nIMPORTANT: The student is ADDING to an existing schedule. Their current pre-registered total is ${currentCredits} credits. Present ONLY the ${selected.length} new course(s) below — do NOT re-list courses already mentioned in this conversation. State the credit hours of the new course and confirm the new total: "This adds ${addedCredits} credits, bringing your total to ${currentCredits + addedCredits} credits." End with: "Contact your advisor to confirm availability before registering."`
-        : `\nIMPORTANT: The student asked for exactly ${requestedCourseCount} courses${effectivePreferred ? ` (preferring ${effectivePreferred}-credit courses)` : ""}. Present EVERY course listed above — all ${selected.length}. List each with course code, title, and credit hours. Total credits: ${addedCredits} cr. End with: "Contact your advisor to confirm availability before registering."`
     } else {
       // Default: fill to TARGET_CREDITS.
       // Order of preference: (1) current-code required courses, (2) GE, (3) legacy-code required courses.
@@ -1567,20 +1563,27 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
         })
 
         if (selected.length === 0) {
-          // No required courses found — student is likely near graduation with only electives left.
-          // Offer a choice list (5 GE options that fit the remaining capacity) instead of forcing one.
-          // Shuffle 3-credit non-math courses so the same course (e.g. ANT 200) isn't always first.
-          const fits = (ge: { credit_hours: number }) => ge.credit_hours <= semesterCapacityRemaining
-          const nonMath3 = geSorted.filter((ge) => ge.credit_hours === 3 && !isMathGE(ge.course_code) && fits(ge))
-          const rest = geSorted.filter((ge) => (ge.credit_hours !== 3 || isMathGE(ge.course_code)) && fits(ge))
-          // Fisher-Yates shuffle on the 3-credit non-math pool so variety across requests
-          for (let i = nonMath3.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [nonMath3[i], nonMath3[j]] = [nonMath3[j], nonMath3[i]]
+          // Near-graduation: pick one 3-credit non-math course from each distinct GE area
+          // so the student sees diverse options (not a cluster of ANT/ARB/ART).
+          const areasSeen = new Set<string>()
+          const geOptions: typeof selected = []
+          // Pass 1: one per area, 3-credit non-math only
+          for (const ge of geSorted) {
+            if (geOptions.length >= 5) break
+            if (ge.credit_hours !== 3 || isMathGE(ge.course_code)) continue
+            if (ge.credit_hours > semesterCapacityRemaining) continue
+            if (areasSeen.has(ge.area_code)) continue
+            geOptions.push({ code: ge.course_code, title: ge.course_title, credits: ge.credit_hours, tag: `GE – ${ge.area_name}` })
+            areasSeen.add(ge.area_code)
           }
-          for (const ge of [...nonMath3, ...rest].slice(0, 5)) {
-            selected.push({ code: ge.course_code, title: ge.course_title, credits: ge.credit_hours, tag: `GE – ${ge.area_name}` })
+          // Pass 2: fill remaining slots if fewer than 5 distinct areas available
+          for (const ge of geSorted) {
+            if (geOptions.length >= 5) break
+            if (ge.credit_hours > semesterCapacityRemaining) continue
+            if (geOptions.find((c) => c.code === ge.course_code)) continue
+            geOptions.push({ code: ge.course_code, title: ge.course_title, credits: ge.credit_hours, tag: `GE – ${ge.area_name}` })
           }
+          selected.push(...geOptions)
         } else {
           // Required courses already selected — add ONE best GE filler.
           // A 3-credit course at 18/19 is fine; no need to hunt for an exact fill.
@@ -1605,14 +1608,7 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
         }
       }
 
-      const allGE = selected.every((c) => c.tag.startsWith("GE –"))
       scheduleLines = selected.map((c) => `- ${c.code}: ${c.title} (${c.credits} cr) [${c.tag}]`)
-      const scheduleTotalCredits = selected.reduce((s, c) => s + c.credits, 0)
-      scheduleNote = requestedCreditTarget
-        ? `\nIMPORTANT: The student asked for a ${requestedCreditTarget}-credit schedule. This schedule totals ${scheduleTotalCredits} credits. Lead your response with: "Here is your ${requestedCreditTarget}-credit schedule for next semester:" (this is the closest achievable to ${requestedCreditTarget} credits). Present EVERY course listed — do not drop any. List each with course code, title, and credit count (write "X credits", not "X cr"). End with: "Contact your advisor to confirm availability before registering."`
-        : allGE
-          ? `\nIMPORTANT: Your required curriculum courses are all completed or already registered. Format your response EXACTLY like this:\n1. First sentence: "I see you have registered for [list the pre-registered courses by name]. Since your required courses are all accounted for, here are some General Education options you could add:"\n2. Then a bulleted list — one bullet per course, formatted as: "• COURSE CODE: Course Title (X credits)"\n3. Final line: "Let me know if this works or if you'd like me to suggest different options!"\nDO NOT calculate or show a combined credit total for all the options. DO NOT say 'Total after adding'. These are choices — the student picks ONE, not all of them.`
-          : `\nIMPORTANT: Present EVERY course listed in the "Suggested Schedule for Next Semester" section above — do not drop any of them. Total: ${scheduleTotalCredits} credits. List each with its course code, title, and credit count (write "X credits", not "X cr"). Do NOT add courses not in that list. If the student wants more or fewer courses, acknowledge and adjust from the eligible list. End with: "Contact your advisor to confirm availability before registering."`
     }
 
     const filteredRecommendation = recommendation
@@ -1646,6 +1642,8 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       return "next semester"
     })()
 
+    const allGE = scheduleLines.length > 0 && scheduleLines.every((l) => l.includes("[GE –"))
+
     const formattedCourseLines = scheduleLines.map(line =>
       line
         .replace(/^- /, "")
@@ -1675,7 +1673,10 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
 
       const totalAfterAdding = preRegisteredCreditsUpcoming + addedCredits
       const addSection = formattedCourseLines.length > 0
-        ? `\n\n**Courses you could add (${addedCredits} credit${addedCredits !== 1 ? "s" : ""}):**\n${formattedCourseLines.join("\n")}\n\n**Total after adding: ${totalAfterAdding} credits** (${CREDIT_CAP - totalAfterAdding} credit${CREDIT_CAP - totalAfterAdding !== 1 ? "s" : ""} still available).`
+        ? allGE
+          // GE-choice mode: bullet list of options — no combined credit total (student picks ONE)
+          ? `\n\n**General Education options you could add (each is ${semesterCapacityRemaining >= 3 ? "3" : semesterCapacityRemaining} credits):**\n\n${formattedCourseLines.map((l) => `- ${l}`).join("\n")}\n\nLet me know if any of these work, or say "show me more" for a different set!`
+          : `\n\n**Courses you could add (${addedCredits} credit${addedCredits !== 1 ? "s" : ""}):**\n${formattedCourseLines.map((l) => `- ${l}`).join("\n")}\n\n**Total after adding: ${totalAfterAdding} credits** (${CREDIT_CAP - totalAfterAdding} credit${CREDIT_CAP - totalAfterAdding !== 1 ? "s" : ""} still available).`
         : semesterCapacityRemaining > 0
           ? `\n\nNo required courses fit within your remaining ${semesterCapacityRemaining} credits right now — you might consider a General Education elective to fill the gap.`
           : ""
@@ -1698,7 +1699,9 @@ IMPORTANT: The course schedule has already been generated and will be shown belo
 ${hasPreRegisteredCourses
   ? atCap
     ? `The student is already at the 19-credit cap. Acknowledge this warmly and ask if they want to swap a course or adjust their plan.`
-    : `The student has ${preRegisteredCreditsUpcoming} credits registered. Acknowledge that, mention they have ${semesterCapacityRemaining} credits of space, and invite them to confirm if they want to add from the suggestions or have a different goal (e.g. lighter load, specific type of course).`
+    : allGE
+      ? `The student has ${preRegisteredCreditsUpcoming} credits pre-registered for ${termLabelForSchedule} and all their required courses are covered. Write 1–2 sentences: acknowledge what they already have registered (name 2–3 courses), say their required courses are all set, and invite them to pick one of the General Education options below to fill the remaining ${semesterCapacityRemaining} credits. Do NOT say "Here are the options" — the list follows automatically.`
+      : `The student has ${preRegisteredCreditsUpcoming} credits registered. Acknowledge that, mention they have ${semesterCapacityRemaining} credits of space, and invite them to confirm if they want to add from the suggestions or have a different goal (e.g. lighter load, specific type of course).`
   : `Introduce the recommended schedule for ${termLabelForSchedule}. One sentence only.`
 }
 Do NOT add a "Verify availability" line — it's already included.`

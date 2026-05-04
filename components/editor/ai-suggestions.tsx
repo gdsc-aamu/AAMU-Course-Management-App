@@ -182,32 +182,70 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
   useEffect(() => {
     let isActive = true
 
-    const loadThread = async () => {
+    ;(async () => {
+      // Step 1: resolve session + name BEFORE loading thread so the welcome message
+      // always has the student's first name (no race condition).
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (!isActive) return
+
+      const uid = sessionData.session?.user.id ?? null
+      setStudentId(uid)
+
+      const name =
+        sessionData.session?.user.user_metadata?.full_name ??
+        sessionData.session?.user.user_metadata?.name ??
+        null
+      if (name) setStudentName(name)
+
+      // Step 2: kick off profile fetch in background (non-blocking — context improves
+      // suggestions but chat still works without it).
+      if (uid && sessionData.session?.access_token) {
+        const cachedCtx = sessionCache.read(uid)
+        if (cachedCtx && isActive) setSessionContext(cachedCtx)
+
+        fetch("/api/user/academic-profile", {
+          headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+        })
+          .then(async (profileRes) => {
+            if (!isActive || !profileRes.ok) return
+            const profilePayload = await profileRes.json()
+            if (!isActive || !profilePayload.profile) return
+            const ctx = {
+              programCode: profilePayload.profile.programCode ?? undefined,
+              bulletinYear: profilePayload.profile.bulletinYear ?? undefined,
+              classification: profilePayload.profile.classification ?? undefined,
+              isInternational: profilePayload.profile.is_international ?? profilePayload.profile.isInternational ?? false,
+              isAthlete: profilePayload.profile.isAthlete ?? false,
+              scholarshipType: profilePayload.profile.scholarship_type ?? profilePayload.profile.scholarshipType ?? undefined,
+              scholarshipMinGpa: profilePayload.profile.scholarship_min_gpa ?? profilePayload.profile.scholarshipMinGpa ?? undefined,
+              scholarshipMinCreditsPerYear: profilePayload.profile.scholarship_min_credits_per_year ?? profilePayload.profile.scholarshipMinCreditsPerYear ?? undefined,
+            }
+            setSessionContext(ctx)
+            sessionCache.write(uid, ctx)
+          })
+          .catch(() => {})
+      }
+
+      // Step 3: load thread — name is now resolved
+      const welcomeContent = `Hi${name ? ` ${name.split(" ")[0]}` : ""}! I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.`
       try {
         const response = await authenticatedFetch(`/api/chat/threads/${threadId}`)
         if (!response.ok) {
           throw new Error(`Failed to load thread: ${response.statusText}`)
         }
         const data = await response.json()
-        
+
         if (!isActive) return
 
-        // Convert DB messages to local Message format
         const dbMessages = data.messages || []
-        const loadedMessages: Message[] = dbMessages.map((msg: any, idx: number) => ({
+        const loadedMessages: Message[] = dbMessages.map((msg: any) => ({
           id: msg.id,
           role: msg.role,
           content: msg.content,
         }))
 
         if (loadedMessages.length === 0) {
-          // No messages yet, show welcome
-          loadedMessages.push({
-            id: "msg-welcome",
-            role: "assistant",
-            content:
-              `Hi${studentName ? ` ${studentName.split(" ")[0]}` : ""}! I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.`,
-          })
+          loadedMessages.push({ id: "msg-welcome", role: "assistant", content: welcomeContent })
         }
 
         setMessages(loadedMessages)
@@ -219,81 +257,9 @@ export function AISuggestions({ currentCourses = [], threadId, planSemester }: A
           description: errorMsg,
           variant: "destructive",
         })
-        // Fallback: show welcome message
-        setMessages([
-          {
-            id: "msg-welcome",
-            role: "assistant",
-            content:
-              `Hi${studentName ? ` ${studentName.split(" ")[0]}` : ""}! I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.`,
-          },
-        ])
+        setMessages([{ id: "msg-welcome", role: "assistant", content: welcomeContent }])
       } finally {
-        if (isActive) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    loadThread()
-
-    // Fetch session user and academic profile context
-    ;(async () => {
-      const { data } = await supabase.auth.getSession()
-      if (!isActive) return
-      const uid = data.session?.user.id ?? null
-      setStudentId(uid)
-
-      const name =
-        data.session?.user.user_metadata?.full_name ??
-        data.session?.user.user_metadata?.name ??
-        null
-      if (name) {
-        setStudentName(name)
-        // Patch the welcome message if it was rendered before the name resolved
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === "msg-welcome"
-              ? {
-                  ...m,
-                  content: `Hi ${name.split(" ")[0]}! I'm your AAMU course advisor. Ask me anything about your courses, what you need to graduate, prerequisites, or what to register for next semester.`,
-                }
-              : m
-          )
-        )
-      }
-
-      if (uid && data.session?.access_token) {
-        // Serve cached static context immediately, revalidate in background
-        const cachedCtx = sessionCache.read(uid)
-        if (cachedCtx && isActive) {
-          setSessionContext(cachedCtx)
-        }
-
-        try {
-          const profileRes = await fetch("/api/user/academic-profile", {
-            headers: { Authorization: `Bearer ${data.session.access_token}` },
-          })
-          if (profileRes.ok) {
-            const profilePayload = await profileRes.json()
-            if (isActive && profilePayload.profile) {
-              const ctx = {
-                programCode: profilePayload.profile.programCode ?? undefined,
-                bulletinYear: profilePayload.profile.bulletinYear ?? undefined,
-                classification: profilePayload.profile.classification ?? undefined,
-                isInternational: profilePayload.profile.is_international ?? profilePayload.profile.isInternational ?? false,
-                isAthlete: profilePayload.profile.isAthlete ?? false,
-                scholarshipType: profilePayload.profile.scholarship_type ?? profilePayload.profile.scholarshipType ?? undefined,
-                scholarshipMinGpa: profilePayload.profile.scholarship_min_gpa ?? profilePayload.profile.scholarshipMinGpa ?? undefined,
-                scholarshipMinCreditsPerYear: profilePayload.profile.scholarship_min_credits_per_year ?? profilePayload.profile.scholarshipMinCreditsPerYear ?? undefined,
-              }
-              setSessionContext(ctx)
-              sessionCache.write(uid, ctx)
-            }
-          }
-        } catch {
-          // non-fatal — chat still works without context
-        }
+        if (isActive) setIsLoading(false)
       }
     })()
 
