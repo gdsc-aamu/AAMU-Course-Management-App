@@ -474,10 +474,11 @@ function buildAcademicStatusBlock(degreeSummaryData: FullDegreeSummary | null): 
 async function handleDbOnly(payload: ChatQueryRequest, intent = ""): Promise<Record<string, unknown>> {
   const history = payload.conversationHistory ?? []
   const question = payload.question.trim()
+  const isShowMoreGE = asksShowMoreGE(question)
 
   // Guard: single-word affirmatives with no conversation history should not trigger a full schedule.
   // The router may still send CHITCHAT here when intent is CHITCHAT; handle gracefully.
-  if (intent === "CHITCHAT" || /^(ok|okay|yes|yeah|yep|sure|alright|got\s+it|sounds\s+good|cool|great|thanks?|thank\s+you|bye|hello|hi|hey|noted)\.?$/i.test(question)) {
+  if (!isShowMoreGE && (intent === "CHITCHAT" || /^(ok|okay|yes|yeah|yep|sure|alright|got\s+it|sounds\s+good|cool|great|thanks?|thank\s+you|bye|hello|hi|hey|noted)\.?$/i.test(question))) {
     const isShortAck = /^(ok|okay|yes|yeah|yep|sure|alright|got\s+it|sounds\s+good|cool|great|thanks?|thank\s+you|noted|perfect|awesome|nice|great\s+job|good\s+job|appreciate\s+(it|that)|understood|makes?\s+sense)[\s!.]*$/i.test(question.trim())
     const chitchatContext = `You are a warm, knowledgeable, and conversational AAMU academic advisor AI. Your personality is encouraging, relatable, and supportive — like a senior student who knows everything about AAMU's academics.
 
@@ -556,7 +557,6 @@ Always refer to the university as "AAMU" (never spell out "Alabama A&M Universit
 
   // Use LLM intent label when available; fall back to regex for edge cases
   const isPrereqQuery       = intent === "PREREQUISITES"      || asksPrerequisiteQuestion(question)
-  const isShowMoreGE        = asksShowMoreGE(question)
   const isNextCoursesQuery  = intent === "NEXT_COURSES"       || asksNextCoursesQuestion(question) || isShowMoreGE
   const isCompletedCoursesQuery = intent === "COMPLETED_COURSES" || asksCompletedCoursesQuestion(question)
   const isGraduationGapQuery = intent === "GRADUATION_GAP"   || asksGraduationGapQuestion(question) || asksGpaQuestion(question)
@@ -1179,7 +1179,7 @@ Instruction: Answer the student's question about retaking/repeating a course usi
     return { mode: "DB_ONLY", answer, data: gap }
   }
 
-  if (isFreeElectiveQuery) {
+  if (isFreeElectiveQuery && !isShowMoreGE) {
     if (!payload.studentId) {
       return { mode: "DB_ONLY", answer: SETUP_NEEDED_MESSAGE, data: null }
     }
@@ -1514,7 +1514,7 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
       }
       // Fill from GE courses if still short
       if (selected.length < requestedCourseCount && geCtx && geCtx.availableCourses.length > 0) {
-        const isMathGE = (code: string) => /^MA[TH] /i.test(code)
+        const isMathGE = (code: string) => /^(MAT|MTH) /i.test(code)
         const geSorted = [...geCtx.availableCourses]
           .filter((ge) => !historyCodes.has(ge.course_code))
           .sort((a, b) => {
@@ -1568,7 +1568,7 @@ Note: This is a hypothetical simulation. Courses listed above as "hypothetically
 
       // Fill with GE courses before falling back to legacy-code required courses.
       if (total < TARGET_CREDITS && geCtx && geCtx.availableCourses.length > 0) {
-        const isMathGE = (code: string) => /^MA[TH] /i.test(code)
+        const isMathGE = (code: string) => /^(MAT|MTH) /i.test(code)
 
         // Partition into tiers: non-math 3-credit (primary), other non-math, math last.
         // Filter out courses already shown in prior turns (covers "show me more" batch rotation).
